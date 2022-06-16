@@ -1,3 +1,40 @@
+''''''''''''''''''''''''''''''
+'Contains the following procedures #33
+''''''''''''''''''''''''''''''
+'ActiveCodepaneWorkbook
+'ActiveProcedure
+'AddListOfLinkedProceduresToProcedure
+'ArrayDimensions
+'ArrayTrim
+'CalculateByteCharacters
+'CollectionContains
+'DPH
+'DebugPrintHairetu
+'ExportProcedure
+'FileExists
+'FileLastModified
+'FollowLink
+'GetCallsOfProcedure
+'GetProcText
+'InStrExact
+'LinkedProcs
+'ListAndExportProcedure
+'ListContainedProceduresInTXT
+'ModuleOfProcedure
+'ProcedureExists
+'ProcedureFirstLine
+'ProceduresOfTXT
+'ProceduresOfWorkbook
+'RegexTest
+'ShortenToByteCharacters
+'SortArray
+'TextDecomposition
+'TxtOverwrite
+'TxtRead
+'dp
+'joinArrays
+'
+
 
 Sub ListAndExportProcedure( _
                             Optional ProcedureName As String, _
@@ -13,7 +50,7 @@ Rem @star
 '#INCLUDE ProceduresOfWorkbook
 '#INCLUDE ProcedureExists
 '#INCLUDE ActiveCodepaneWorkbook
-'#INCLUDE ActiveProcName
+'#INCLUDE ActiveProcedure
 '#INCLUDE ListContainedProceduresInTXT
 '#INCLUDE dp
 '#INCLUDE CollectionContains
@@ -25,7 +62,7 @@ Rem @star
 ''YOUTUBE    https://bit.ly/3aLZU9M
 ''''''''''''''''''''''''''''''''''''''''''''
 
-    If ProcedureName = "" Then ProcedureName = ActiveProcName
+    If ProcedureName = "" Then ProcedureName = ActiveProcedure
     If FromWorkbook Is Nothing Then Set FromWorkbook = ActiveCodepaneWorkbook
     
 
@@ -147,7 +184,7 @@ Sub ExportProcedure( _
 '#INCLUDE TxtOverwrite
 '#INCLUDE LinkedProcs
 '#INCLUDE ActiveCodepaneWorkbook
-'#INCLUDE ActiveProcName
+'#INCLUDE ActiveProcedure
 '#INCLUDE GetProcText
 '#INCLUDE ModuleOfProcedure
 '#INCLUDE FileLastModified
@@ -155,7 +192,7 @@ Sub ExportProcedure( _
     
     
     
-    If ProcedureName = "" Then ProcedureName = ActiveProcName
+    If ProcedureName = "" Then ProcedureName = ActiveProcedure
     If FromWorkbook Is Nothing Then Set FromWorkbook = ActiveCodepaneWorkbook
     Dim procedures As Collection: Set procedures = LinkedProcs(ProcedureName, FromWorkbook)
     On Error Resume Next
@@ -283,9 +320,9 @@ Public Function ActiveCodepaneWorkbook() As Workbook
     Set ActiveCodepaneWorkbook = Workbooks(TmpStr)
 End Function
 
-Public Function ActiveProcName() As String
+Public Function ActiveProcedure() As String
     Application.VBE.ActiveCodePane.GetSelection L1&, C1&, L2&, C2&
-    ActiveProcName = Application.VBE.ActiveCodePane _
+    ActiveProcedure = Application.VBE.ActiveCodePane _
                      .CodeModule.ProcOfLine(L1&, vbext_pk_Proc)
 End Function
 
@@ -304,13 +341,15 @@ Sub ListContainedProceduresInTXT(FileName As String)
 End Sub
 
 Sub FollowLink(FolderPath As String)
-On Error Resume Next
+    If Right(FolderPath, 1) = "\" Then FolderPath = Left(FolderPath, Len(FolderPath) - 1)
+    On Error Resume Next
     Dim oShell As Object
     Dim Wnd As Object
     Set oShell = CreateObject("Shell.Application")
     For Each Wnd In oShell.Windows
         If Wnd.Name = "File Explorer" Then
             If Wnd.Document.Folder.Self.path = FolderPath Then Exit Sub
+            
         End If
     Next Wnd
     Application.ThisWorkbook.FollowHyperlink Address:=FolderPath, NewWindow:=True
@@ -561,19 +600,19 @@ Function ProceduresOfTXT(FilePath As Variant, Optional NameOnly As Boolean) As V
     If TypeName(out) = "Empty" Then Exit Function
     out = Filter(out, "(", True)
     out = Filter(out, "Declare", False)
+    out = Filter(out, Chr(34) & "Sub ", False)
+    out = Filter(out, Chr(34) & "Function ", False)
     If NameOnly = True Then
         Dim i As Long
         For i = LBound(out) To UBound(out)
-'            If InStr(out(i), "(") <> 0 Then
                 out(i) = Left(out(i), InStr(1, out(i), "(") - 1)
                 out(i) = Replace(out(i), "Private ", "")
                 out(i) = Replace(out(i), "Public ", "")
                 out(i) = Replace(out(i), "Sub ", "")
                 out(i) = Replace(out(i), "Function ", "")
-'            End If
         Next
     End If
-    SortArray out
+    out = SortArray(out)
     ProceduresOfTXT = out
     Rem ProceduresOfTXT = Join(out, Chr(10))
 End Function
