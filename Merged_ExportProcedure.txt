@@ -62,12 +62,19 @@ Rem @star
 ''YOUTUBE    https://bit.ly/3aLZU9M
 ''''''''''''''''''''''''''''''''''''''''''''
 
-    If PROCEDURENAME = "" Then PROCEDURENAME = ActiveProcedure
+    If PROCEDURENAME = "" Then
+        If Len(CodepaneSelection) = 0 Then
+            PROCEDURENAME = ActiveProcedure
+        Else
+            PROCEDURENAME = CodepaneSelection
+        End If
+    End If
     If FromWorkbook Is Nothing Then Set FromWorkbook = ActiveCodepaneWorkbook
     
 
     If ProcedureExists(PROCEDURENAME, FromWorkbook) = False Then
         MsgBox PROCEDURENAME & " not found in workbook " & FromWorkbook.Name
+        Exit Sub
     End If
     
     AddListOfLinkedProceduresToProcedure CStr(PROCEDURENAME), ProceduresOfWorkbook(FromWorkbook), FromWorkbook
@@ -565,8 +572,8 @@ Function InStrExact(Start As Long, SourceText As String, WordToFind As String, _
                     Optional CaseSensitive As Boolean = False, _
                     Optional AllowAccentedCharacters As Boolean = False) As Long
     Dim x As Long, Str1 As String, Str2 As String, Pattern As String
-    Const UpperAccentsOnly As String = "ÇÉÑ"
-    Const UpperAndLowerAccents As String = "ÇÉÑçéñ"
+    Const UpperAccentsOnly As String = "Ã‡Ã‰Ã‘"
+    Const UpperAndLowerAccents As String = "Ã‡Ã‰Ã‘Ã§Ã©Ã±"
     If CaseSensitive Then
         Str1 = SourceText
         Str2 = WordToFind
