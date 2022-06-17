@@ -1,5 +1,6 @@
+
 ''''''''''''''''''''''''''''''
-'Contains the following procedures #32
+Contains the following #43 procedures
 ''''''''''''''''''''''''''''''
 'ActiveCodepaneWorkbook
 'ActiveProcedure
@@ -7,17 +8,28 @@
 'ArrayDimensions
 'ArrayTrim
 'CalculateByteCharacters
+'CheckPath
+'CodepaneSelection
 'CollectionContains
-'DPH
+'CreateOrSetModule
 'DebugPrintHairetu
+'DownloadTextFile
+'dp
+'DPH
 'ExportProcedure
 'ExportTargetProcedure
 'FileExists
 'FileLastModified
+'FolderExists
+'FoldersCreate
 'FollowLink
 'GetCallsOfProcedure
 'GetProcText
+'HttpExists
+'ImportImports
+'ImportProcedure
 'InStrExact
+'joinArrays
 'LinkedProcs
 'ListContainedProceduresInTXT
 'ModuleOfProcedure
@@ -31,9 +43,11 @@
 'TextDecomposition
 'TxtOverwrite
 'TxtRead
-'dp
-'joinArrays
-'
+'UpdateProcedure
+'UpdateAllProcedures
+
+
+Public SNIP_FOLDER as string
 
 Sub ExportProcedure( _
                         Optional PROCEDURENAME As String, _
@@ -62,19 +76,15 @@ Rem @star
 ''YOUTUBE    https://bit.ly/3aLZU9M
 ''''''''''''''''''''''''''''''''''''''''''''
 
-    If PROCEDURENAME = "" Then
-        If Len(CodepaneSelection) = 0 Then
-            PROCEDURENAME = ActiveProcedure
-        Else
-            PROCEDURENAME = CodepaneSelection
-        End If
-    End If
+    'SNIP_FOLDER = Environ("USERprofile") & "\My Documents\vbArc\Snippets\"
+    'If FolderExists(SNIP_FOLDER) = False Then FoldersCreate (SNIP_FOLDER)
+
+    If PROCEDURENAME = "" Then PROCEDURENAME = ActiveProcedure
     If FromWorkbook Is Nothing Then Set FromWorkbook = ActiveCodepaneWorkbook
     
 
     If ProcedureExists(PROCEDURENAME, FromWorkbook) = False Then
         MsgBox PROCEDURENAME & " not found in workbook " & FromWorkbook.Name
-        Exit Sub
     End If
     
     AddListOfLinkedProceduresToProcedure CStr(PROCEDURENAME), ProceduresOfWorkbook(FromWorkbook), FromWorkbook
@@ -126,6 +136,86 @@ retry:
         End If
         FollowLink SNIP_FOLDER
 End Sub
+
+
+Sub ImportProcedure( _
+    Optional PROCEDURE As String, _
+    Optional TargetWorkbook As Workbook, _
+    Optional Module As VBComponent, _
+    Optional OverWrite As Boolean)
+
+'#INCLUDE DownloadTextFile
+'#INCLUDE CheckPath
+'#INCLUDE CodepaneSelection
+'#INCLUDE TxtOverwrite
+'#INCLUDE ImportImports
+'#INCLUDE UpdateProcedure
+'#INCLUDE TxtRead
+'#INCLUDE ProcedureExists
+'#INCLUDE ActiveCodepaneWorkbook
+'#INCLUDE CreateOrSetModule
+    
+    
+''''''''''''''''''''''''''''''''''''''''''''
+''DEVELOPER  Anastasiou Alex
+''EMAIL      AnastasiouAlex@gmail.com
+''GITHUB     https://github.com/AlexOfRhodes
+''YOUTUBE    https://bit.ly/3aLZU9M
+''''''''''''''''''''''''''''''''''''''''''''
+
+    'SNIP_FOLDER = Environ("USERprofile") & "\My Documents\vbArc\Snippets\"
+    'If FolderExists(SNIP_FOLDER) = False Then FoldersCreate (SNIP_FOLDER)
+
+    Rem @todo file picker?
+    
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    If PROCEDURE = "" Then PROCEDURE = CodepaneSelection
+    
+    If PROCEDURE = "" Or InStr(1, PROCEDURE, " ") > 0 Then Exit Sub
+    Dim ProcedurePath As String
+    ProcedurePath = SNIP_FOLDER & PROCEDURE & ".txt"
+    
+    If CheckPath(ProcedurePath) = "I" Then
+        On Error Resume Next
+        Dim DownloadedProcedure As String
+        DownloadedProcedure = DownloadTextFile("https://github.com/alexofrhodes/Excel-Snippets/raw/main/" & PROCEDURE & ".txt")
+        On Error GoTo 0
+        If Len(DownloadedProcedure) > 0 Then
+            TxtOverwrite SNIP_FOLDER & PROCEDURE & ".txt", DownloadedProcedure
+        Else
+            MsgBox "File not found neither localy nor online"
+            Exit Sub
+        End If
+    End If
+    
+    If ProcedureExists(PROCEDURE, TargetWorkbook) = True Then
+        If OverWrite = True Then UpdateProcedure PROCEDURE, TxtRead(ProcedurePath), TargetWorkbook
+    Else
+        If Module Is Nothing Then Set Module = CreateOrSetModule("vbArcImports", vbext_ct_StdModule, TargetWorkbook)
+        Module.CodeModule.AddFromFile ProcedurePath
+    End If
+    ImportImports ProcedurePath, TargetWorkbook, Module, OverWrite
+End Sub
+
+Function DownloadTextFile(URL As String) As String
+    On Error GoTo Err_GetFromWebpage
+    Dim objWeb As Object
+    Dim strXML As String
+    Set objWeb = CreateObject("Msxml2.ServerXMLHTTP")
+    objWeb.Open "GET", URL, False
+    objWeb.setRequestHeader "Content-Type", "text/xml"
+    objWeb.setRequestHeader "Cache-Control", "no-cache"
+    objWeb.setRequestHeader "Pragma", "no-cache"
+    objWeb.send
+    strXML = objWeb.responseText
+    DownloadTextFile = strXML
+End_GetFromWebpage:
+    Set objWeb = Nothing
+    Exit Function
+Err_GetFromWebpage:
+    MsgBox err.Description & " (" & err.Number & ")"
+    Resume End_GetFromWebpage
+End Function
 
 Function FileExists(ByVal strFile As String, Optional bFindFolders As Boolean) As Boolean
     Dim lngAttributes As Long
@@ -572,8 +662,8 @@ Function InStrExact(Start As Long, SourceText As String, WordToFind As String, _
                     Optional CaseSensitive As Boolean = False, _
                     Optional AllowAccentedCharacters As Boolean = False) As Long
     Dim x As Long, Str1 As String, Str2 As String, Pattern As String
-    Const UpperAccentsOnly As String = "ÇÉÑ"
-    Const UpperAndLowerAccents As String = "ÇÉÑçéñ"
+    Const UpperAccentsOnly As String = "ΗΙΡ"
+    Const UpperAndLowerAccents As String = "ΗΙΡηιρ"
     If CaseSensitive Then
         Str1 = SourceText
         Str2 = WordToFind
@@ -808,3 +898,142 @@ Function TextDecomposition(Mojiretu$)
     Next i
     TextDecomposition = Output
 End Function
+
+
+
+Function CheckPath(path) As String
+    Dim retval
+    retval = "I"
+    If (retval = "I") And FileExists(path) Then retval = "F"
+    If (retval = "I") And FolderExists(path) Then retval = "D"
+    If (retval = "I") And HttpExists(path) Then retval = "U"
+    CheckPath = retval
+End Function
+
+Public Function CodepaneSelection() As String
+    Dim StartLine As Long, StartColumn As Long, EndLine As Long, EndColumn As Long
+    Application.VBE.ActiveCodePane.GetSelection StartLine, StartColumn, EndLine, EndColumn
+    If EndLine - StartLine = 0 Then
+        CodepaneSelection = Mid(Application.VBE.ActiveCodePane.CodeModule.Lines(StartLine, 1), StartColumn, EndColumn - StartColumn)
+        Exit Function
+    End If
+    Dim str As String
+    Dim i As Long
+    For i = StartLine To EndLine
+        If str = "" Then
+            str = Mid(Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1), StartColumn)
+        ElseIf i < EndLine Then
+            str = str & vbNewLine & Mid(Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1), 1)
+        Else
+            str = str & vbNewLine & Mid(Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1), 1, EndColumn - 1)
+        End If
+    Next
+    CodepaneSelection = str
+End Function
+
+Sub ImportImports( _
+    Optional PROCEDURE As String, _
+    Optional TargetWorkbook As Workbook, _
+    Optional Module As VBComponent, _
+    Optional OverWrite As Boolean)
+    
+    Rem @TODO infinite loop possible?
+    Dim var
+    Dim importfile As String
+    var = Split(TxtRead(PROCEDURE), vbLf)
+    Dim TextLine As Variant
+    For Each TextLine In var
+        TextLine = Trim(TextLine)
+        If Left(TextLine, 9) = "'#INCLUDE" Then
+            importfile = Split(TextLine, " ")(1)
+            ImportProcedure importfile, TargetWorkbook, Module, OverWrite
+        End If
+    Next
+End Sub
+
+Public Sub UpdateProcedure( _
+                            PROCEDURE As Variant, _
+                            Code As String, _
+                            TargetWorkbook As Workbook)
+    Dim StartLine As Integer
+    Dim NumLines As Integer
+    Dim Module As VBComponent
+    Set Module = ModuleOfProcedure(TargetWorkbook, PROCEDURE)
+    With Module.CodeModule
+        StartLine = .ProcStartLine(PROCEDURE, vbext_pk_Proc)
+        NumLines = .ProcCountLines(PROCEDURE, vbext_pk_Proc)
+        .DeleteLines StartLine, NumLines
+        .InsertLines StartLine, Code
+    End With
+End Sub
+
+
+
+Function CreateOrSetModule(compName As String, compType As VBIDE.vbext_ComponentType, Optional TargetWorkbook As Workbook) As VBComponent
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim vbComp As VBComponent
+    On Error Resume Next
+    Set vbComp = TargetWorkbook.VBProject.VBComponents(compName)
+    On Error GoTo 0
+    If vbComp Is Nothing Then
+        Set vbComp = TargetWorkbook.VBProject.VBComponents.Add(compType)
+        vbComp.Name = compName
+    End If
+    Set CreateOrSetModule = vbComp
+End Function
+
+
+
+Function FolderExists(ByVal strPath As String) As Boolean
+    On Error Resume Next
+    FolderExists = ((GetAttr(strPath) And vbDirectory) = vbDirectory)
+End Function
+
+Function HttpExists(ByVal sURL As String) As Boolean
+    Dim oXHTTP As Object
+    Set oXHTTP = CreateObject("MSXML2.XMLHTTP")
+    If Not UCase(sURL) Like "HTTP:*" Then
+        sURL = "http://" & sURL
+    End If
+    On Error GoTo haveError
+    oXHTTP.Open "HEAD", sURL, False
+    oXHTTP.send
+    HttpExists = IIf(oXHTTP.Status = 200, True, False)
+    Exit Function
+haveError:
+    Rem Debug.Print err.Description
+    HttpExists = False
+End Function
+
+
+Sub UpdateAllProcedures(Optional TargetWorkbook As Workbook)
+If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim procedures As New Collection
+    Set procedures = ProceduresOfWorkbook(TargetWorkbook)
+    Dim PROCEDURE
+    For Each PROCEDURE In procedures
+        If UCase(CStr(PROCEDURE)) <> UCase("UpdateAllProcedures") Then ImportProcedure CStr(PROCEDURE), TargetWorkbook, , True
+    Next
+End Sub
+
+
+Function FolderExists(ByVal strPath As String) As Boolean
+    On Error Resume Next
+    FolderExists = ((GetAttr(strPath) And vbDirectory) = vbDirectory)
+End Function
+
+
+Sub FoldersCreate(FolderPath As String)
+    Dim individualFolders() As String
+    Dim tempFolderPath As String
+    Dim arrayElement As Variant
+    If Right(FolderPath, 1) = "\" Then FolderPath = Left(FolderPath, Len(FolderPath) - 1)
+    individualFolders = Split(FolderPath, "\")
+    On Error Resume Next
+    For Each arrayElement In individualFolders
+        tempFolderPath = tempFolderPath & arrayElement & "\"
+        If Dir(tempFolderPath, vbDirectory) = "" Then
+            MkDir tempFolderPath
+        End If
+    Next arrayElement
+End Sub
