@@ -1,0 +1,15 @@
+Function ProceduresOfModule(Module As VBComponent) As Collection
+    Dim ProcKind As VBIDE.vbext_ProcKind
+    Dim lineNum As Long
+    Dim coll As New Collection
+    Dim procname As String
+    With Module.CodeModule
+        lineNum = .CountOfDeclarationLines + 1
+        Do Until lineNum >= .CountOfLines
+            procname = .ProcOfLine(lineNum, ProcKind)
+            coll.Add procname
+            lineNum = .ProcStartLine(procname, ProcKind) + .ProcCountLines(procname, ProcKind) + 1
+        Loop
+    End With
+    Set ProceduresOfModule = coll
+End Function

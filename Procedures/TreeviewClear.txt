@@ -1,0 +1,5 @@
+Sub TreeviewClear(TV As TreeView)
+  For i = TV.Nodes.count To 1 Step -1
+    TV.Nodes.Remove i
+  Next
+End Sub

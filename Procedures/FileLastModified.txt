@@ -1,0 +1,8 @@
+
+Function FileLastModified(FilePath) As Date
+    Dim fs, f
+    Set fs = CreateObject("Scripting.FileSystemObject")
+    Set f = fs.GetFile(FilePath)
+    FileLastModified = f.DateLastModified
+End Function
+

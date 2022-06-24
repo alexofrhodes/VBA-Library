@@ -1,0 +1,28 @@
+
+
+
+Sub TreeviewSelectNodes(TV As TreeView, SingleSelect As Boolean, lvl1crit As String, Optional CriteriaByLevel As Variant)
+    Dim nd As node
+    For Each nd In TV.Nodes
+        If nd.Text = lvl1crit Then
+            nd.Selected = True
+            nd.Expanded = True
+            If SingleSelect = True Then Exit For
+        End If
+    Next
+    
+    x = nd.Index + 1
+    Dim crit
+    For Each crit In CriteriaByLevel
+        For i = x To TV.Nodes.count
+            If TV.Nodes.Item(i).Text = crit Then
+                TV.Nodes.Item(i).Selected = True
+                TV.Nodes.Item(i).Expanded = True
+                If SingleSelect = True Then Exit For
+            End If
+        Next
+        x = i + 1
+    Next
+    
+End Sub
+

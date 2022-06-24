@@ -1,8 +1,0 @@
-
-Function ProtectedVBProject(ByVal wb As Workbook) As Boolean
-    If wb.VBProject.Protection = 1 Then
-        ProtectedVBProject = True
-    Else
-        ProtectedVBProject = False
-    End If
-End Function

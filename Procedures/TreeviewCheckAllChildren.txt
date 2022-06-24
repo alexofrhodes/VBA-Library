@@ -1,0 +1,15 @@
+
+Sub TreeviewCheckAllChildren(parent As MSComctlLib.node, _
+                            Optional check As Boolean = True)
+'In userform:
+'Sub treeview1_NodeCheck(ByVal node As MSComctlLib.node)
+'    TreeviewNodeCheck node, node.Checked
+'End Sub
+    Dim child As MSComctlLib.node
+    parent.Checked = check
+    Set child = parent.child
+    While Not child Is Nothing
+        TreeviewCheckAllChildren child, check
+        Set child = child.Next
+    Wend
+End Sub

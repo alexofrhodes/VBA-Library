@@ -1,6 +1,0 @@
-
-Sub TreeviewExpandAllNodes(TV As TreeView)
-    For i = 1 To TV.Nodes.count
-        TV.Nodes(i).Expanded = True
-    Next
-End Sub

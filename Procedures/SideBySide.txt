@@ -1,0 +1,44 @@
+
+
+
+
+Sub SideBySide(Optional Module1 As VBComponent, _
+                Optional Module2 As VBComponent)
+'#INCLUDE ActiveModule
+    
+    If Module1 Is Nothing Then Set Module1 = ActiveModule
+    With Module1.CodeModule.CodePane.Window
+        .Width = 800
+        .Left = 1
+        .Top = 1
+        .Height = 1000
+        .Visible = True
+        .WindowState = vbext_ws_Normal
+        .SetFocus
+        'Set Application.VBE.ActiveCodePane = Module1.CodeModule.CodePane
+    End With
+    If Module1.Type = vbext_ct_MSForm Then
+        
+        With Module1.DesignerWindow
+            .Width = 800
+            .Left = 800
+            .Top = 1
+            .Height = 1000
+            .Visible = True
+            .WindowState = vbext_ws_Normal
+            Module1.DesignerWindow.SetFocus
+            
+        End With
+    ElseIf Not Module2 Is Nothing Then
+        With Module2.CodeModule.CodePane.Window
+            .Width = 800
+            .Left = 800
+            .Top = 1
+            .Height = 1000
+            .Visible = True
+            .WindowState = vbext_ws_Normal
+            'Set Application.VBE.ActiveCodePane = Module2.CodeModule.CodePane
+            .SetFocus
+        End With
+    End If
+End Sub
