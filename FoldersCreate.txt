@@ -1,0 +1,13 @@
+
+Sub FoldersCreate(folderPath As String)
+    Dim individualFolders() As String
+    Dim tempFolderPath As String
+    Dim arrayElement As Variant
+    individualFolders = Split(folderPath, "\")
+    For Each arrayElement In individualFolders
+        tempFolderPath = tempFolderPath & arrayElement & "\"
+        If FolderExists(tempFolderPath) = False Then
+            MkDir tempFolderPath
+        End If
+    Next arrayElement
+End Sub
