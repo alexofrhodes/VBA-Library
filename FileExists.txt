@@ -1,0 +1,14 @@
+
+Function FileExists(ByVal strFile As String, Optional bFindFolders As Boolean) As Boolean
+    Dim lngAttributes As Long
+    lngAttributes = (vbReadOnly Or vbHidden Or vbSystem)
+    If bFindFolders Then
+        lngAttributes = (lngAttributes Or vbDirectory)
+    Else
+        Do While Right$(strFile, 1) = "\"
+            strFile = Left$(strFile, Len(strFile) - 1)
+        Loop
+    End If
+    On Error Resume Next
+    FileExists = (Len(Dir(strFile, lngAttributes)) > 0)
+End Function
