@@ -1,0 +1,8 @@
+
+Public Function TreeviewGetLevel(theNode As node) As Integer
+  TreeviewGetLevel = 1
+  Do Until theNode.Root = theNode.FirstSibling
+    TreeviewGetLevel = TreeviewGetLevel + 1
+    Set theNode = theNode.parent
+  Loop
+End Function
