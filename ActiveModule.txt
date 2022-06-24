@@ -1,0 +1,4 @@
+
+Function ActiveModule() As VBComponent
+    Set ActiveModule = Application.VBE.SelectedVBComponent
+End Function
