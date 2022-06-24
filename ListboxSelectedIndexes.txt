@@ -1,0 +1,12 @@
+
+Function ListboxSelectedIndexes(LBox As MSForms.ListBox) As Collection
+    Dim i As Long
+    Dim SelectedIndexes As Collection
+    Set SelectedIndexes = New Collection
+    If LBox.ListCount > 0 Then
+        For i = 0 To LBox.ListCount - 1
+            If LBox.Selected(i) Then SelectedIndexes.Add i
+        Next i
+    End If
+    Set ListboxSelectedIndexes = SelectedIndexes
+End Function

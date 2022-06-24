@@ -1,0 +1,48 @@
+Sub SaveUserformOptions(FORM As Object, _
+                Optional includeCheckbox As Boolean = True, _
+                Optional includeOptionButton As Boolean = True, _
+                Optional includeTextBox As Boolean = True, _
+                Optional includeListbox As Boolean = True)
+'#INCLUDE CollectionToArray
+'#INCLUDE CreateOrSetSheet
+'#INCLUDE ListboxSelectedIndexes
+'#IMPORTS CreateOrSetSheet
+'#IMPORTS ListboxSelectedIndexes
+'#IMPORTS CollectionToArray
+    Dim ws As Worksheet
+    Set ws = CreateOrSetSheet(FORM.Name & "_Settings", ThisWorkbook) ' change to activeworkbook for testing
+    ws.Cells.Clear
+    Dim coll As New Collection
+    Dim cell As Range
+    Set cell = ws.Cells(1, 1)
+    Dim c As MSForms.control
+    For Each c In FORM.Controls
+        If TypeName(c) Like "CheckBox" Then
+            If Not includeCheckbox Then GoTo SKIP
+        ElseIf TypeName(c) Like "OptionButton" Then
+            If Not includeOptionButton Then GoTo SKIP
+        ElseIf TypeName(c) Like "TextBox" Then
+            If Not includeTextBox Then GoTo SKIP
+        ElseIf TypeName(c) = "ListBox" Then
+            If Not includeListbox Then GoTo SKIP
+        Else
+            GoTo SKIP
+        End If
+        
+        cell = c.Name
+        Select Case TypeName(c)
+        Case "TextBox", "CheckBox", "OptionButton"
+            cell.Offset(0, 1) = c.Value
+        Case "ListBox"
+            Set coll = ListboxSelectedIndexes(c)
+            If coll.count > 0 Then
+                cell.Offset(0, 1) = Join(CollectionToArray(coll), ",")
+            Else
+                cell.Offset(0, 1) = -1
+            End If
+        End Select
+        
+        Set cell = cell.Offset(1, 0)
+SKIP:
+    Next
+End Sub
