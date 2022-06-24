@@ -231,7 +231,8 @@ Function FileExists(ByVal strFile As String, Optional bFindFolders As Boolean) A
     FileExists = (Len(Dir(strFile, lngAttributes)) > 0)
 End Function
 
-Sub AddListOfLinkedProceduresToProcedure(PROCEDURENAME As String, procedures As Collection, FromWorkbook As Workbook)
+
+Sub AddListOfLinkedProceduresToProcedure(PROCEDURENAME As String, Procedures As Collection, FromWorkbook As Workbook)
 '#INCLUDE RegexTest
 '#INCLUDE ProcedureFirstLine
 '#INCLUDE GetProcText
@@ -240,10 +241,10 @@ Sub AddListOfLinkedProceduresToProcedure(PROCEDURENAME As String, procedures As 
     Dim Module As VBComponent:  Set Module = ModuleOfProcedure(FromWorkbook, PROCEDURENAME)
     Dim ProcedureText As String:    ProcedureText = GetProcText(Module, PROCEDURENAME)
     Dim PROCEDURE As Variant
-    For Each PROCEDURE In procedures
+    For Each PROCEDURE In Procedures
         If UCase(CStr(PROCEDURE)) <> UCase(CStr(PROCEDURENAME)) Then
-            If InStr(1, ProcedureText, CStr(PROCEDURE)) > 0 Then
-                Rem If RegexTest(ProcedureText, "\W" & Procedure & "[.(\W]", , True) Then
+Rem         If InStr(1, ProcedureText, CStr(PROCEDURE)) > 0 Then
+            If RegexTest(ProcedureText, "\W" & PROCEDURE & "[.(\W]", , True) = True Then
                 If InStr(1, ProcedureText, "#INCLUDE " & PROCEDURE) = 0 And InStr(1, ListOfImports, "#INCLUDE " & PROCEDURE) = 0 Then
                     If ListOfImports = "" Then
                         ListOfImports = "'#INCLUDE " & PROCEDURE
@@ -251,6 +252,7 @@ Sub AddListOfLinkedProceduresToProcedure(PROCEDURENAME As String, procedures As 
                         ListOfImports = ListOfImports & vbNewLine & "'#INCLUDE " & PROCEDURE
                     End If
                 End If
+                
             End If
         End If
     Next
@@ -373,25 +375,40 @@ Function TxtRead(sPath As String) As String
 End Function
 
 
-
-Function ProceduresOfWorkbook(TargetWorkbook As Workbook) As Collection
+Function ProceduresOfWorkbook( _
+                            TargetWorkbook As Workbook, _
+                            Optional ExcludeDocument As Boolean = True, _
+                            Optional ExcludeClass As Boolean = True, _
+                            Optional ExcludeForm As Boolean = True) As Collection
+                            
     Dim Module As VBComponent
     Dim ProcKind As VBIDE.vbext_ProcKind
     Dim lineNum As Long
     Dim coll As New Collection
     Dim PROCEDURENAME As String
     For Each Module In TargetWorkbook.VBProject.VBComponents
-        If Module.Type <> vbext_ct_ClassModule Then
-            With Module.CodeModule
-                lineNum = .CountOfDeclarationLines + 1
-                Do Until lineNum >= .CountOfLines
-                    PROCEDURENAME = .ProcOfLine(lineNum, ProcKind)
-                    If InStr(1, PROCEDURENAME, "_") = 0 Then coll.Add PROCEDURENAME
-                    lineNum = .ProcStartLine(PROCEDURENAME, ProcKind) + .ProcCountLines(PROCEDURENAME, ProcKind) + 1
-                Loop
-            End With
+        If ExcludeClass = True Then
+            If Module.Type = vbext_ct_ClassModule Then GoTo SKIP
         End If
-    Next
+        If ExcludeDocument = True Then
+            If Module.Type = vbext_ct_Document Then GoTo SKIP
+        End If
+        If ExcludeForm = True Then
+            If Module.Type = vbext_ct_MSForm Then GoTo SKIP
+        End If
+        
+            If Module.Type <> vbext_ct_ClassModule Then
+                With Module.CodeModule
+                    lineNum = .CountOfDeclarationLines + 1
+                    Do Until lineNum >= .CountOfLines
+                        PROCEDURENAME = .ProcOfLine(lineNum, ProcKind)
+                        If InStr(1, PROCEDURENAME, "_") = 0 Then coll.Add PROCEDURENAME
+                        lineNum = .ProcStartLine(PROCEDURENAME, ProcKind) + .ProcCountLines(PROCEDURENAME, ProcKind) + 1
+                    Loop
+                End With
+            End If
+SKIP:
+    Next Module
     Set ProceduresOfWorkbook = coll
 End Function
 
