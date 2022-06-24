@@ -1,6 +1,6 @@
 
 ''''''''''''''''''''''''''''''
-Contains the following #43 procedures
+Contains the following procedures
 ''''''''''''''''''''''''''''''
 'ActiveCodepaneWorkbook
 'ActiveProcedure
