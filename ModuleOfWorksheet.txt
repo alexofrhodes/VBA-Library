@@ -1,0 +1,4 @@
+
+Function ModuleOfWorksheet(TargetSheet As Worksheet) As VBComponent
+    Set ModuleOfWorksheet = TargetSheet.parent.VBProject.VBComponents(TargetSheet.CodeName)
+End Function

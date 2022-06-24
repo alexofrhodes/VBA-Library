@@ -1,0 +1,11 @@
+
+Public Function ProcedureEndLine(Module As VBComponent, procname As String) As Long
+    Dim ProcKind As VBIDE.vbext_ProcKind
+    Dim StartAt As Long
+    Dim EndAt As Long
+    Dim CountOf As Long
+    StartAt = Module.CodeModule.ProcStartLine(procname, ProcKind)
+    EndAt = Module.CodeModule.ProcStartLine(procname, ProcKind) + Module.CodeModule.ProcCountLines(procname, ProcKind) - 1
+    CountOf = Module.CodeModule.ProcCountLines(procname, ProcKind)
+    ProcedureEndLine = EndAt
+End Function

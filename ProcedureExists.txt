@@ -1,0 +1,15 @@
+
+Function ProcedureExists( _
+         PROCEDURENAME As Variant, _
+         FromWorkbook As Workbook) _
+        As Boolean
+'#INCLUDE ProceduresOfWorkbook
+    Dim AllProcedures As Collection: Set AllProcedures = ProceduresOfWorkbook(FromWorkbook)
+    Dim PROCEDURE As Variant
+    For Each PROCEDURE In AllProcedures
+        If UCase(CStr(PROCEDURE)) = UCase(PROCEDURENAME) Then
+            ProcedureExists = True
+            Exit Function
+        End If
+    Next
+End Function
