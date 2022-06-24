@@ -1,0 +1,26 @@
+''''''''''''''''''''''''''''''
+'Contains the following procedures #1
+''''''''''''''''''''''''''''''
+'whichOption
+
+
+Function whichOption(Frame As Variant, controlType As String) As Variant
+'controlType="OptionButton"
+'controlType="CheckBox"
+
+Dim out As New Collection
+    For Each Control In Frame.Controls
+        If UCase(TypeName(Control)) = UCase(controlType) Then
+            If Control.Value = True Then
+                out.Add Control
+                If TypeName(Frame) = "Frame" Then Exit For
+                If controlType = "OptionButton" Then Exit For
+            End If
+        End If
+    Next
+    If out.Count = 1 Then
+        Set whichOption = out(1)
+    ElseIf out.Count > 1 Then
+        Set whichOption = out
+    End If
+End Function

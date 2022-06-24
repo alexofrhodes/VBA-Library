@@ -1,0 +1,28 @@
+Sub AlignVbeCommentsToColumn(AlignAtColumn As Long)
+'#INCLUDE Inject
+'#INCLUDE CodePaneSelectionStartLine
+'#INCLUDE CodePaneSelectionEndLine
+'#INCLUDE CodePaneSelectionSet
+'#INCLUDE ActiveModule
+    Dim firstRow As Long
+        firstRow = CodePaneSelectionStartLine
+    Dim lastRow As Long
+        lastRow = CodePaneSelectionEndLine
+    Dim commentOriginalColumn As Long
+    Dim LineText As String
+    Dim i As Long
+    Dim numberOfSpacesToInsert
+    For i = firstRow To lastRow
+    LineText = ActiveModule.CodeModule.Lines(i, 1)
+    commentOriginalColumn = InStr(1, LineText, "'")
+        If commentOriginalColumn > 0 Then
+            
+            numberOfSpacesToInsert = AlignAtColumn - commentOriginalColumn
+            If numberOfSpacesToInsert > 0 Then
+                commentOriginalColumn = InStrRev(LineText, "'")
+                CodePaneSelectionSet i, commentOriginalColumn, i, commentOriginalColumn
+                Inject Space(numberOfSpacesToInsert)
+            End If
+        End If
+    Next
+End Sub

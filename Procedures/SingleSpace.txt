@@ -1,0 +1,10 @@
+
+Public Function SingleSpace(ByVal Text As String) As String
+    Dim pos As String
+    pos = InStr(1, Text, Space(2), vbBinaryCompare)
+    Do Until pos = 0
+        Text = Replace(Text, Space(2), Space(1))
+        pos = InStr(1, Text, Space(2), vbBinaryCompare)
+    Loop
+    SingleSpace = Text
+End Function

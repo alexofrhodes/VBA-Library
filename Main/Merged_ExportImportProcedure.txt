@@ -985,6 +985,54 @@ Public Sub UpdateProcedure( _
 End Sub
 
 
+Function getAllMissingDependencies(Optional TargetWorkbook As Workbook) As Boolean
+'#INCLUDE ProceduresOfWorkbook
+'#INCLUDE ActiveCodepaneWorkbook
+'#INCLUDE getMissingMissingDependenciesOfProcedure
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim Procedures As New Collection
+    Set Procedures = ProceduresOfWorkbook(TargetWorkbook)
+    Dim PROCEDURE As Variant
+    For Each PROCEDURE In Procedures
+        getMissingMissingDependenciesOfProcedure CStr(PROCEDURE), TargetWorkbook
+    Next
+End Function
+
+Function getMissingMissingDependenciesOfProcedure(Optional PROCEDURE As String, Optional TargetWorkbook As Workbook) As Boolean
+'#INCLUDE ImportProcedure
+'#INCLUDE ProceduresOfWorkbook
+'#INCLUDE ActiveCodepaneWorkbook
+'#INCLUDE ActiveProcedure
+'#INCLUDE GetProcText
+'#INCLUDE ModuleOfProcedure
+'#INCLUDE CollectionContains
+    If PROCEDURE = "" Then PROCEDURE = ActiveProcedure
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim Procedures As New Collection
+    Set Procedures = ProceduresOfWorkbook(TargetWorkbook)
+    Dim Code As String
+        Code = GetProcText(ModuleOfProcedure(TargetWorkbook, PROCEDURE), PROCEDURE)
+    Dim CodeLines As Variant
+        CodeLines = Split(ProcedureCode, vbNewLine)
+    Dim CodeLine As Variant
+    Dim RequiredProcedure As String
+    Dim Log As String
+    If InStr(1, Code, "'#INCLUDE", vbTextCompare) > 0 Then
+        For Each CodeLine In CodeLines
+            If Left(CodeLine, 9) = "'#INCLUDE" Then
+                RequiredProcedure = Split(CodeLine, " ")(1)
+                If Not CollectionContains(Procedures, , RequiredProcedure) Then
+                    ImportProcedure RequiredProcedure, TargetWorkbook, , True
+                    'If Log = "" Then Log = TargetWorkbook.Name & " is missing the following required procedures in order to run : " & PROCEDURE
+                    'Log = Log & vbNewLine & RequiredProcedure
+                End If
+            End If
+        Next
+    End If
+    'Debug.Print IIf(Log <> "", Log, TargetWorkbook.Name & " contains all requires Procedures to run : " & PROCEDURE)
+    ProcedureDependenciesExist = (Log = "")
+End Function
+
 
 Function CreateOrSetModule(compName As String, compType As VBIDE.vbext_ComponentType, Optional TargetWorkbook As Workbook) As VBComponent
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
