@@ -178,7 +178,7 @@ Sub ImportProcedure( _
     If CheckPath(ProcedurePath) = "I" Then
         On Error Resume Next
         Dim DownloadedProcedure As String
-        DownloadedProcedure = DownloadTextFile("https://github.com/alexofrhodes/Excel-Snippets/raw/main/" & PROCEDURE & ".txt")
+        DownloadedProcedure = DownloadTextFile("https://github.com/alexofrhodes/Snippets/Procedures/raw/main/" & PROCEDURE & ".txt")
         On Error GoTo 0
         If Len(DownloadedProcedure) > 0 Then
             TxtOverwrite SNIP_FOLDER & PROCEDURE & ".txt", DownloadedProcedure
