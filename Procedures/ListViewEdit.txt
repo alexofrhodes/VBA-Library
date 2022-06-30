@@ -1,0 +1,9 @@
+
+Sub ListViewEdit(LV As ListView, RowIndex As Long, ColumnIndex As Long, NewValue As Variant)
+Rem base 1 like range
+    If ColumnIndex = 1 Then
+        LV.ListItems(RowIndex).Text = NewValue
+    ElseIf ColumnIndex > 1 Then
+        LV.ListItems(RowIndex).ListSubItems(ColumnIndex - 1).Text = NewValue
+    End If
+End Sub
