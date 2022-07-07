@@ -1,58 +1,33 @@
 
-''''''''''''''''''''''''''''''
-Contains the following procedures
-''''''''''''''''''''''''''''''
-'ActiveCodepaneWorkbook
-'ActiveProcedure
-'AddListOfLinkedProceduresToProcedure
-'ArrayDimensions
-'ArrayTrim
-'CalculateByteCharacters
-'CheckPath
-'CodepaneSelection
-'CollectionContains
-'CreateOrSetModule
-'DebugPrintHairetu
-'DownloadTextFile
-'dp
-'DPH
-'ExportProcedure
-'ExportTargetProcedure
-'FileExists
-'FileLastModified
-'FolderExists
-'FoldersCreate
-'FollowLink
-'GetCallsOfProcedure
-'GetProcText
-'HttpExists
-'ImportImports
-'ImportProcedure
-'InStrExact
-'joinArrays
-'LinkedProcs
-'ListContainedProceduresInTXT
-'ModuleOfProcedure
-'ProcedureExists
-'ProcedureFirstLine
-'ProceduresOfTXT
-'ProceduresOfWorkbook
-'RegexTest
-'ShortenToByteCharacters
-'SortArray
-'TextDecomposition
-'TxtOverwrite
-'TxtRead
-'UpdateProcedure
+''DEVELOPER  Anastasiou Alex  
+''EMAIL      AnastasiouAlex@gmail.com  
+''GITHUB     https://github.com/AlexOfRhodes  
+''YOUTUBE    https://bit.ly/3aLZU9M  
+''VK         https://vk.com/vbarc_hive  
+''FACEBOOK   https://www.facebook.com/profile.php?id=100065068627996  
+
+''Please keep the comments
+
+'You can copy this txt to a module in your Personal.xlsb to have it work for all your projects using the immediate window, 
+'or  make a vbe [commandbar](https://github.com/alexofrhodes/vba-Multiple-Commandbars-from-sheet-data), 
+'or a popup Macro menu with [autohotkey](https://github.com/alexofrhodes/AutoHotkey/tree/main/Excel%20macro%20menu/popup%20variant)
+
+'Contact me for more help, suggestions, bug reports or just to say hi.
+
+'Main procedures are:
+
+'ExportProcedure  (place mouse inside procedure's code or select a procedure name to call without passing arguments)
+'ImportProcedure  (select a procedure name to call without passing arguments)
+'getMissingMissingDependenciesOfProcedure    (place mouse inside procedure's code to call without passing arguments)
 'UpdateAllProcedures
 
-
-Public SNIP_FOLDER as string
+'Change the following lines to your existing PC and GITHUB Folders
+Public CONST SNIP_FOLDER = "C:\Users\acer\Documents\vbArc\SNIPPETS\"                             'with \ at end
+Public CONST GITHUB_FOLDER = "https://github.com/alexofrhodes/Snippets/Procedures/raw/main/"     'with / at end
 
 Sub ExportProcedure( _
                         Optional PROCEDURENAME As String, _
                         Optional FromWorkbook As Workbook)
-Rem @star
 '#INCLUDE FollowLink
 '#INCLUDE FileExists
 '#INCLUDE AddListOfLinkedProceduresToProcedure
@@ -69,12 +44,7 @@ Rem @star
 '#INCLUDE CollectionContains
 '#INCLUDE ExportTargetProcedure
 
-''''''''''''''''''''''''''''''''''''''''''''
-''DEVELOPER  Anastasiou Alex
-''EMAIL      AnastasiouAlex@gmail.com
-''GITHUB     https://github.com/AlexOfRhodes
-''YOUTUBE    https://bit.ly/3aLZU9M
-''''''''''''''''''''''''''''''''''''''''''''
+
 
     'SNIP_FOLDER = Environ("USERprofile") & "\My Documents\vbArc\Snippets\"
     'If FolderExists(SNIP_FOLDER) = False Then FoldersCreate (SNIP_FOLDER)
@@ -178,7 +148,7 @@ Sub ImportProcedure( _
     If CheckPath(ProcedurePath) = "I" Then
         On Error Resume Next
         Dim DownloadedProcedure As String
-        DownloadedProcedure = DownloadTextFile("https://github.com/alexofrhodes/Snippets/Procedures/raw/main/" & PROCEDURE & ".txt")
+        DownloadedProcedure = DownloadTextFile(GITHUB_FOLDER & PROCEDURE & ".txt")
         On Error GoTo 0
         If Len(DownloadedProcedure) > 0 Then
             TxtOverwrite SNIP_FOLDER & PROCEDURE & ".txt", DownloadedProcedure
