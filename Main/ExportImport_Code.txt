@@ -22,6 +22,7 @@
 'UpdateAllProcedures
 
 'Change the following lines to your existing PC and GITHUB Folders
+
 Public CONST SNIP_FOLDER = "C:\Users\acer\Documents\vbArc\SNIPPETS\"                             'with \ at end
 Public CONST GITHUB_FOLDER = "https://github.com/alexofrhodes/Snippets/Procedures/raw/main/"     'with / at end
 
