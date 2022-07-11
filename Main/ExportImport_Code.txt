@@ -15,11 +15,20 @@
 'Contact me for more help, suggestions, bug reports or just to say hi.
 
 
+
 'Change the following lines to your existing PC and GITHUB Folders
 
 Public Const SNIP_FOLDER = "C:\Users\acer\Documents\vbArc\SNIPPETS\"                                        'with \ at end
 Public Const GITHUB_FOLDER = "https://raw.githubusercontent.com/alexofrhodes/Snippets/main/Procedures/"     'with / at end
 
+'+++ TEST +++
+Sub TestExport()
+    ExportProcedure "ExportProcedure"
+End Sub
+
+Sub TestImport()
+    ImportProcedure "WhichOption"
+End Sub
 
 '===MAIN PROCEDURES===
 
@@ -31,8 +40,8 @@ Public Const GITHUB_FOLDER = "https://raw.githubusercontent.com/alexofrhodes/Sni
 
 'Example use from immediate window:
 '----------------------------------
-'exportprocedure "exportprocedure"  
-'importprocedure "WhichOption"      'case sensitive when getting file from github repo
+'exportprocedure "exportprocedure"
+'importprocedure "WhichOption"       'case sensitive when getting file from github repo
 
 
 Sub ExportProcedure( _
