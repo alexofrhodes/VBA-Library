@@ -1,20 +1,18 @@
 
-''DEVELOPER  Anastasiou Alex  
-''EMAIL      AnastasiouAlex@gmail.com  
-''GITHUB     https://github.com/AlexOfRhodes  
-''YOUTUBE    https://bit.ly/3aLZU9M  
-''VK         https://vk.com/vbarc_hive  
-''FACEBOOK   https://www.facebook.com/profile.php?id=100065068627996  
+''DEVELOPER  Anastasiou Alex
+''EMAIL      AnastasiouAlex@gmail.com
+''GITHUB     https://github.com/AlexOfRhodes
+''YOUTUBE    https://bit.ly/3aLZU9M
+''VK         https://vk.com/vbarc_hive
+''FACEBOOK   https://www.facebook.com/profile.php?id=100065068627996
 
 ''Please keep the comments
 
-'You can copy this txt to a module in your Personal.xlsb to have it work for all your projects using the immediate window, 
-'or  make a vbe [commandbar](https://github.com/alexofrhodes/vba-Multiple-Commandbars-from-sheet-data), 
+'You can copy this txt to a module in your Personal.xlsb to have it work for all your projects using the immediate window,
+'or  make a vbe [commandbar](https://github.com/alexofrhodes/vba-Multiple-Commandbars-from-sheet-data),
 'or a popup Macro menu with [autohotkey](https://github.com/alexofrhodes/AutoHotkey/tree/main/Excel%20macro%20menu/popup%20variant)
 
 'Contact me for more help, suggestions, bug reports or just to say hi.
-
-'Needs reference to Microsoft Visual Basic for Applications Extensibility 5.3 library
 
 'Main procedures are:
 
@@ -25,8 +23,8 @@
 
 'Change the following lines to your existing PC and GITHUB Folders
 
-Public CONST SNIP_FOLDER = "C:\Users\acer\Documents\vbArc\SNIPPETS\"                             'with \ at end
-Public CONST GITHUB_FOLDER = "https://github.com/alexofrhodes/Snippets/Procedures/raw/main/"     'with / at end
+Public Const SNIP_FOLDER = "C:\Users\acer\Documents\vbArc\SNIPPETS\"                             'with \ at end
+Public Const GITHUB_FOLDER = "https://github.com/alexofrhodes/Snippets/Procedures/raw/main/"     'with / at end
 
 Sub ExportProcedure( _
                         Optional PROCEDURENAME As String, _
@@ -78,7 +76,7 @@ Sub ExportProcedure( _
     
     'test
     Dim ProceduresCount As Long
-    ProceduresCount = ExportedProcedures.count
+    ProceduresCount = ExportedProcedures.Count
 retry:
     For Each PROCEDURE In ExportedProcedures
         For Each ELEMENT In LinkedProcs(PROCEDURE, FromWorkbook)
@@ -88,14 +86,14 @@ retry:
             End If
         Next
     Next
-    If ExportedProcedures.count > ProceduresCount Then
-        ProceduresCount = ExportedProcedures.count
+    If ExportedProcedures.Count > ProceduresCount Then
+        ProceduresCount = ExportedProcedures.Count
         GoTo retry
     End If
     On Error GoTo 0
     'end test
             
-        If ExportedProcedures.count > 1 Then
+        If ExportedProcedures.Count > 1 Then
             Dim MergedName As String
             Dim procFile As String
                 MergedName = "Merged_" & PROCEDURENAME
@@ -116,6 +114,8 @@ Sub ImportProcedure( _
     Optional TargetWorkbook As Workbook, _
     Optional Module As VBComponent, _
     Optional OverWrite As Boolean)
+'#INCLUDE FolderExists
+'#INCLUDE FoldersCreate
 
 '#INCLUDE DownloadTextFile
 '#INCLUDE CheckPath
@@ -186,7 +186,7 @@ End_GetFromWebpage:
     Set objWeb = Nothing
     Exit Function
 Err_GetFromWebpage:
-    MsgBox err.Description & " (" & err.Number & ")"
+    MsgBox Err.Description & " (" & Err.Number & ")"
     Resume End_GetFromWebpage
 End Function
 
@@ -205,7 +205,7 @@ Function FileExists(ByVal strFile As String, Optional bFindFolders As Boolean) A
 End Function
 
 
-Sub AddListOfLinkedProceduresToProcedure(PROCEDURENAME As String, Procedures As Collection, FromWorkbook As Workbook)
+Sub AddListOfLinkedProceduresToProcedure(PROCEDURENAME As String, procedures As Collection, FromWorkbook As Workbook)
 '#INCLUDE RegexTest
 '#INCLUDE ProcedureFirstLine
 '#INCLUDE GetProcText
@@ -214,7 +214,7 @@ Sub AddListOfLinkedProceduresToProcedure(PROCEDURENAME As String, Procedures As 
     Dim Module As VBComponent:  Set Module = ModuleOfProcedure(FromWorkbook, PROCEDURENAME)
     Dim ProcedureText As String:    ProcedureText = GetProcText(Module, PROCEDURENAME)
     Dim PROCEDURE As Variant
-    For Each PROCEDURE In Procedures
+    For Each PROCEDURE In procedures
         If UCase(CStr(PROCEDURE)) <> UCase(CStr(PROCEDURENAME)) Then
 Rem         If InStr(1, ProcedureText, CStr(PROCEDURE)) > 0 Then
             If RegexTest(ProcedureText, "\W" & PROCEDURE & "[.(\W]", , True) = True Then
@@ -243,9 +243,9 @@ Exit_Err_Handler:
     Exit Function
 Err_Handler:
     MsgBox "The following error has occurred" & vbCrLf & vbCrLf & _
-           "Error Number: " & err.Number & vbCrLf & _
+           "Error Number: " & Err.Number & vbCrLf & _
            "Error Source: TxtOverwrite" & vbCrLf & _
-           "Error Description: " & err.Description, vbCritical, "An Error has Occurred!"
+           "Error Description: " & Err.Description, vbCritical, "An Error has Occurred!"
     GoTo Exit_Err_Handler
 End Function
 
@@ -308,7 +308,7 @@ Function LinkedProcs( _
     Dim Proccessed As Collection:          Set Proccessed = New Collection
     Dim CalledProcedures As Collection:    Set CalledProcedures = New Collection
         GetCallsOfProcedure ModuleOfProcedure(FromWorkbook, PROCEDURENAME), PROCEDURENAME, AllProcedures, CalledProcedures
-    Dim CalledProceduresCount As Long:    CalledProceduresCount = CalledProcedures.count
+    Dim CalledProceduresCount As Long:    CalledProceduresCount = CalledProcedures.Count
     Dim PROCEDURE As Variant
     Dim Module As VBComponent
 REPEAT:
@@ -321,8 +321,8 @@ REPEAT:
             GetCallsOfProcedure Module, CStr(PROCEDURE), AllProcedures, CalledProcedures
         End If
     Next
-    If CalledProcedures.count > CalledProceduresCount Then
-        CalledProceduresCount = CalledProcedures.count
+    If CalledProcedures.Count > CalledProceduresCount Then
+        CalledProceduresCount = CalledProcedures.Count
         GoTo REPEAT
     End If
     Set LinkedProcs = CalledProcedures
@@ -478,8 +478,8 @@ Public Function CollectionContains(Kollection As Collection, Optional Key As Var
         On Error Resume Next
         CollectionContains = True
         var = Kollection(strKey)
-        If err.Number = 91 Then GoTo CheckForObject
-        If err.Number = 5 Then GoTo NotFound
+        If Err.Number = 91 Then GoTo CheckForObject
+        If Err.Number = 5 Then GoTo NotFound
         On Error GoTo 0
         Exit Function
 CheckForObject:
@@ -652,8 +652,8 @@ Function InStrExact(Start As Long, SourceText As String, WordToFind As String, _
                     Optional CaseSensitive As Boolean = False, _
                     Optional AllowAccentedCharacters As Boolean = False) As Long
     Dim x As Long, Str1 As String, Str2 As String, Pattern As String
-    Const UpperAccentsOnly As String = "ΗΙΡ"
-    Const UpperAndLowerAccents As String = "ΗΙΡηιρ"
+    Const UpperAccentsOnly As String = "???"
+    Const UpperAndLowerAccents As String = "??????"
     If CaseSensitive Then
         Str1 = SourceText
         Str2 = WordToFind
@@ -703,40 +703,17 @@ Function ProceduresOfTXT(FilePath As Variant, Optional NameOnly As Boolean) As V
     Rem ProceduresOfTXT = Join(out, Chr(10))
 End Function
 
-Public Sub SortArray(vArray As Variant, inLow As Long, inHi As Long)
-    Dim tmpSwap As Variant
-    Dim tmpLow  As Long:    tmpLow = inLow
-    Dim tmpHi   As Long:      tmpHi = inHi
-    Dim pivot   As Variant:    pivot = vArray((inLow + inHi) \ 2)
-    While (tmpLow <= tmpHi)
-        While (vArray(tmpLow) < pivot And tmpLow < inHi)
-            tmpLow = tmpLow + 1
-        Wend
-        While (pivot < vArray(tmpHi) And tmpHi > inLow)
-            tmpHi = tmpHi - 1
-        Wend
-        If (tmpLow <= tmpHi) Then
-            tmpSwap = vArray(tmpLow)
-            vArray(tmpLow) = vArray(tmpHi)
-            vArray(tmpHi) = tmpSwap
-            tmpLow = tmpLow + 1
-            tmpHi = tmpHi - 1
-        End If
-    Wend
-    If (inLow < tmpHi) Then SortArray vArray, inLow, tmpHi
-    If (tmpLow < inHi) Then SortArray vArray, tmpLow, inHi
-End Sub
 
 Function joinArrays(arr1 As Variant, arr2 As Variant) As Variant
     Dim arrToReturn() As Variant, myCollection As New Collection
     For Each x In arr1: myCollection.Add x: Next
     For Each y In arr2: myCollection.Add y: Next
-    If myCollection.count = 0 Then
+    If myCollection.Count = 0 Then
         joinArrays = Array("")
         Exit Function
     End If
-    ReDim arrToReturn(1 To myCollection.count)
-    For i = 1 To myCollection.count: arrToReturn(i) = myCollection.Item(i): Next
+    ReDim arrToReturn(1 To myCollection.Count)
+    For i = 1 To myCollection.Count: arrToReturn(i) = myCollection.Item(i): Next
     joinArrays = arrToReturn
 End Function
 
@@ -892,6 +869,9 @@ End Function
 
 
 Function CheckPath(path) As String
+'#INCLUDE FileExists
+'#INCLUDE FolderExists
+'#INCLUDE HttpExists
     Dim retval
     retval = "I"
     If (retval = "I") And FileExists(path) Then retval = "F"
@@ -926,6 +906,8 @@ Sub ImportImports( _
     Optional TargetWorkbook As Workbook, _
     Optional Module As VBComponent, _
     Optional OverWrite As Boolean)
+'#INCLUDE ImportProcedure
+'#INCLUDE TxtRead
     
     Rem @TODO infinite loop possible?
     Dim var
@@ -945,6 +927,7 @@ Public Sub UpdateProcedure( _
                             PROCEDURE As Variant, _
                             Code As String, _
                             TargetWorkbook As Workbook)
+'#INCLUDE ModuleOfProcedure
     Dim StartLine As Integer
     Dim NumLines As Integer
     Dim Module As VBComponent
@@ -963,10 +946,10 @@ Function getAllMissingDependencies(Optional TargetWorkbook As Workbook) As Boole
 '#INCLUDE ActiveCodepaneWorkbook
 '#INCLUDE getMissingMissingDependenciesOfProcedure
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
-    Dim Procedures As New Collection
-    Set Procedures = ProceduresOfWorkbook(TargetWorkbook)
+    Dim procedures As New Collection
+    Set procedures = ProceduresOfWorkbook(TargetWorkbook)
     Dim PROCEDURE As Variant
-    For Each PROCEDURE In Procedures
+    For Each PROCEDURE In procedures
         getMissingMissingDependenciesOfProcedure CStr(PROCEDURE), TargetWorkbook
     Next
 End Function
@@ -981,8 +964,8 @@ Function getMissingMissingDependenciesOfProcedure(Optional PROCEDURE As String, 
 '#INCLUDE CollectionContains
     If PROCEDURE = "" Then PROCEDURE = ActiveProcedure
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
-    Dim Procedures As New Collection
-    Set Procedures = ProceduresOfWorkbook(TargetWorkbook)
+    Dim procedures As New Collection
+    Set procedures = ProceduresOfWorkbook(TargetWorkbook)
     Dim Code As String
         Code = GetProcText(ModuleOfProcedure(TargetWorkbook, PROCEDURE), PROCEDURE)
     Dim CodeLines As Variant
@@ -994,7 +977,7 @@ Function getMissingMissingDependenciesOfProcedure(Optional PROCEDURE As String, 
         For Each CodeLine In CodeLines
             If Left(CodeLine, 9) = "'#INCLUDE" Then
                 RequiredProcedure = Split(CodeLine, " ")(1)
-                If Not CollectionContains(Procedures, , RequiredProcedure) Then
+                If Not CollectionContains(procedures, , RequiredProcedure) Then
                     ImportProcedure RequiredProcedure, TargetWorkbook, , True
                     'If Log = "" Then Log = TargetWorkbook.Name & " is missing the following required procedures in order to run : " & PROCEDURE
                     'Log = Log & vbNewLine & RequiredProcedure
@@ -1008,6 +991,7 @@ End Function
 
 
 Function CreateOrSetModule(compName As String, compType As VBIDE.vbext_ComponentType, Optional TargetWorkbook As Workbook) As VBComponent
+'#INCLUDE ActiveCodepaneWorkbook
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     Dim vbComp As VBComponent
     On Error Resume Next
@@ -1053,14 +1037,51 @@ If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
         If UCase(CStr(PROCEDURE)) <> UCase("UpdateAllProcedures") Then ImportProcedure CStr(PROCEDURE), TargetWorkbook, , True
     Next
 End Sub
-
-
-Function FolderExists(ByVal strPath As String) As Boolean
-    On Error Resume Next
-    FolderExists = ((GetAttr(strPath) And vbDirectory) = vbDirectory)
+Public Function SortArray(ByVal sortableArray As Variant, Optional ByVal descendingFlag As Boolean) As Variant
+    '@Description: This function is an implementation of Bubble Sort, allowing the user to sort an array,
+    '               optionally allowing the user to specify the array to be sorted in descending order
+    '@Author: Anthony Mancini
+    '@Version: 1.0.0
+    '@License: MIT
+    '@Param: sortableArray is the array that will be sorted
+    '@Param: descendingFlag changes the sort to descending
+    '@Returns: Returns the a sorted array
+    '@Example: =Sort({1,3,2}) -> {1,2,3}
+    '@Example: =Sort({1,3,2}, True) -> {3,2,1}
+    Dim i As Integer
+    Dim swapOccuredBool As Boolean
+    Dim arrayLength As Integer
+    arrayLength = UBound(sortableArray) - LBound(sortableArray) + 1
+    Dim sortedArray() As Variant
+    ReDim sortedArray(arrayLength)
+    Dim dif As Long
+    dif = IIf(LBound(sortableArray) = 1, 1, 0)
+    For i = 0 To arrayLength - 1
+        sortedArray(i) = sortableArray(i + dif)
+    Next
+    Dim temporaryValue As Variant
+    Do
+        swapOccuredBool = False
+        For i = 0 To arrayLength - 1
+            If (sortedArray(i)) < sortedArray(i + 1) Then
+                temporaryValue = sortedArray(i)
+                sortedArray(i) = sortedArray(i + 1)
+                sortedArray(i + 1) = temporaryValue
+                swapOccuredBool = True
+            End If
+        Next
+    Loop While swapOccuredBool
+    If descendingFlag = True Then
+        SortArray = sortedArray
+    Else
+        Dim ascendingArray() As Variant
+        ReDim ascendingArray(arrayLength)
+        For i = 0 To arrayLength - 1
+            ascendingArray(i) = sortedArray(arrayLength - i - 1)
+        Next
+        SortArray = ascendingArray
+    End If
 End Function
-
-
 Sub FoldersCreate(FolderPath As String)
     Dim individualFolders() As String
     Dim tempFolderPath As String
@@ -1075,3 +1096,4 @@ Sub FoldersCreate(FolderPath As String)
         End If
     Next arrayElement
 End Sub
+
