@@ -6,6 +6,8 @@
 ''VK         https://vk.com/vbarc_hive
 ''FACEBOOK   https://www.facebook.com/profile.php?id=100065068627996
 
+''Video https://youtu.be/FYIEMTrmgvE
+
 ''Please keep the comments
 
 'You can copy this txt to a module in your Personal.xlsb to have it work for all your projects using the immediate window,
