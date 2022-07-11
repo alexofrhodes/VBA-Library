@@ -14,6 +14,8 @@
 
 'Contact me for more help, suggestions, bug reports or just to say hi.
 
+'Needs reference to Microsoft Visual Basic for Applications Extensibility 5.3 library
+
 'Main procedures are:
 
 'ExportProcedure  (place mouse inside procedure's code or select a procedure name to call without passing arguments)
