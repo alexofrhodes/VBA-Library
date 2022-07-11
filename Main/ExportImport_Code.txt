@@ -14,17 +14,26 @@
 
 'Contact me for more help, suggestions, bug reports or just to say hi.
 
-'Main procedures are:
+
+
+'Change the following lines to your existing PC and GITHUB Folders
+
+Public Const SNIP_FOLDER = "C:\Users\acer\Documents\vbArc\SNIPPETS\"                             'with \ at end
+Public Const GITHUB_FOLDER = "https://github.com/alexofrhodes/Snippets/Procedures/raw/main/"     'with / at end
+
+'===MAIN PROCEDURES===
 
 'ExportProcedure  (place mouse inside procedure's code or select a procedure name to call without passing arguments)
 'ImportProcedure  (select a procedure name to call without passing arguments)
 'getMissingMissingDependenciesOfProcedure    (place mouse inside procedure's code to call without passing arguments)
 'UpdateAllProcedures
 
-'Change the following lines to your existing PC and GITHUB Folders
 
-Public Const SNIP_FOLDER = "C:\Users\acer\Documents\vbArc\SNIPPETS\"                             'with \ at end
-Public Const GITHUB_FOLDER = "https://github.com/alexofrhodes/Snippets/Procedures/raw/main/"     'with / at end
+'Example use from immediate window:
+'----------------------------------
+'exportprocedure "exportprocedure"
+'importprocedure "WhichOption"
+
 
 Sub ExportProcedure( _
                         Optional PROCEDURENAME As String, _
@@ -170,7 +179,68 @@ Sub ImportProcedure( _
     ImportImports ProcedurePath, TargetWorkbook, Module, OverWrite
 End Sub
 
-Function DownloadTextFile(URL As String) As String
+Public Function getAllMissingDependencies(Optional TargetWorkbook As Workbook) As Boolean
+'#INCLUDE ProceduresOfWorkbook
+'#INCLUDE ActiveCodepaneWorkbook
+'#INCLUDE getMissingMissingDependenciesOfProcedure
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim procedures As New Collection
+    Set procedures = ProceduresOfWorkbook(TargetWorkbook)
+    Dim PROCEDURE As Variant
+    For Each PROCEDURE In procedures
+        getMissingMissingDependenciesOfProcedure CStr(PROCEDURE), TargetWorkbook
+    Next
+End Function
+
+Public Function getMissingMissingDependenciesOfProcedure(Optional PROCEDURE As String, Optional TargetWorkbook As Workbook) As Boolean
+'#INCLUDE ImportProcedure
+'#INCLUDE ProceduresOfWorkbook
+'#INCLUDE ActiveCodepaneWorkbook
+'#INCLUDE ActiveProcedure
+'#INCLUDE GetProcText
+'#INCLUDE ModuleOfProcedure
+'#INCLUDE CollectionContains
+    If PROCEDURE = "" Then PROCEDURE = ActiveProcedure
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim procedures As New Collection
+    Set procedures = ProceduresOfWorkbook(TargetWorkbook)
+    Dim Code As String
+        Code = GetProcText(ModuleOfProcedure(TargetWorkbook, PROCEDURE), PROCEDURE)
+    Dim CodeLines As Variant
+        CodeLines = Split(ProcedureCode, vbNewLine)
+    Dim CodeLine As Variant
+    Dim RequiredProcedure As String
+    Dim Log As String
+    If InStr(1, Code, "'#INCLUDE", vbTextCompare) > 0 Then
+        For Each CodeLine In CodeLines
+            If Left(CodeLine, 9) = "'#INCLUDE" Then
+                RequiredProcedure = Split(CodeLine, " ")(1)
+                If Not CollectionContains(procedures, , RequiredProcedure) Then
+                    ImportProcedure RequiredProcedure, TargetWorkbook, , True
+                    'If Log = "" Then Log = TargetWorkbook.Name & " is missing the following required procedures in order to run : " & PROCEDURE
+                    'Log = Log & vbNewLine & RequiredProcedure
+                End If
+            End If
+        Next
+    End If
+    'Debug.Print IIf(Log <> "", Log, TargetWorkbook.Name & " contains all requires Procedures to run : " & PROCEDURE)
+    ProcedureDependenciesExist = (Log = "")
+End Function
+
+Sub UpdateAllProcedures(Optional TargetWorkbook As Workbook)
+If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim procedures As New Collection
+    Set procedures = ProceduresOfWorkbook(TargetWorkbook)
+    Dim PROCEDURE
+    For Each PROCEDURE In procedures
+        If UCase(CStr(PROCEDURE)) <> UCase("UpdateAllProcedures") Then ImportProcedure CStr(PROCEDURE), TargetWorkbook, , True
+    Next
+End Sub
+
+
+'---HELPER FUNCTIONS---
+
+Private Function DownloadTextFile(URL As String) As String
     On Error GoTo Err_GetFromWebpage
     Dim objWeb As Object
     Dim strXML As String
@@ -190,7 +260,7 @@ Err_GetFromWebpage:
     Resume End_GetFromWebpage
 End Function
 
-Function FileExists(ByVal strFile As String, Optional bFindFolders As Boolean) As Boolean
+Private Function FileExists(ByVal strFile As String, Optional bFindFolders As Boolean) As Boolean
     Dim lngAttributes As Long
     lngAttributes = (vbReadOnly Or vbHidden Or vbSystem)
     If bFindFolders Then
@@ -205,11 +275,12 @@ Function FileExists(ByVal strFile As String, Optional bFindFolders As Boolean) A
 End Function
 
 
-Sub AddListOfLinkedProceduresToProcedure(PROCEDURENAME As String, procedures As Collection, FromWorkbook As Workbook)
+Private Sub AddListOfLinkedProceduresToProcedure(PROCEDURENAME As String, procedures As Collection, FromWorkbook As Workbook)
 '#INCLUDE RegexTest
 '#INCLUDE ProcedureFirstLine
 '#INCLUDE GetProcText
 '#INCLUDE ModuleOfProcedure
+    
     Dim ListOfImports As String
     Dim Module As VBComponent:  Set Module = ModuleOfProcedure(FromWorkbook, PROCEDURENAME)
     Dim ProcedureText As String:    ProcedureText = GetProcText(Module, PROCEDURENAME)
@@ -232,7 +303,7 @@ Rem         If InStr(1, ProcedureText, CStr(PROCEDURE)) > 0 Then
     If ListOfImports <> "" Then Module.CodeModule.InsertLines ProcedureFirstLine(Module, PROCEDURENAME), ListOfImports
 End Sub
 
-Function TxtOverwrite(sFile As String, sText As String)
+Private Function TxtOverwrite(sFile As String, sText As String)
     On Error GoTo Err_Handler
     Dim FileNumber As Integer
     FileNumber = FreeFile
@@ -249,7 +320,7 @@ Err_Handler:
     GoTo Exit_Err_Handler
 End Function
 
-Sub ExportTargetProcedure( _
+Private Sub ExportTargetProcedure( _
                     Optional PROCEDURENAME As String, _
                     Optional FromWorkbook As Workbook)
 '#INCLUDE FileExists
@@ -295,7 +366,7 @@ Sub ExportTargetProcedure( _
     
 End Sub
 
-Function LinkedProcs( _
+Private Function LinkedProcs( _
          PROCEDURENAME As Variant, _
          FromWorkbook As Workbook) As Collection
     Rem dp LinkedProcs("FindIfGetRow",thisworkbook)
@@ -328,7 +399,7 @@ REPEAT:
     Set LinkedProcs = CalledProcedures
 End Function
 
-Function TxtRead(sPath As String) As String
+Private Function TxtRead(sPath As String) As String
 '#INCLUDE FileExists
     If FileExists(sPath) = False Then
         MsgBox "File was not found."
@@ -348,7 +419,7 @@ Function TxtRead(sPath As String) As String
 End Function
 
 
-Function ProceduresOfWorkbook( _
+Private Function ProceduresOfWorkbook( _
                             TargetWorkbook As Workbook, _
                             Optional ExcludeDocument As Boolean = True, _
                             Optional ExcludeClass As Boolean = True, _
@@ -385,7 +456,7 @@ SKIP:
     Set ProceduresOfWorkbook = coll
 End Function
 
-Function ProcedureExists( _
+Private Function ProcedureExists( _
          PROCEDURENAME As Variant, _
          FromWorkbook As Workbook) _
         As Boolean
@@ -400,20 +471,20 @@ Function ProcedureExists( _
     Next
 End Function
 
-Public Function ActiveCodepaneWorkbook() As Workbook
+Private Function ActiveCodepaneWorkbook() As Workbook
     Dim TmpStr As String
     TmpStr = Application.VBE.SelectedVBComponent.Collection.Parent.FileName
     TmpStr = Right(TmpStr, Len(TmpStr) - InStrRev(TmpStr, "\"))
     Set ActiveCodepaneWorkbook = Workbooks(TmpStr)
 End Function
 
-Public Function ActiveProcedure() As String
+Private Function ActiveProcedure() As String
     Application.VBE.ActiveCodePane.GetSelection L1&, C1&, L2&, C2&
     ActiveProcedure = Application.VBE.ActiveCodePane _
                      .CodeModule.ProcOfLine(L1&, vbext_pk_Proc)
 End Function
 
-Sub ListContainedProceduresInTXT(FileName As String)
+Private Sub ListContainedProceduresInTXT(FileName As String)
 '#INCLUDE ProceduresOfTXT
 '#INCLUDE TxtOverwrite
 '#INCLUDE TxtRead
@@ -427,7 +498,7 @@ Sub ListContainedProceduresInTXT(FileName As String)
     Join(v, vbNewLine & "'") & vbNewLine & vbNewLine & s
 End Sub
 
-Sub FollowLink(FolderPath As String)
+Private Sub FollowLink(FolderPath As String)
     If Right(FolderPath, 1) = "\" Then FolderPath = Left(FolderPath, Len(FolderPath) - 1)
     On Error Resume Next
     Dim oShell As Object
@@ -442,7 +513,7 @@ Sub FollowLink(FolderPath As String)
     Application.ThisWorkbook.FollowHyperlink Address:=FolderPath, NewWindow:=True
 End Sub
 
-Sub dp(var As Variant)
+Private Sub dp(var As Variant)
 '#INCLUDE DPH
 '#INCLUDE ArrayDimensions
     Dim ELEMENT As Variant
@@ -470,7 +541,7 @@ Sub dp(var As Variant)
     End Select
 End Sub
 
-Public Function CollectionContains(Kollection As Collection, Optional Key As Variant, Optional Item As Variant) As Boolean
+Private Function CollectionContains(Kollection As Collection, Optional Key As Variant, Optional Item As Variant) As Boolean
     Dim strKey As String
     Dim var As Variant
     If Not IsMissing(Key) Then
@@ -505,7 +576,7 @@ NotFound:
     End If
 End Function
 
-Public Function RegexTest( _
+Private Function RegexTest( _
        ByVal string1 As String, _
        ByVal stringPattern As String, _
        Optional ByVal globalFlag As Boolean, _
@@ -523,7 +594,7 @@ Public Function RegexTest( _
     RegexTest = Regex.test(string1)
 End Function
 
-Function ProcedureFirstLine(Module As VBComponent, procname As String) As Long
+Private Function ProcedureFirstLine(Module As VBComponent, procname As String) As Long
 '#INCLUDE InStrExact
     Dim N As Long
     Dim s As String
@@ -545,7 +616,7 @@ Function ProcedureFirstLine(Module As VBComponent, procname As String) As Long
     ProcedureFirstLine = N
 End Function
 
-Public Function GetProcText(vbComp As VBComponent, _
+Private Function GetProcText(vbComp As VBComponent, _
                             sProcName As Variant, _
                             Optional bInclHeader As Boolean = True) As String
     If vbComp Is Nothing Then
@@ -579,7 +650,7 @@ Error_Handler:
     Resume Error_Handler_Exit
 End Function
 
-Function ModuleOfProcedure(wb As Workbook, PROCEDURENAME As Variant) As VBComponent
+Private Function ModuleOfProcedure(wb As Workbook, PROCEDURENAME As Variant) As VBComponent
     Dim ProcKind As VBIDE.vbext_ProcKind
     Dim lineNum As Long, NumProc As Long
     Dim procname As String
@@ -599,7 +670,7 @@ Function ModuleOfProcedure(wb As Workbook, PROCEDURENAME As Variant) As VBCompon
     Next vbComp
 End Function
 
-Function FileLastModified(FilePath) As Date
+Private Function FileLastModified(FilePath) As Date
     Dim fs, f
     Set fs = CreateObject("Scripting.FileSystemObject")
     Set f = fs.GetFile(FilePath)
@@ -607,7 +678,7 @@ Function FileLastModified(FilePath) As Date
 End Function
 
 
-Sub GetCallsOfProcedure( _
+Private Sub GetCallsOfProcedure( _
                         Module As VBComponent, _
                         PROCEDURENAME As Variant, _
                         AllProcedures As Collection, _
@@ -641,14 +712,14 @@ End Sub
 
 
 
-Sub ArrayTrim(arr As Variant)
+Private Sub ArrayTrim(arr As Variant)
     Dim i As Long
     For i = LBound(arr) To UBound(arr)
         If TypeName(arr(i)) = "String" Then arr(i) = Trim(arr(i))
     Next
 End Sub
 
-Function InStrExact(Start As Long, SourceText As String, WordToFind As String, _
+Private Function InStrExact(Start As Long, SourceText As String, WordToFind As String, _
                     Optional CaseSensitive As Boolean = False, _
                     Optional AllowAccentedCharacters As Boolean = False) As Long
     Dim x As Long, Str1 As String, Str2 As String, Pattern As String
@@ -675,7 +746,7 @@ Function InStrExact(Start As Long, SourceText As String, WordToFind As String, _
 End Function
 
 
-Function ProceduresOfTXT(FilePath As Variant, Optional NameOnly As Boolean) As Variant
+Private Function ProceduresOfTXT(FilePath As Variant, Optional NameOnly As Boolean) As Variant
 '#INCLUDE joinArrays
 '#INCLUDE SortArray
 '#INCLUDE TxtRead
@@ -704,7 +775,7 @@ Function ProceduresOfTXT(FilePath As Variant, Optional NameOnly As Boolean) As V
 End Function
 
 
-Function joinArrays(arr1 As Variant, arr2 As Variant) As Variant
+Private Function joinArrays(arr1 As Variant, arr2 As Variant) As Variant
     Dim arrToReturn() As Variant, myCollection As New Collection
     For Each x In arr1: myCollection.Add x: Next
     For Each y In arr2: myCollection.Add y: Next
@@ -717,12 +788,12 @@ Function joinArrays(arr1 As Variant, arr2 As Variant) As Variant
     joinArrays = arrToReturn
 End Function
 
-Sub DPH(ByVal Hairetu, Optional HyoujiMaxNagasa%, Optional HairetuName$)
+Private Sub DPH(ByVal Hairetu, Optional HyoujiMaxNagasa%, Optional HairetuName$)
 '#INCLUDE DebugPrintHairetu
     Call DebugPrintHairetu(Hairetu, HyoujiMaxNagasa, HairetuName)
 End Sub
 
-Function ArrayDimensions(ByVal vArray As Variant) As Long
+Private Function ArrayDimensions(ByVal vArray As Variant) As Long
     Dim dimnum As Long
     On Error GoTo FinalDimension
     For dimnum = 1 To 60000
@@ -735,7 +806,7 @@ End Function
 Rem ------------------------
 
 
-Sub DebugPrintHairetu(ByVal Hairetu, Optional HyoujiMaxNagasa%, Optional HairetuName$)
+Private Sub DebugPrintHairetu(ByVal Hairetu, Optional HyoujiMaxNagasa%, Optional HairetuName$)
 '#INCLUDE ShortenToByteCharacters
     Dim i&, j&, k&, m&, N&
     Dim TateMin&, TateMax&, YokoMin&, YokoMax&
@@ -802,7 +873,7 @@ Sub DebugPrintHairetu(ByVal Hairetu, Optional HyoujiMaxNagasa%, Optional Hairetu
                     Next i
                 End Sub
 
-Function ShortenToByteCharacters(Mojiretu$, ByteNum%)
+Private Function ShortenToByteCharacters(Mojiretu$, ByteNum%)
 '#INCLUDE CalculateByteCharacters
 '#INCLUDE TextDecomposition
     Dim OriginByte%
@@ -837,7 +908,7 @@ Function ShortenToByteCharacters(Mojiretu$, ByteNum%)
     ShortenToByteCharacters = Output
 End Function
 
-Function CalculateByteCharacters(Mojiretu$)
+Private Function CalculateByteCharacters(Mojiretu$)
     Dim MojiKosu%
     MojiKosu = Len(Mojiretu)
     Dim Output
@@ -855,7 +926,7 @@ Function CalculateByteCharacters(Mojiretu$)
     CalculateByteCharacters = Output
 End Function
 
-Function TextDecomposition(Mojiretu$)
+Private Function TextDecomposition(Mojiretu$)
     Dim i&, N&
     Dim Output
     N = Len(Mojiretu)
@@ -868,7 +939,7 @@ End Function
 
 
 
-Function CheckPath(path) As String
+Private Function CheckPath(path) As String
 '#INCLUDE FileExists
 '#INCLUDE FolderExists
 '#INCLUDE HttpExists
@@ -880,7 +951,7 @@ Function CheckPath(path) As String
     CheckPath = retval
 End Function
 
-Public Function CodepaneSelection() As String
+Private Function CodepaneSelection() As String
     Dim StartLine As Long, StartColumn As Long, EndLine As Long, EndColumn As Long
     Application.VBE.ActiveCodePane.GetSelection StartLine, StartColumn, EndLine, EndColumn
     If EndLine - StartLine = 0 Then
@@ -901,7 +972,7 @@ Public Function CodepaneSelection() As String
     CodepaneSelection = str
 End Function
 
-Sub ImportImports( _
+Private Sub ImportImports( _
     Optional PROCEDURE As String, _
     Optional TargetWorkbook As Workbook, _
     Optional Module As VBComponent, _
@@ -923,7 +994,7 @@ Sub ImportImports( _
     Next
 End Sub
 
-Public Sub UpdateProcedure( _
+Private Sub UpdateProcedure( _
                             PROCEDURE As Variant, _
                             Code As String, _
                             TargetWorkbook As Workbook)
@@ -940,57 +1011,7 @@ Public Sub UpdateProcedure( _
     End With
 End Sub
 
-
-Function getAllMissingDependencies(Optional TargetWorkbook As Workbook) As Boolean
-'#INCLUDE ProceduresOfWorkbook
-'#INCLUDE ActiveCodepaneWorkbook
-'#INCLUDE getMissingMissingDependenciesOfProcedure
-    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
-    Dim procedures As New Collection
-    Set procedures = ProceduresOfWorkbook(TargetWorkbook)
-    Dim PROCEDURE As Variant
-    For Each PROCEDURE In procedures
-        getMissingMissingDependenciesOfProcedure CStr(PROCEDURE), TargetWorkbook
-    Next
-End Function
-
-Function getMissingMissingDependenciesOfProcedure(Optional PROCEDURE As String, Optional TargetWorkbook As Workbook) As Boolean
-'#INCLUDE ImportProcedure
-'#INCLUDE ProceduresOfWorkbook
-'#INCLUDE ActiveCodepaneWorkbook
-'#INCLUDE ActiveProcedure
-'#INCLUDE GetProcText
-'#INCLUDE ModuleOfProcedure
-'#INCLUDE CollectionContains
-    If PROCEDURE = "" Then PROCEDURE = ActiveProcedure
-    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
-    Dim procedures As New Collection
-    Set procedures = ProceduresOfWorkbook(TargetWorkbook)
-    Dim Code As String
-        Code = GetProcText(ModuleOfProcedure(TargetWorkbook, PROCEDURE), PROCEDURE)
-    Dim CodeLines As Variant
-        CodeLines = Split(ProcedureCode, vbNewLine)
-    Dim CodeLine As Variant
-    Dim RequiredProcedure As String
-    Dim Log As String
-    If InStr(1, Code, "'#INCLUDE", vbTextCompare) > 0 Then
-        For Each CodeLine In CodeLines
-            If Left(CodeLine, 9) = "'#INCLUDE" Then
-                RequiredProcedure = Split(CodeLine, " ")(1)
-                If Not CollectionContains(procedures, , RequiredProcedure) Then
-                    ImportProcedure RequiredProcedure, TargetWorkbook, , True
-                    'If Log = "" Then Log = TargetWorkbook.Name & " is missing the following required procedures in order to run : " & PROCEDURE
-                    'Log = Log & vbNewLine & RequiredProcedure
-                End If
-            End If
-        Next
-    End If
-    'Debug.Print IIf(Log <> "", Log, TargetWorkbook.Name & " contains all requires Procedures to run : " & PROCEDURE)
-    ProcedureDependenciesExist = (Log = "")
-End Function
-
-
-Function CreateOrSetModule(compName As String, compType As VBIDE.vbext_ComponentType, Optional TargetWorkbook As Workbook) As VBComponent
+Private Function CreateOrSetModule(compName As String, compType As VBIDE.vbext_ComponentType, Optional TargetWorkbook As Workbook) As VBComponent
 '#INCLUDE ActiveCodepaneWorkbook
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     Dim vbComp As VBComponent
@@ -1004,14 +1025,12 @@ Function CreateOrSetModule(compName As String, compType As VBIDE.vbext_Component
     Set CreateOrSetModule = vbComp
 End Function
 
-
-
-Function FolderExists(ByVal strPath As String) As Boolean
+Private Function FolderExists(ByVal strPath As String) As Boolean
     On Error Resume Next
     FolderExists = ((GetAttr(strPath) And vbDirectory) = vbDirectory)
 End Function
 
-Function HttpExists(ByVal sURL As String) As Boolean
+Private Function HttpExists(ByVal sURL As String) As Boolean
     Dim oXHTTP As Object
     Set oXHTTP = CreateObject("MSXML2.XMLHTTP")
     If Not UCase(sURL) Like "HTTP:*" Then
@@ -1027,17 +1046,7 @@ haveError:
     HttpExists = False
 End Function
 
-
-Sub UpdateAllProcedures(Optional TargetWorkbook As Workbook)
-If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
-    Dim procedures As New Collection
-    Set procedures = ProceduresOfWorkbook(TargetWorkbook)
-    Dim PROCEDURE
-    For Each PROCEDURE In procedures
-        If UCase(CStr(PROCEDURE)) <> UCase("UpdateAllProcedures") Then ImportProcedure CStr(PROCEDURE), TargetWorkbook, , True
-    Next
-End Sub
-Public Function SortArray(ByVal sortableArray As Variant, Optional ByVal descendingFlag As Boolean) As Variant
+Private Function SortArray(ByVal sortableArray As Variant, Optional ByVal descendingFlag As Boolean) As Variant
     '@Description: This function is an implementation of Bubble Sort, allowing the user to sort an array,
     '               optionally allowing the user to specify the array to be sorted in descending order
     '@Author: Anthony Mancini
@@ -1082,7 +1091,8 @@ Public Function SortArray(ByVal sortableArray As Variant, Optional ByVal descend
         SortArray = ascendingArray
     End If
 End Function
-Sub FoldersCreate(FolderPath As String)
+
+Private Sub FoldersCreate(FolderPath As String)
     Dim individualFolders() As String
     Dim tempFolderPath As String
     Dim arrayElement As Variant
