@@ -1,0 +1,8 @@
+
+Sub TestDoSomeLogging(printThis As String)
+    testString = testFormatTextFunction(printThis)
+    Dim mLogger As New LogFile        ' instantiate the log class as an object
+    mLogger.CreateLogFileByName "QuickIllustration"        ' or new alternative.
+    mLogger.Log testString
+    mLogger.OpenLogFile
+End Sub

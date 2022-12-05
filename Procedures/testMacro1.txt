@@ -1,0 +1,13 @@
+   
+
+Sub testMacro1()
+'@ParentModule A_Test2
+'@INCLUDE PROCEDURE TestDoSomeLogging
+'@INCLUDE USERFORM zTest
+'@INCLUDE DECLARATION MY_NAME
+'@INCLUDE DECLARATION myDay
+    If Not Day(Now) = myDay.myMonday Then Exit Sub
+    TestDoSomeLogging MY_NAME
+    Debug.Print formatThis
+    zTest.Show
+End Sub

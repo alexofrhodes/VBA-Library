@@ -1,0 +1,45 @@
+'Contains the following #4 procedures 
+''''''''''''''''''''''''''''''
+'QuickIllustration
+'TestDoSomeLogging
+'testFormatTextFunction
+'testMacro1
+''''''''''''''''''''''''''''''
+
+
+   
+
+Sub testMacro1()
+'@ParentModule A_Test2
+'@INCLUDE PROCEDURE TestDoSomeLogging
+'@INCLUDE USERFORM zTest
+'@INCLUDE DECLARATION MY_NAME
+'@INCLUDE DECLARATION myDay
+    If Not Day(Now) = myDay.myMonday Then Exit Sub
+    TestDoSomeLogging MY_NAME
+    Debug.Print formatThis
+    zTest.Show
+End Sub
+
+Sub TestDoSomeLogging(printThis As String)
+    testString = testFormatTextFunction(printThis)
+    Dim mLogger As New LogFile        ' instantiate the log class as an object
+    mLogger.CreateLogFileByName "QuickIllustration"        ' or new alternative.
+    mLogger.Log testString
+    mLogger.OpenLogFile
+End Sub
+
+Function testFormatTextFunction(formatThis As String)
+    formatThis = Now & vbTab & formatThis
+    testFormatTextFunction = formatThis
+End Function
+
+Private Sub QuickIllustration()
+'@INCLUDE CLASS LogFile
+'@ParentModule C_LogFile
+    Dim mLogger As New LogFile        ' instantiate the log class as an object
+    '--logger.CreateLogFile logFileName:="QuickIllustration" '<-- using legacy method
+    mLogger.CreateLogFileByName "QuickIllustration"        ' or new alternative.
+    mLogger.Log "Some string you want to log."
+    mLogger.OpenLogFile
+End Sub

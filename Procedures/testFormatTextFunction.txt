@@ -1,0 +1,5 @@
+
+Function testFormatTextFunction(formatThis As String)
+    formatThis = Now & vbTab & formatThis
+    testFormatTextFunction = formatThis
+End Function

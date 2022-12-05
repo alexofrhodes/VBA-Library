@@ -1,0 +1,4 @@
+Enum myDay
+    myMonday = 1
+    myTuesday = 2
+End Enum
