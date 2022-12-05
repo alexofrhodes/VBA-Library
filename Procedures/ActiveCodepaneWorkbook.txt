@@ -1,7 +1,0 @@
-
-Public Function ActiveCodepaneWorkbook() As Workbook
-    Dim TmpStr As String
-    TmpStr = Application.VBE.SelectedVBComponent.Collection.parent.FileName
-    TmpStr = Right(TmpStr, Len(TmpStr) - InStrRev(TmpStr, "\"))
-    Set ActiveCodepaneWorkbook = Workbooks(TmpStr)
-End Function

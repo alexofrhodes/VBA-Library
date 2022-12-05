@@ -1,8 +1,0 @@
-
-Sub ListViewClear(LV As ListView)
-    Dim i As Long
-    For i = LV.ListItems.count To 1 Step -1
-        LV.ListItems.Remove i
-    Next
-    LV.Refresh
-End Sub

@@ -1,6 +1,0 @@
-
-Function WorkbookOfProject(vbProj As VBProject) As Workbook
-    TmpStr = vbProj.FileName
-    TmpStr = Right(TmpStr, Len(TmpStr) - InStrRev(TmpStr, "\"))
-    Set WorkbookOfProject = Workbooks(TmpStr)
-End Function

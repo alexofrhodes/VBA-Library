@@ -1,7 +1,0 @@
-
-Public Function PartAfterCodePaneSelection(StartLine As Long, StartColumn As Long, EndLine As Long, EndColumn As Long)
-    Dim str As String
-    str = Application.VBE.ActiveCodePane.CodeModule.Lines(EndLine, 1)
-    str = Mid(str, EndColumn)
-    PartAfterCodePaneSelection = str
-End Function
