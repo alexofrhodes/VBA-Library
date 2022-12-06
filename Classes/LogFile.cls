@@ -654,7 +654,7 @@ Public Sub Log(ByVal stringToLog As String, Optional formatType As LogFormatType
     Case LogFormatType.LogLineThru
         nlen(1) = C_MAX_LEN - VBA.Len(VBA.Now & ": ")
         If (VBA.Len(stringToLog) <= nlen(1)) Then
-            strg = VBA.replace(stringToLog, " ", "-")
+            strg = VBA.Replace(stringToLog, " ", "-")
             strg = "---" & strg
             nlen(2) = nlen(1) - VBA.Len(stringToLog) - 3
             For ilen = 1 To nlen(2)

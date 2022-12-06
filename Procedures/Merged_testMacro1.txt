@@ -1,13 +1,11 @@
-'Contains the following #4 procedures 
+'Contains the following #3 procedures 
 ''''''''''''''''''''''''''''''
-'QuickIllustration
 'TestDoSomeLogging
 'testFormatTextFunction
 'testMacro1
 ''''''''''''''''''''''''''''''
 
 
-   
 
 Sub testMacro1()
 '@ParentModule A_Test2
@@ -22,24 +20,19 @@ Sub testMacro1()
 End Sub
 
 Sub TestDoSomeLogging(printThis As String)
+'@ParentModule A_Test2
+'@INCLUDE PROCEDURE testFormatTextFunction
+'@INCLUDE CLASS LogFile
+'@INCLUDE DECLARATION testString
     testString = testFormatTextFunction(printThis)
-    Dim mLogger As New LogFile        ' instantiate the log class as an object
-    mLogger.CreateLogFileByName "QuickIllustration"        ' or new alternative.
+Dim mLogger As New LogFile
+mLogger.CreateLogFileByName "testIllustration"
     mLogger.Log testString
     mLogger.OpenLogFile
 End Sub
 
 Function testFormatTextFunction(formatThis As String)
+'@ParentModule A_Test2
     formatThis = Now & vbTab & formatThis
     testFormatTextFunction = formatThis
 End Function
-
-Private Sub QuickIllustration()
-'@INCLUDE CLASS LogFile
-'@ParentModule C_LogFile
-    Dim mLogger As New LogFile        ' instantiate the log class as an object
-    '--logger.CreateLogFile logFileName:="QuickIllustration" '<-- using legacy method
-    mLogger.CreateLogFileByName "QuickIllustration"        ' or new alternative.
-    mLogger.Log "Some string you want to log."
-    mLogger.OpenLogFile
-End Sub
