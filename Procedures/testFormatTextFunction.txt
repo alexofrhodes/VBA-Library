@@ -1,6 +1,0 @@
-
-Function testFormatTextFunction(formatThis As String)
-'@ParentModule A_Test2
-    formatThis = Now & vbTab & formatThis
-    testFormatTextFunction = formatThis
-End Function

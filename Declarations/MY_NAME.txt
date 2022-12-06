@@ -1,1 +1,0 @@
-Const MY_NAME = "Alex"
