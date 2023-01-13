@@ -1,0 +1,8 @@
+
+Function WorkbookProjectExists(wb As Workbook) As Boolean
+    Dim WbProjComp As Object
+    On Error Resume Next
+    Set WbProjComp = wb.VBProject.VBComponents
+    WorkbookProjectExists = Not WbProjComp Is Nothing
+End Function
+

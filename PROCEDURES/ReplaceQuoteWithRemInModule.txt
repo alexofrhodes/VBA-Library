@@ -1,0 +1,18 @@
+
+Public Sub ReplaceQuoteWithRemInModule(Optional Module As VBComponent)
+'@BlogPosted
+'@AssignedModule F_Vbe_Comments
+'@INCLUDE PROCEDURE ActiveModule
+    If Module Is Nothing Then Set Module = ActiveModule
+    Dim N As Long
+    Dim s As String
+    With Module.CodeModule
+        For N = .CountOfLines To 1 Step -1
+            If .CountOfLines = 0 Then Exit For
+            s = .Lines(N, 1)
+            If left(Trim(s), 1) = "'" Then
+                .ReplaceLine N, Replace(s, "'", "Rem ", , 1)
+            End If
+        Next N
+    End With
+End Sub

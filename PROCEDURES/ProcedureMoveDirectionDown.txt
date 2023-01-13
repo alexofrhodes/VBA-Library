@@ -1,0 +1,30 @@
+
+Sub ProcedureMoveDirectionDown( _
+                            Optional TargetWorkbook As Workbook, _
+                            Optional Module As VBComponent, _
+                            Optional Procedure As String)
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE CollectionIndexOf
+'@INCLUDE PROCEDURE AssignCPSvariables
+'@INCLUDE PROCEDURE ProceduresOfModule
+'@INCLUDE PROCEDURE ProcedureLinesLast
+'@INCLUDE PROCEDURE ProcedureDelete
+'@INCLUDE PROCEDURE ProcedureCode
+'@INCLUDE PROCEDURE ProcedureTitleLineFirst
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
+    Dim Procedures As New Collection
+    Set Procedures = ProceduresOfModule(Module)
+    Dim index As Long
+        index = CollectionIndexOf(Procedures, Procedure)
+    If index = Procedures.Count Then Exit Sub
+    Dim code As String
+        code = ProcedureCode(TargetWorkbook, Module, Procedure)
+    Dim NextProcedure As String
+        NextProcedure = Procedures(index + 1)
+    ProcedureDelete Module, Procedure
+    Module.CodeModule.InsertLines ProcedureLinesLast(Module, NextProcedure) + 1, code
+    Dim ln As Long
+    ln = ProcedureTitleLineFirst(Module, Procedure)
+    Application.VBE.ActiveCodePane.SetSelection ln, 1, ln, 1
+End Sub
+

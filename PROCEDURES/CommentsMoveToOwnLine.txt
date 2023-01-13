@@ -1,0 +1,58 @@
+
+Function CommentsMoveToOwnLine(ByVal txt As String) As String
+'@BlogPosted
+'@INCLUDE PROCEDURE CommentsTrim
+'@AssignedModule F_Vbe_Comments
+
+    Dim var As Variant
+    ReDim var(0)
+    Dim str As Variant
+        str = Split(txt, vbNewLine)
+    
+    Dim N               As Long
+    Dim i               As Long
+    Dim j               As Long
+    Dim k               As Long
+    Dim l               As Long
+    Dim LineText        As String
+    Dim QUOTES          As Long
+    Dim Q               As Long
+    Dim StartPos        As Long
+    
+    For j = LBound(str) To UBound(str)
+        LineText = Trim(str(j))
+        StartPos = 1
+retry:
+        N = InStr(StartPos, LineText, "'")
+        Q = InStr(StartPos, LineText, """")
+        QUOTES = 0
+        If Q < N Then
+            For l = 1 To N
+                If Mid(LineText, l, 1) = """" Then
+                    QUOTES = QUOTES + 1
+                End If
+            Next l
+        End If
+        If QUOTES = Application.WorksheetFunction.Odd(QUOTES) Then
+            StartPos = N + 1
+            GoTo retry:
+        Else
+            Select Case N
+                Case Is = 0
+                    var(UBound(var)) = str(j)
+                    ReDim Preserve var(UBound(var) + 1)
+                Case Is = 1
+                    var(UBound(var)) = CommentsTrim(Array(str(j)))
+                    ReDim Preserve var(UBound(var) + 1)
+                Case Is > 1
+                    var(UBound(var)) = Space(Len(str(j)) - Len(LTrim(str(j)))) & Mid(LineText, N)
+                    ReDim Preserve var(UBound(var) + 1)
+                    var(UBound(var)) = Space(Len(str(j)) - Len(LTrim(str(j)))) & left(LineText, N - 1)
+                    ReDim Preserve var(UBound(var) + 1)
+            End Select
+        End If
+    Next j
+
+     CommentsMoveToOwnLine = Join(var, vbNewLine)
+     CommentsMoveToOwnLine = left(CommentsMoveToOwnLine, Len(CommentsMoveToOwnLine) - Len(vbNewLine))
+End Function

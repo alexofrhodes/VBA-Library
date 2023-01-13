@@ -1,0 +1,14 @@
+
+Public Sub CommentsRemoveFromWorkbook(TargetWorkbook As Workbook, RemoveRem As Boolean)
+'@BlogPosted
+'@AssignedModule F_Vbe_Comments
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@INCLUDE PROCEDURE CommentsRemoveFromModule
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim Module As VBIDE.VBComponent
+    For Each Module In ActiveCodepaneWorkbook.VBProject.VBComponents
+        CommentsRemoveFromModule Module, RemoveRem
+    Next
+End Sub
+'--------------------
+'@EndFolder Remove

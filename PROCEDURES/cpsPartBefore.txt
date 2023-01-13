@@ -1,0 +1,11 @@
+
+Public Function cpsPartBefore() As String
+'@AssignedModule F_Vbe_Selection
+    Dim StartLine As Long, StartColumn As Long, EndLine As Long, EndColumn  As Long
+    Application.VBE.ActiveCodePane.GetSelection StartLine, StartColumn, EndLine, EndColumn
+    Dim str As String
+    str = Application.VBE.ActiveCodePane.CodeModule.Lines(StartLine, 1)
+    str = Mid(str, 1, StartColumn - 1)
+    cpsPartBefore = str
+End Function
+

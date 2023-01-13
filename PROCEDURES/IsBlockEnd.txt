@@ -1,0 +1,20 @@
+
+
+Public Function IsBlockEnd(strLine As String) As Boolean
+'@AssignedModule F_VBE
+    strLine = Replace(strLine, Chr(13), "")
+    Dim bOK As Boolean
+    Dim nPos As Integer
+    Dim strTemp As String
+    nPos = InStr(1, strLine, " ") - 1
+    If nPos < 0 Then nPos = Len(strLine)
+    strTemp = left$(strLine, nPos)
+    Select Case strTemp
+    Case "Next", "Loop", "Wend", "Case", "Else", "#Else", "Else:", "#Else:", "ElseIf", "#ElseIf", "#End"
+        bOK = True
+    Case "End"
+        bOK = (Len(strLine) > 3)
+    End Select
+    IsBlockEnd = bOK
+End Function
+

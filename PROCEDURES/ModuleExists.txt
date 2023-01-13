@@ -1,0 +1,12 @@
+
+Public Function ModuleExists( _
+                            TargetName As String, _
+                            TargetWorkbook As Workbook) As Boolean
+'@AssignedModule F_Vbe_Modules
+    Dim Module As VBComponent
+    On Error Resume Next
+    Set Module = TargetWorkbook.VBProject.VBComponents(TargetName)
+    On Error GoTo 0
+    ModuleExists = Not Module Is Nothing
+End Function
+

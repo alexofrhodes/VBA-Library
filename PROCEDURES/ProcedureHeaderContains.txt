@@ -1,0 +1,30 @@
+
+Public Function ProcedureHeaderContains( _
+                                        FindWhat As String, _
+                                        WholeWord As Boolean, _
+                                        MatchCase As Boolean, _
+                                        Optional PatternSearch As Boolean, _
+                                        Optional TargetWorkbook As Workbook, _
+                                        Optional Module As VBComponent, _
+                                        Optional Procedure As String) As Boolean
+'
+'@INCLUDE PROCEDURE AssignCPSvariables
+'@INCLUDE PROCEDURE ProcedureHeaderLineFirst
+'@INCLUDE PROCEDURE ProcedureHeaderLineLast
+'@INCLUDE PROCEDURE ProcedureHeaderLineCount
+'@AssignedModule F_Vbe_ReadCode
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
+    If ProcedureHeaderLineCount(Module, Procedure) = 0 Then Exit Function
+    ProcedureHeaderContains = Module.CodeModule.Find( _
+                                                    FindWhat, _
+                                                    ProcedureHeaderLineFirst(Module, _
+                                                    Procedure), _
+                                                    1, _
+                                                    ProcedureHeaderLineLast(Module, _
+                                                    Procedure), _
+                                                    10000, _
+                                                    WholeWord, _
+                                                    MatchCase, _
+                                                    PatternSearch)
+End Function
+

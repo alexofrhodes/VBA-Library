@@ -1,0 +1,25 @@
+
+Public Function ProcedureHeader( _
+                               Module As VBComponent, _
+                               Procedure As String) As String
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE ProcedureLinesFirst
+'@INCLUDE PROCEDURE ProcedureHeaderLineCount
+'@INCLUDE PROCEDURE ProcedureTitleLineFirst
+    If Module Is Nothing Then Set Module = ActiveModule
+    If Procedure = "" Then Procedure = ActiveProcedure
+    Dim startAt As Long, endAt As Long
+    startAt = ProcedureLinesFirst(Module, Procedure)
+    endAt = ProcedureTitleLineFirst(Module, Procedure) - 1
+    Dim decLinesCount As Long
+    decLinesCount = endAt - startAt + 1
+    Dim sDeclarations
+    If ProcedureHeaderLineCount(Module, Procedure) = 0 Then
+        sDeclarations = ""
+    Else
+        sDeclarations = Module.CodeModule.Lines(startAt, endAt - startAt + 1)
+        sDeclarations = Join(Split(sDeclarations, vbLf), vbLf)
+    End If
+    ProcedureHeader = sDeclarations
+End Function
+

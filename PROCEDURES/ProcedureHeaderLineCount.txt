@@ -1,0 +1,14 @@
+
+Public Function ProcedureHeaderLineCount( _
+                                        Module As VBComponent, _
+                                        Procedure As String) As Long
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE ProcedureHeaderLineFirst
+'@INCLUDE PROCEDURE ProcedureHeaderLineLast
+    Dim EndLine As Long
+        EndLine = ProcedureHeaderLineLast(Module, Procedure)
+    Dim StartLine As Long
+        StartLine = ProcedureHeaderLineFirst(Module, Procedure)
+    ProcedureHeaderLineCount = EndLine - StartLine + 1
+End Function
+

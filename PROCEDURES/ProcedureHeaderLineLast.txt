@@ -1,0 +1,9 @@
+
+Public Function ProcedureHeaderLineLast( _
+                                      Module As VBComponent, _
+                                      ProcedureName As String) As Long
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE ProcedureTitleLineFirst
+    ProcedureHeaderLineLast = ProcedureTitleLineFirst(Module, ProcedureName) - 1
+End Function
+

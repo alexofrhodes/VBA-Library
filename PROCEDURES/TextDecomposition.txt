@@ -1,0 +1,14 @@
+
+Private Function TextDecomposition(Mojiretu$)
+'https://gist.github.com/YujiFukami/15c922d41ff06c9b12ad450a14131080#file-
+'@AssignedModule F_Vbe_DebugPrintStop
+    Dim i&, N&
+    Dim output
+    N = Len(Mojiretu)
+    ReDim output(1 To N)
+    For i = 1 To N
+        output(i) = Mid(Mojiretu, i, 1)
+    Next i
+    TextDecomposition = output
+End Function
+

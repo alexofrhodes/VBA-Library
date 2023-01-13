@@ -1,0 +1,12 @@
+
+Public Sub ProceduresSortPublicPrivateInWorkbook(Optional TargetWorkbook As Workbook)
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@INCLUDE PROCEDURE ProceduresSortPublicPrivateInModule
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim Module As VBComponent
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        If Module.Type = vbext_ct_StdModule Then ProceduresSortPublicPrivateInModule Module
+    Next
+End Sub
+

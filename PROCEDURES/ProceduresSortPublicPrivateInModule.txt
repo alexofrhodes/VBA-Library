@@ -1,0 +1,37 @@
+
+Public Sub ProceduresSortPublicPrivateInModule(Optional Module As VBComponent)
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE WorkbookOfModule
+'@INCLUDE PROCEDURE ArrayQuickSort
+'@INCLUDE PROCEDURE ProcedureCode
+'@INCLUDE PROCEDURE ProcedureScope
+'@INCLUDE PROCEDURE ProceduresOfModuleArray
+'@INCLUDE PROCEDURE ModuleIgnore
+'@INCLUDE PROCEDURE ActiveModule
+'@INCLUDE PROCEDURE ModuleCodeRemove
+    If Module Is Nothing Then Set Module = ActiveModule
+    If ModuleIgnore(Module) Then Exit Sub
+    If Module.CodeModule.CountOfLines = 0 Then Exit Sub
+    Dim TargetWorkbook As Workbook
+    Set TargetWorkbook = WorkbookOfModule(Module)
+    Dim ThePublic As String, ThePrivate As String, TheOther As String
+    Dim code As String
+    Dim Procedure As String
+    Dim i As Long
+    Dim Procedures
+        Procedures = ProceduresOfModuleArray(Module)
+    ArrayQuickSort Procedures
+    For i = LBound(Procedures) To UBound(Procedures)
+        Procedure = CStr(Procedures(i))
+        code = ProcedureCode(TargetWorkbook, Module, Procedure)
+        If ProcedureScope(Module, Procedure) = "Public" Then
+            ThePublic = IIf(ThePublic = "", code, ThePublic & vbNewLine & code)
+        Else
+            ThePrivate = IIf(ThePrivate = "", code, ThePrivate & vbNewLine & code)
+        End If
+    Next i
+    ModuleCodeRemove Module
+    Module.CodeModule.AddFromString ThePrivate
+    Module.CodeModule.AddFromString ThePublic
+End Sub
+

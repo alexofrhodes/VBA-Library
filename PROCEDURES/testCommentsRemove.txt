@@ -1,0 +1,16 @@
+
+
+
+
+'@FOLDER Remove
+'--------------------
+Sub testCommentsRemove()
+'@BlogPosted
+'@AssignedModule F_Vbe_Comments
+'@INCLUDE PROCEDURE CommentsRemove
+    Dim code As String
+        code = "'comment" & vbNewLine & "if something then 'comment" & vbNewLine & "doevents" & vbNewLine & "'comment"
+    Debug.Print "---INPUT---" & String(2, vbNewLine) & code & vbNewLine
+        code = CommentsRemove(code, True)
+    Debug.Print "---OUTPUT---" & String(2, vbNewLine) & code
+End Sub

@@ -1,0 +1,17 @@
+
+Public Function ProcedureIgnore( _
+                            TargetWorkbook As Workbook, _
+                            Module As VBComponent, _
+                            Procedure As String) As Boolean
+'@INCLUDE PROCEDURE ProcedureCodeContains
+    ProcedureIgnore = ProcedureCodeContains( _
+                                           "@IGNORE PROCEDURE", _
+                                           True, _
+                                           False, _
+                                           , _
+                                           TargetWorkbook, _
+                                           Module, _
+                                           Procedure) As Boolean
+'@AssignedModule F_Vbe_ReadCode
+End Function
+

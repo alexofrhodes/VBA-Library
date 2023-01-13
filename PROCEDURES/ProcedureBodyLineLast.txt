@@ -1,0 +1,9 @@
+
+Function ProcedureBodyLineLast( _
+                              Module As VBComponent, _
+                              Procedure As String) As Long
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE ProcedureLinesLast
+    ProcedureBodyLineLast = ProcedureLinesLast(Module, Procedure, True) - 1
+End Function
+

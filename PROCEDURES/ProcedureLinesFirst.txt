@@ -1,0 +1,10 @@
+
+Public Function ProcedureLinesFirst( _
+                                   Module As VBComponent, _
+                                   Procedure As String) As Long
+'@AssignedModule F_Vbe_Procedures
+    Dim ProcKind As VBIDE.vbext_ProcKind
+        ProcKind = vbext_pk_Proc
+    ProcedureLinesFirst = Module.CodeModule.ProcStartLine(Procedure, ProcKind)
+End Function
+

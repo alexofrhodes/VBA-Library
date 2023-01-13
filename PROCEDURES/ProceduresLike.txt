@@ -1,0 +1,17 @@
+
+Function ProceduresLike( _
+                       TargetWorkbook As Workbook, _
+                       This As String) As Collection
+'@AssignedModule F_Procedures
+'@INCLUDE PROCEDURE ProceduresOfWorkbook
+    Dim Procedures As New Collection
+    Set Procedures = ProceduresOfWorkbook(TargetWorkbook)
+    Dim Procedure
+    Dim out As New Collection
+    For Each Procedure In Procedures
+        If UCase(Procedure) Like UCase(This) Then
+            out.Add Procedure
+        End If
+    Next
+    Set ProceduresLike = out
+End Function

@@ -1,0 +1,25 @@
+
+Sub UnRemLines()
+'@BlogPosted
+'@AssignedModule F_Vbe_Comments
+'@INCLUDE PROCEDURE cpsLineFirst
+'@INCLUDE PROCEDURE cpsLineLast
+'@INCLUDE PROCEDURE ActiveModule
+    Dim Module As VBComponent
+    Set Module = ActiveModule
+    Dim blockStart As Long
+    blockStart = cpsLineFirst
+    Dim blockEnd As Long
+    blockEnd = cpsLineLast
+    Dim i As Long
+    For i = blockStart To blockEnd
+        With Module.CodeModule
+            If left(Trim(.Lines(i, 1)), 4) = "Rem " Then
+                pos = InStr(1, .Lines(i, 1), "Rem ")
+                .ReplaceLine i, Replace(.Lines(i, 1), "Rem ", "", , 1)
+            End If
+        End With
+    Next
+    Module.CodeModule.CodePane.SetSelection blockStart, 1, blockEnd, 1000
+End Sub
+

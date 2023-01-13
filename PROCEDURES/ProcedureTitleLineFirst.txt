@@ -1,0 +1,8 @@
+
+Public Function ProcedureTitleLineFirst( _
+                                       Module As VBComponent, _
+                                       Procedure As String) As Long
+'@AssignedModule F_Vbe_Procedures
+    ProcedureTitleLineFirst = Module.CodeModule.ProcBodyLine(Procedure, vbext_pk_Proc)
+End Function
+

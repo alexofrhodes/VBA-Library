@@ -1,0 +1,19 @@
+
+Public Function ProcedureKind( _
+                             Module As VBComponent, _
+                             ByVal Procedure As String) As Long
+    Dim txt As String
+        txt = ProcedureTitleClean(Module, Procedure)
+    If InStr(1, txt, "Get " & Procedure) > 0 Then
+        ProcedureKind = vbext_pk_Get '3
+    ElseIf InStr(1, txt, "Let " & Procedure) > 0 Then
+        ProcedureKind = vbext_pk_Let '1
+    ElseIf InStr(1, txt, "Set " & Procedure) > 0 _
+    And Not (InStr(1, txt, "Sub " & Procedure) > 0 _
+    Or InStr(1, txt, "Function " & Procedure) > 0) Then
+        ProcedureKind = vbext_pk_Set '2
+    Else
+        ProcedureKind = vbext_pk_Proc '0
+    End If
+End Function
+

@@ -1,0 +1,11 @@
+
+Public Function ProcedureTitleClean( _
+                                    Module As VBComponent, _
+                                    Procedure As String) As String
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE ArrayRemoveEmptyElements
+'@INCLUDE PROCEDURE ArrayTrim
+'@INCLUDE PROCEDURE ProcedureTitle
+    ProcedureTitleClean = Replace(Join(ArrayRemoveEmptyElements(ArrayTrim(Split(ProcedureTitle(Module, Procedure), "_" & vbNewLine))), " "), "( ", "(")
+End Function
+

@@ -1,0 +1,24 @@
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 10-01-2023 07:26    Alex                (ProcedureLastModDateMarked)
+
+Function StringLastModDate(txt As String)
+'@LastModDate 2301100926
+'@AssignedModule F_VbeLinkedProcedures
+'@INCLUDE PROCEDURE ArrayAllocated
+
+    Dim code As Variant
+        code = Filter(Split(code, vbLf), "'@LastModDate ")
+    If ArrayAllocated(code) Then
+        Dim lastDate As Variant
+        If Trim(lastDate) Like "'@LastModDate *" Then
+            lastDate = Split(code(0), " ")(1)
+            lastDate = DateSerial(left(lastDate, 2), Mid(lastDate, 3, 2), Mid(lastDate, 5, 2)) _
+                       & " " & TimeSerial(Mid(lastDate, 7, 2), Mid(lastDate, 9, 2), 0)
+            StringLastModDate = Split(code(0), " ")(1)
+    '        StringLastModDate = lastDate
+        End If
+    Else
+        
+    End If
+End Function

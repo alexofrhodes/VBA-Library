@@ -1,0 +1,57 @@
+
+Function CommentsRemove(ByVal txt As String, RemoveRem As Boolean) As String
+'@BlogPosted
+'modified from Jacob Hilderbrand's code, found at
+'http://www.vbaexpress.com/kb/getarticle.php?kb_id=266
+    Dim var As Variant
+    ReDim var(0)
+    Dim str
+        str = Split(txt, vbNewLine)
+        str = ArrayRemoveEmptyElements(str)
+    Dim N               As Long
+    Dim i               As Long
+    Dim j               As Long
+    Dim k               As Long
+    Dim l               As Long
+    Dim LineText        As String
+    Dim QUOTES          As Long
+    Dim Q               As Long
+    Dim StartPos        As Long
+    
+    For j = LBound(str) To UBound(str)
+        LineText = LTrim(str(j))
+        If RemoveRem Then If LineText Like "Rem *" Then GoTo SKIP
+        StartPos = 1
+retry:
+        N = InStr(StartPos, LineText, "'")
+        Q = InStr(StartPos, LineText, """")
+        QUOTES = 0
+        If Q < N Then
+            For l = 1 To N
+                If Mid(LineText, l, 1) = """" Then
+                    QUOTES = QUOTES + 1
+                End If
+            Next l
+        End If
+        If QUOTES = Application.WorksheetFunction.Odd(QUOTES) Then
+            StartPos = N + 1
+            GoTo retry:
+        Else
+            Select Case N
+                Case Is = 0
+                    If Len(LineText) > 0 Then
+                        var(UBound(var)) = str(j)
+                        ReDim Preserve var(UBound(var) + 1)
+                    End If
+                Case Is = 1
+                    '
+                Case Is > 1
+                    var(UBound(var)) = left(str(j), N - 1)
+                    ReDim Preserve var(UBound(var) + 1)
+            End Select
+        End If
+SKIP:
+    Next j
+    var = ArrayRemoveEmptyElements(var)
+    CommentsRemove = Join(var, vbNewLine)
+End Function

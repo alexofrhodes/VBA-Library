@@ -1,0 +1,24 @@
+
+Private Sub printDictionary(var As Variant)
+'@AssignedModule F_Vbe_DebugPrint
+'@INCLUDE PROCEDURE dp
+    Dim i As Long: Dim iCount As Long
+    Dim arrKeys
+    Dim sKey        As String
+    Dim varItem
+    With var
+        iCount = .Count
+        arrKeys = .Keys
+        iCount = UBound(arrKeys, 1)
+        For i = 0 To iCount
+            sKey = arrKeys(i)
+            If IsObject(.item(sKey)) Then
+                Debug.Print sKey & " : "
+                dp (.item(sKey))
+            Else
+                Debug.Print sKey & " : " & .item(sKey)
+            End If
+        Next i
+    End With
+End Sub
+

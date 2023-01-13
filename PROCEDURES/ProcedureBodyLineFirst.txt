@@ -1,0 +1,10 @@
+
+Function ProcedureBodyLineFirst( _
+                               Module As VBComponent, _
+                               Procedure As String) As Long
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE ProcedureTitleLineFirst
+'@INCLUDE PROCEDURE ProcedureTitleLineCount
+    ProcedureBodyLineFirst = ProcedureTitleLineFirst(Module, Procedure) + ProcedureTitleLineCount(Module, Procedure)
+End Function
+

@@ -1,0 +1,72 @@
+
+
+
+Sub ModuleImport( _
+                TargetWorkbook As Workbook, _
+                ReplaceExisting As Boolean)
+'@AssignedModule F_Vbe_Modules
+'@INCLUDE PROCEDURE ArrayAllocated
+'@INCLUDE PROCEDURE DataFilePartFolder
+'@INCLUDE PROCEDURE DataFilePartExtension
+'@INCLUDE PROCEDURE DataFilePartName
+'@INCLUDE PROCEDURE DataFilePicker
+'@INCLUDE PROCEDURE WorkbookExists
+'@INCLUDE PROCEDURE WorksheetExists
+'@INCLUDE PROCEDURE Toast
+'@INCLUDE PROCEDURE ModuleExists
+'@INCLUDE PROCEDURE ModuleRemove
+    Dim SelectedModules
+        SelectedModules = DataFilePicker(Array("bas", "frm", "cls", "doccls"), True)
+    If Not ArrayAllocated(SelectedModules) Then Exit Sub
+
+    Dim basePath As String
+        basePath = DataFilePartFolder(SelectedModules(1), True)
+    Dim SourceWorkbook As Workbook
+    Dim SourceWorkbookName As String
+        SourceWorkbookName = Dir(basePath & "*.xl*")
+    Dim wasOpen As Boolean
+    If SourceWorkbookName <> "" Then
+        wasOpen = WorkbookExists(SourceWorkbookName)
+    End If
+    Dim extension As String
+    Dim TargetName As String
+    Dim element
+    For Each element In SelectedModules
+        TargetName = DataFilePartName(CStr(element), False)
+        extension = DataFilePartExtension(CStr(element))
+        If extension <> "doccls" Then
+            If ModuleExists(TargetName, TargetWorkbook) Then
+                If ReplaceExisting Then
+                    ModuleRemove TargetWorkbook, TargetWorkbook.VBProject.VBComponents(TargetName)
+                Else
+                    GoTo NextElement
+                End If
+            End If
+            TargetWorkbook.VBProject.VBComponents.Import element
+        ElseIf extension = "doccls" And SourceWorkbookName <> "" Then
+            If WorksheetExists(TargetName, TargetWorkbook) Then
+                If ReplaceExisting Then
+                    TargetWorkbook.Worksheets(TargetName).name=TargetName & "_old"
+                    'TargetWorkbook.Worksheets(TargetName).Delete
+                Else
+                    GoTo NextElement
+                End If
+
+                If wasOpen = False Then
+                    Application.EnableEvents = False
+                    Set SourceWorkbook = Workbooks.Open(basePath & SourceWorkbookName)
+                Else
+                    Set SourceWorkbook = Workbooks(SourceWorkbookName)
+                End If
+                SourceWorkbook.SHEETS(TargetName).Copy Before:=TargetWorkbook.SHEETS(1)
+                Application.EnableEvents = True
+            End If
+        End If
+NextElement:
+    Next element
+
+    If wasOpen = False And WorkbookExists(SourceWorkbookName) Then SourceWorkbook.Close False
+    'https://github.com/rfl808/Notify
+    Toast , "Import successful"
+End Sub
+

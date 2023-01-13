@@ -1,0 +1,12 @@
+
+Sub VbeFormatTemplate( _
+                     Optional TargetWorkbook As Workbook, _
+                     Optional Module As VBComponent, _
+                     Optional procedure As String)
+'@BlogPosted
+'@AssignedModule F_VbeFormat
+'@INCLUDE PROCEDURE AssignCPSvariables
+
+    If Not AssignCPSvariables(TargetWorkbook, Module, procedure) Then Stop 'exit sub 'goto ErrorHandler
+    'formatting code here
+End Sub

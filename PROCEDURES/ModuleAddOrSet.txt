@@ -1,0 +1,24 @@
+
+Function ModuleAddOrSet( _
+                       TargetWorkbook As Workbook, _
+                       TargetName As String, _
+                       ModuleType As VBIDE.vbext_ComponentType) As VBComponent
+'@AssignedModule F_Vbe_Modules
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+
+'Example
+'Dim Module as vbComponent
+'set Module=ModuleAddOrSet(TargetWorkbook,"NewModule",vbext_ct_StdModule)
+
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim Module As VBComponent
+    On Error Resume Next
+    Set Module = TargetWorkbook.VBProject.VBComponents(TargetName)
+    On Error GoTo 0
+    If Module Is Nothing Then
+        Set Module = TargetWorkbook.VBProject.VBComponents.Add(ModuleType)
+        Module.name = TargetName
+    End If
+    Set ModuleAddOrSet = Module
+End Function
+

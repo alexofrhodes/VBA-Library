@@ -1,0 +1,24 @@
+
+Function CommentsTrim(ByVal txt As String) As String
+'@BlogPosted
+'@INCLUDE PROCEDURE ArrayRemoveEmptyElements
+'@AssignedModule F_Vbe_Comments
+    Dim var As Variant
+    ReDim var(0)
+    Dim str As Variant
+        str = Split(txt, vbNewLine)
+    For j = LBound(str) To UBound(str)
+        LineText = Trim(str(j))
+        If left(LineText, 2) = "' " Then
+            tmp = Mid(LineText, 2)
+            dif = Len(tmp) - Len(LTrim(tmp))
+            var(UBound(var)) = Space(dif) & "'" & LTrim(tmp)
+            ReDim Preserve var(UBound(var) + 1)
+        Else
+            var(UBound(var)) = str(j)
+            ReDim Preserve var(UBound(var) + 1)
+        End If
+    Next
+    var = ArrayRemoveEmptyElements(var)
+    CommentsTrim = Join(var, vbNewLine)
+End Function

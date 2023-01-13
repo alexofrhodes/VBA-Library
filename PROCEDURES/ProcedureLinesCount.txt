@@ -1,0 +1,10 @@
+
+Public Function ProcedureLinesCount( _
+                                    Module As VBComponent, _
+                                    Procedure As String) As Long
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE ProcedureLinesFirst
+'@INCLUDE PROCEDURE ProcedureLinesLast
+    ProcedureLinesCount = ProcedureLinesLast(Module, Procedure) - ProcedureLinesFirst(Module, Procedure) + 1
+End Function
+

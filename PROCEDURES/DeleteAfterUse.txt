@@ -1,0 +1,11 @@
+
+Sub DeleteAfterUse()
+'@BlogPosted
+    Dim var
+    var = Split(CLIP, vbNewLine)
+    Dim element
+    For Each element In var
+        BlogMarkProcedureAdded
+        ProcedureSaveToLocalGithubFolder , , CStr(Procedure)
+    Next
+End Sub

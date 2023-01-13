@@ -1,0 +1,9 @@
+
+Function WorkbookExists(ByVal WorkbookName As String) As Boolean
+    Dim TargetWorkbook As Workbook
+    On Error Resume Next
+    Set TargetWorkbook = Workbooks(WorkbookName)
+    On Error GoTo 0
+    WorkbookExists = Not TargetWorkbook Is Nothing
+End Function
+

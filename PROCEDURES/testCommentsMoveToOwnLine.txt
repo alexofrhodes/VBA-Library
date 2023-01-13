@@ -1,0 +1,10 @@
+
+
+Sub testCommentsMoveToOwnLine()
+'@BlogPosted
+    Dim code As String
+        code = "First line 'comment 1" & vbNewLine & "    Second line indented 'comment 2"
+    Debug.Print "---INPUT---" & String(2, vbNewLine) & code & vbNewLine
+        code = CommentsMoveToOwnLine(code)
+    Debug.Print "---OUTPUT---" & String(2, vbNewLine) & code
+End Sub

@@ -1,0 +1,10 @@
+
+
+Public Function ProcedureHeaderLineFirst( _
+                                        Module As VBComponent, _
+                                        ProcedureName As String) As Long
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE ProcedureLinesFirs
+    ProcedureHeaderLineFirst = ProcedureLinesFirst(Module, ProcedureName)
+End Function
+

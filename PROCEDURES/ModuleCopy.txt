@@ -1,0 +1,35 @@
+
+Function ModuleCopy( _
+                   Module As VBComponent, _
+                   TargetWorkbook As Workbook, _
+                   OverwriteExisting As Boolean) As Boolean
+'@INCLUDE PROCEDURE WorkbookOfModule
+'@INCLUDE PROCEDURE ModuleExists
+'@INCLUDE PROCEDURE ModuleExtension
+'@AssignedModule F_Vbe_Modules
+    If Module.name = "ThisWorkbook" Then Exit Function
+    If Module.Type = vbext_ct_Document Then Exit Function
+    If WorkbookOfModule(Module).name = TargetWorkbook.name Then Exit Function
+    Dim TempModule As VBIDE.VBComponent
+    
+    If ModuleExists(Module.name, TargetWorkbook) Then
+        If OverwriteExisting = True Then
+            With TargetWorkbook.VBProject
+                .VBComponents.Remove .VBComponents(Module.name)
+            End With
+        Else
+            Exit Function
+        End If
+    End If
+    
+    Dim ext As String
+        ext = ModuleExtension(Module)
+    Dim FName As String
+        FName = Environ("Temp") & "\" & Module.name & ext
+    Module.Export fileName:=FName
+    
+    TargetWorkbook.VBProject.VBComponents.Import fileName:=FName
+    Kill FName
+    ModuleCopy = True
+End Function
+

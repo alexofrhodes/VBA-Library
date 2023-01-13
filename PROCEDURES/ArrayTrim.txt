@@ -1,0 +1,9 @@
+
+Function ArrayTrim(ByVal arr As Variant)
+        Dim i As Long
+        For i = LBound(arr) To UBound(arr)
+            arr(i) = Trim(arr(i))
+        Next
+        ArrayTrim = arr
+End Function
+

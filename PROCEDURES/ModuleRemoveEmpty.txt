@@ -1,0 +1,18 @@
+
+
+Sub ModuleRemoveEmpty(Optional TargetWorkbook As Workbook)
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@INCLUDE PROCEDURE ProceduresOfModule
+'@INCLUDE PROCEDURE ModuleIgnore
+'@AssignedModule F_Vbe_Modules
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim Module As VBComponent
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        If Module.Type = vbext_ct_StdModule Then
+            If Not ModuleIgnore(Module) Then
+                If ProceduresOfModule(Module).Count = 0 And Module.CodeModule.CountOfLines < 3 Then TargetWorkbook.VBProject.VBComponents.Remove Module
+            End If
+        End If
+    Next
+End Sub
+

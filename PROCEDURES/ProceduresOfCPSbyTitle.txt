@@ -1,0 +1,12 @@
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 09-01-2023 07:30    Alex                (cpsProceduresSelected)
+
+Function ProceduresOfCPSbyTitle() As Collection
+'must include the title in selection
+'@LastModDate 2301090730
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE CodepaneSelection
+'@INCLUDE PROCEDURE ProceduresOfTXT
+    Set ProceduresOfCPSbyTitle = ProceduresOfTXT(CodepaneSelection, True)
+End Function

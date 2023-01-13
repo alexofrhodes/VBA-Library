@@ -1,0 +1,11 @@
+
+
+Function RemoveBlankLines(txt As String) As String
+'@AssignedModule F_Strings
+'@INCLUDE PROCEDURE ArrayRemoveEmptyElements
+    Dim var
+    var = Split(txt, vbNewLine)
+    ArrayRemoveEmptyElements var
+    RemoveBlankLines = Join(var, vbNewLine)
+End Function
+

@@ -1,0 +1,12 @@
+
+Public Sub IndentWorkbook(Optional TargetWorkbook As Workbook)
+'@AssignedModule F_Vbe_Indent
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@INCLUDE PROCEDURE IndentModule
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim Module As VBComponent
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        IndentModule Module
+    Next
+End Sub
+

@@ -1,0 +1,23 @@
+
+Public Function CodepaneSelection() As String
+'for relative macros i'll use -> cps <- because CodepaneSelection is too long
+'@AssignedModule F_Vbe_Selection
+    Dim startLine As Long, StartColumn As Long, endLine As Long, EndColumn As Long
+    Application.VBE.ActiveCodePane.GetSelection startLine, StartColumn, endLine, EndColumn
+    If endLine - startLine = 0 Then
+        CodepaneSelection = Mid(Application.VBE.ActiveCodePane.CodeModule.Lines(startLine, 1), StartColumn, EndColumn - StartColumn)
+        Exit Function
+    End If
+    Dim str As String
+    Dim i As Long
+    For i = startLine To endLine
+        If str = "" Then
+            str = Mid(Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1), StartColumn)
+        ElseIf i < endLine Then
+            str = str & vbNewLine & Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1)
+        Else
+            str = str & vbNewLine & left(Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1), EndColumn - 1)
+        End If
+    Next
+    CodepaneSelection = str
+End Function

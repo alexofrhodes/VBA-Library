@@ -1,0 +1,20 @@
+
+Function ProcedureReturnType( _
+                        Optional TargetWorkbook As Workbook, _
+                        Optional Module As VBComponent, _
+                        Optional Procedure As String)
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE AssignCPSvariables
+'@INCLUDE PROCEDURE ProcedureTitleClean
+'@INCLUDE PROCEDURE ProcedureType
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Exit Function
+    If ProcedureType(TargetWorkbook, Module, Procedure) <> "Function" Then Exit Function
+    Dim title As String
+        title = ProcedureTitleClean(Module, Procedure)
+'    debug.print title
+    If title Like "*) As *" Then
+        ProcedureReturnType = Split(title, ") As ")(1)
+    Else
+        ProcedureReturnType = "Unspecified"
+    End If
+End Function

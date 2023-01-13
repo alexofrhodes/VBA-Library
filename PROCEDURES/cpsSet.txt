@@ -1,0 +1,6 @@
+
+Public Sub cpsSet(StartLine As Long, StartColumn As Long, EndLine As Long, EndColumn As Long)
+'@AssignedModule F_Vbe_Selection
+    Application.VBE.ActiveCodePane.SetSelection StartLine, StartColumn, EndLine, EndColumn
+End Sub
+

@@ -1,0 +1,12 @@
+
+
+Sub Template( _
+            Optional TargetWorkbook As Workbook, _
+            Optional Module As VBComponent, _
+            Optional Procedure As String)
+'@AssignedModule F_VbeFormat
+'@INCLUDE PROCEDURE AssignCPSvariables
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop 'exit sub 'goto ErrorHandler
+    'code
+End Sub
+

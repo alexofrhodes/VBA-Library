@@ -1,0 +1,39 @@
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 05-01-2023 14:01    Alex                (StringFormatAlignRowsElements)
+
+Function StringFormatAlignRowsElements(txt As String, AlignString As String, Optional AlignAtColumn As Long)
+'@BlogPosted
+'@AssignedModule F_Vbe_Comments
+    Dim TextLines
+        TextLines = Split(txt, vbNewLine)
+    Dim elementOriginalColumn As Long
+    Dim rightMostColumn As Long
+    Dim LineText As String
+    Dim numberOfSpacesToInsert As Long
+    Dim i As Long
+    For i = LBound(TextLines) To UBound(TextLines)
+        LineText = TextLines(i)
+        elementOriginalColumn = InStrRev(LineText, AlignString)
+        If elementOriginalColumn > rightMostColumn Then rightMostColumn = elementOriginalColumn
+    Next
+    If AlignAtColumn = 0 Then AlignAtColumn = rightMostColumn
+    For i = LBound(TextLines) To UBound(TextLines)
+        LineText = TextLines(i)
+        elementOriginalColumn = InStrRev(LineText, AlignString)
+        If elementOriginalColumn > 0 Then
+            numberOfSpacesToInsert = AlignAtColumn - elementOriginalColumn
+            If numberOfSpacesToInsert > 0 Then
+                elementOriginalColumn = InStrRev(LineText, AlignString)
+                TextLines(i) = left(TextLines(i), elementOriginalColumn - 1) & _
+                                Space(numberOfSpacesToInsert) & _
+                                Mid(TextLines(i), elementOriginalColumn)
+            End If
+        End If
+    Next
+    
+    StringFormatAlignRowsElements = Join(TextLines, vbNewLine)
+    
+End Function
+'--------------------
+'@EndFolder Align

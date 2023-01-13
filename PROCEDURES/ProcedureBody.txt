@@ -1,0 +1,15 @@
+
+Public Function ProcedureBody( _
+                            Optional TargetWorkbook As Workbook, _
+                            Optional Module As VBComponent, _
+                            Optional Procedure As String) As String
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE ProcedureBodyLineFirst
+'@INCLUDE PROCEDURE ProcedureLinesLast
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Exit Function
+                      
+    ProcedureBody = Module.CodeModule.Lines( _
+                    ProcedureBodyLineFirst(Module, Procedure), _
+                    ProcedureLinesLast(Module, Procedure, False) - ProcedureBodyLineFirst(Module, Procedure))
+End Function
+

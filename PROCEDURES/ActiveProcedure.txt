@@ -1,0 +1,6 @@
+
+Public Function ActiveProcedure() As String
+'@AssignedModule F_Vbe_Procedures
+    Application.VBE.ActiveCodePane.GetSelection L1&, c1&, L2&, c2&
+    ActiveProcedure = Application.VBE.ActiveCodePane.CodeModule.ProcOfLine(L1&, vbext_pk_Proc)
+End Function

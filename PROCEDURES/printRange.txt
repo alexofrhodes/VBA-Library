@@ -1,0 +1,23 @@
+
+Public Sub printRange(var As Variant)
+'@AssignedModule F_Vbe_DebugPrint
+'@INCLUDE PROCEDURE Combine2Array
+'@INCLUDE PROCEDURE dp
+    If var.Areas.Count = 1 Then
+        dp var.Value
+    Else
+        Dim out As Variant
+        Dim Temp As Variant
+        Dim i As Long
+        For i = 1 To var.Areas.Count
+            Temp = var.Areas(i).Value
+            If IsEmpty(out) Then
+                out = Temp
+            Else
+                out = Combine2Array(out, Temp)
+            End If
+        Next
+        dp out
+    End If
+End Sub
+

@@ -1,0 +1,23 @@
+
+Public Function ModuleOfProcedure( _
+                                 TargetWorkbook As Workbook, _
+                                 ProcedureName As Variant) As VBComponent
+'@AssignedModule F_Vbe_Modules
+    Dim ProcKind As VBIDE.vbext_ProcKind
+    Dim LineNum As Long, NumProc As Long
+    Dim Procedure As String
+    Dim Module As VBComponent
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        With Module.CodeModule
+            LineNum = .CountOfDeclarationLines + 1
+            Do Until LineNum >= .CountOfLines
+                Procedure = .ProcOfLine(LineNum, ProcKind)
+                If UCase(Procedure) = UCase(ProcedureName) Then
+                    Set ModuleOfProcedure = Module
+                    Exit Function
+                End If
+                LineNum = .ProcStartLine(Procedure, ProcKind) + .ProcCountLines(Procedure, ProcKind) + 1
+            Loop
+        End With
+    Next Module
+End Function

@@ -1,0 +1,14 @@
+
+Function ProcedureType( _
+                        Optional TargetWorkbook As Workbook, _
+                        Optional Module As VBComponent, _
+                        Optional Procedure As String) As String
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE AssignCPSvariables
+'@INCLUDE PROCEDURE ProcedureTitle
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Exit Function
+    ProcedureType = "Null"
+    Dim title As String
+        title = ProcedureTitle(Module, Procedure)
+    ProcedureType = IIf(InStr(1, title, "Sub " & Procedure) > 0, "Sub", "Function")
+End Function

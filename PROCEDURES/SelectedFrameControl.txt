@@ -1,0 +1,15 @@
+
+Function SelectedFrameControl() As msforms.control
+'@BlogPosted
+    Dim ctl    As control, c As control
+    Dim out As New Collection
+    Dim Module As VBComponent
+    Set Module = ActiveModule
+    For Each ctl In Module.Designer.SELECTED
+        For Each c In ctl.Controls
+            out.Add c
+        Next
+    Next ctl
+    If out.Count = 0 Then Exit Function
+    Set SelectedFrameControl = out(1)
+End Function

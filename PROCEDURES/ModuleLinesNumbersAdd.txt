@@ -1,0 +1,15 @@
+
+Public Sub ModuleLinesNumbersAdd(Optional TargetWorkbook As Workbook, Optional Module As VBComponent)
+'@AssignedModule F_Vbe_Lines_Number
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@INCLUDE PROCEDURE ProcedureLinesNumbersAdd
+'@INCLUDE PROCEDURE ProceduresOfModule
+'@INCLUDE PROCEDURE ActiveModule
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    If Module Is Nothing Then Set Module = ActiveModule
+    Dim Procedure
+    For Each Procedure In ProceduresOfModule(Module)
+        ProcedureLinesNumbersAdd TargetWorkbook, Module, CStr(Procedure)
+    Next
+End Sub
+

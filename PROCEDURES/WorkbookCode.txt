@@ -1,0 +1,20 @@
+
+Function WorkbookCode(TargetWorkbook) As String
+'@AssignedModule F_Vbe_ReadCode
+'@INCLUDE PROCEDURE ModuleCode
+'@INCLUDE PROCEDURE ModuleOrSheetName
+    If TypeName(TargetWorkbook) <> "Workbook" Then Stop
+    Dim Module As VBComponent
+    Dim txt
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        If Module.CodeModule.CountOfLines > 0 Then
+            txt = txt & _
+                  vbNewLine & _
+                  "'" & String(10, "=") & ModuleOrSheetName(Module) & " (" & Module.Type & ") " & String(10, "=") & _
+                  vbNewLine & _
+                  ModuleCode(Module)
+        End If
+    Next
+    WorkbookCode = txt
+End Function
+

@@ -1,0 +1,8 @@
+
+Public Function cpsColumntFirst() As Long
+'@AssignedModule F_Vbe_Selection
+    Dim StartLine As Long, StartColumn As Long, EndLine As Long, EndColumn As Long
+    Application.VBE.ActiveCodePane.GetSelection StartLine, StartColumn, EndLine, EndColumn
+    cpsColumntFirst = StartColumn
+End Function
+

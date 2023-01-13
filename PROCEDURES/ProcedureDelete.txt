@@ -1,0 +1,12 @@
+
+Sub ProcedureDelete(Module As VBComponent, Procedure As String)
+'@AssignedModule F_Vbe_Procedures
+    Dim startLine As Long
+    Dim NumLines As Long
+    With Module.CodeModule
+        startLine = .ProcStartLine(Procedure, vbext_pk_Proc)
+        NumLines = .ProcCountLines(Procedure, vbext_pk_Proc)
+        .DeleteLines startLine:=startLine, Count:=NumLines
+    End With
+End Sub
+

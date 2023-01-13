@@ -1,0 +1,21 @@
+
+Public Function ProcedureLinesLast(Module As VBComponent, _
+                                   Procedure As String, _
+                                   Optional IncludeTail As Boolean) As Long
+'@AssignedModule F_Vbe_Procedures
+    Dim ProcKind As VBIDE.vbext_ProcKind
+        ProcKind = vbext_pk_Proc
+    Dim startAt As Long
+        startAt = Module.CodeModule.ProcStartLine(Procedure, ProcKind)
+    Dim CountOf As Long
+        CountOf = Module.CodeModule.ProcCountLines(Procedure, ProcKind)
+    Dim endAt As Long
+        endAt = startAt + CountOf - 1
+    If Not IncludeTail Then
+        Do While Not Trim(Module.CodeModule.Lines(endAt, 1)) Like "End *"
+            endAt = endAt - 1
+        Loop
+    End If
+    ProcedureLinesLast = endAt
+End Function
+

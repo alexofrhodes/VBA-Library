@@ -1,0 +1,17 @@
+
+Function AssignCPSvariables( _
+                            ByRef TargetWorkbook As Workbook, _
+                            ByRef Module As VBComponent, _
+                            ByRef Procedure As String) As Boolean
+    '
+'@INCLUDE PROCEDURE AssignWorkbookVariable
+'@INCLUDE PROCEDURE AssignProcedureVariable
+'@INCLUDE PROCEDURE AssignModuleVariable
+'@AssignedModule F_VbeFormat
+
+    If Not AssignWorkbookVariable(TargetWorkbook) Then Exit Function
+    If Not AssignModuleVariable(TargetWorkbook, Module) Then Exit Function
+    If Not AssignProcedureVariable(TargetWorkbook, Procedure) Then Exit Function
+    AssignCPSvariables = True
+    
+End Function

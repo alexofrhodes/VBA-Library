@@ -1,0 +1,38 @@
+
+
+Public Function DataFilePicker(Optional fileType As Variant, Optional multiSelect As Boolean) As Variant
+'@AssignedModule F_FileFolder
+    Dim blArray As Boolean
+    Dim i As Long
+    Dim strErrMsg As String, strTitle As String
+    Dim varItem As Variant
+    If Not IsMissing(fileType) Then
+        blArray = IsArray(fileType)
+        If Not blArray Then strErrMsg = "Please pass an array in the first parameter of this function!"
+    End If
+    If strErrMsg = vbNullString Then
+        If multiSelect Then strTitle = "Choose one or more files" Else strTitle = "Choose file"
+        With Application.FileDialog(msoFileDialogFilePicker)
+            .initialFileName = Environ("USERprofile") & "\Desktop\"
+            .AllowMultiSelect = multiSelect
+            .Filters.clear
+            If blArray Then .Filters.Add "File type", Replace("*." & Join(fileType, ", *."), "..", ".")
+            .title = strTitle
+            If .Show <> 0 Then
+                ReDim arrResults(1 To .SelectedItems.Count) As Variant
+                If blArray Then
+                    For Each varItem In .SelectedItems
+                        i = i + 1
+                        arrResults(i) = varItem
+                    Next varItem
+                Else
+                    arrResults(1) = .SelectedItems(1)
+                End If
+                DataFilePicker = arrResults
+            End If
+        End With
+    Else
+        MsgBox strErrMsg, vbCritical, "Error!"
+    End If
+End Function
+

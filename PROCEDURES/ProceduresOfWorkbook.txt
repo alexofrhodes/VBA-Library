@@ -1,0 +1,30 @@
+Function ProceduresOfWorkbook( _
+                             TargetWorkbook As Workbook, _
+                             Optional ExcludeDocument As Boolean = True, _
+                             Optional ExcludeClass As Boolean = True, _
+                             Optional ExcludeForm As Boolean = True) As Collection
+'@AssignedModule F_Vbe_Procedures
+    Dim Module As VBComponent
+    Dim ProcKind As VBIDE.vbext_ProcKind
+    Dim LineNum As Long
+    Dim coll As New Collection
+    Dim ProcedureName As String
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        If ExcludeClass = True And Module.Type = vbext_ct_ClassModule Then GoTo SKIP
+        If ExcludeDocument = True And Module.Type = vbext_ct_Document Then GoTo SKIP
+        If ExcludeForm = True And Module.Type = vbext_ct_MSForm Then GoTo SKIP
+        With Module.CodeModule
+            LineNum = .CountOfDeclarationLines + 1
+            Do Until LineNum >= .CountOfLines
+                ProcedureName = .ProcOfLine(LineNum, ProcKind)
+                ' _ is used in events. Events may have the same name in different components
+                If InStr(1, ProcedureName, "_") = 0 Then
+                    coll.Add ProcedureName
+                End If
+                LineNum = .ProcStartLine(ProcedureName, ProcKind) + .ProcCountLines(ProcedureName, ProcKind) + 1
+            Loop
+        End With
+SKIP:
+    Next Module
+    Set ProceduresOfWorkbook = coll
+End Function

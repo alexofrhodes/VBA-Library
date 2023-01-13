@@ -1,0 +1,28 @@
+
+Public Sub ProceduresSortAlphabeticallyInModule(Optional Module As VBComponent)
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE WorkbookOfModule
+'@INCLUDE PROCEDURE ArrayQuickSort
+'@INCLUDE PROCEDURE ProcedureCode
+'@INCLUDE PROCEDURE ProceduresOfModuleArray
+'@INCLUDE PROCEDURE ActiveModule
+
+    If Module Is Nothing Then Set Module = ActiveModule
+    If Module.CodeModule.CountOfLines = 0 Then Exit Sub
+    Dim TargetWorkbook As Workbook
+    Set TargetWorkbook = WorkbookOfModule(Module)
+    Dim Procedures
+        Procedures = ProceduresOfModuleArray(Module)
+    StartLine = Module.CodeModule.ProcStartLine(Procedures(0), vbext_pk_Proc)
+    totalLines = Module.CodeModule.CountOfLines - Module.CodeModule.CountOfDeclarationLines
+    ArrayQuickSort Procedures
+    Dim ReplacedProcedures As String
+    Dim i As Long
+    For i = LBound(Procedures) To UBound(Procedures)
+        ReplacedProcedures = IIf(ReplacedProcedures <> "", ReplacedProcedures & vbNewLine, "") & _
+                             ProcedureCode(TargetWorkbook, Module, CStr(Procedures(i)))
+    Next i
+    Module.CodeModule.DeleteLines StartLine, totalLines
+    Module.CodeModule.AddFromString ReplacedProcedures
+End Sub
+

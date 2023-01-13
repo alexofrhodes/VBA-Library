@@ -1,0 +1,17 @@
+
+Sub CommentsMoveToOwnLineProcedure( _
+                                Optional TargetWorkbook As Workbook, _
+                                Optional Module As VBComponent, _
+                                Optional Procedure As String)
+'@BlogPosted
+'@AssignedModule F_Vbe_Comments
+'@INCLUDE PROCEDURE AssignCPSvariables
+'@INCLUDE PROCEDURE ProcedureReplace
+'@INCLUDE PROCEDURE CommentsMoveToOwnLine
+'@INCLUDE PROCEDURE ProcedureCode
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
+    Dim code As String
+        code = ProcedureCode(TargetWorkbook, Module, Procedure)
+        code = CommentsMoveToOwnLine(code)
+    ProcedureReplace Module, Procedure, code
+End Sub

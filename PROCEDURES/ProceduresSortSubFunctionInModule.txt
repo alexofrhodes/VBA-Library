@@ -1,0 +1,41 @@
+
+Public Sub ProceduresSortSubFunctionInModule( _
+                                            Optional TargetWorkbook As Workbook, _
+                                            Optional Module As VBComponent)
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE AssignWorkbookVariable
+'@INCLUDE PROCEDURE AssignModuleVariable
+'@INCLUDE PROCEDURE ArrayQuickSort
+'@INCLUDE PROCEDURE ProcedureCode
+'@INCLUDE PROCEDURE ProcedureType
+'@INCLUDE PROCEDURE ProceduresOfModuleArray
+'@INCLUDE PROCEDURE ModuleCodeRemove
+    AssignWorkbookVariable TargetWorkbook
+    AssignModuleVariable TargetWorkbook, Module
+    If Module.CodeModule.CountOfLines = 0 Then Exit Sub
+
+    Dim Procedures As Variant
+        Procedures = ProceduresOfModuleArray(Module)
+    ArrayQuickSort Procedures
+    
+    Dim TheSubs As String, TheFunctions As String, TheOther As String
+    Dim code As String
+    Dim Procedure As String
+    Dim i As Long
+    For i = LBound(Procedures) To UBound(Procedures)
+        Procedure = CStr(Procedures(i))
+        sProcedureType = ProcedureType(TargetWorkbook, Module, Procedure)
+        code = ProcedureCode(TargetWorkbook, Module, Procedure)
+        If sProcedureType = "Sub" Then
+            TheSubs = IIf(TheSubs = "", code, TheSubs & vbNewLine & code)
+        ElseIf sProcedureType = "Function" Then
+            TheFunctions = IIf(TheFunctions = "", code, TheFunctions & vbNewLine & code)
+        End If
+    Next i
+    ModuleCodeRemove Module
+    'AddFromString Inserts the text starting on the line preceding the first procedure in the module.
+    'If the module doesn't contain procedures, AddFromString places the text at the end of the module.
+    Module.CodeModule.AddFromString TheFunctions
+    Module.CodeModule.AddFromString TheSubs
+End Sub
+

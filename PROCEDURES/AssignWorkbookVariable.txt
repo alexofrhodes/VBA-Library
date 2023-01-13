@@ -1,0 +1,12 @@
+
+Function AssignWorkbookVariable(ByRef TargetWorkbook As Workbook) As Boolean
+'@BlogPosted
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@AssignedModule F_VbeFormat
+     If TargetWorkbook Is Nothing Then
+        On Error Resume Next
+        Set TargetWorkbook = ActiveCodepaneWorkbook
+        On Error GoTo 0
+    End If
+    AssignWorkbookVariable = Not TargetWorkbook Is Nothing
+End Function

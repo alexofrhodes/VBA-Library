@@ -1,0 +1,13 @@
+
+
+
+Sub testCommentsTrim()
+'@BlogPosted
+'@AssignedModule F_Vbe_Comments
+'@INCLUDE PROCEDURE CommentsTrim
+    Dim code As String
+        code = "'    comment 1" & vbNewLine & "'    comment 2"
+    Debug.Print "---INPUT---" & String(2, vbNewLine) & code & vbNewLine
+        code = CommentsTrim(code)
+    Debug.Print "---OUTPUT---" & String(2, vbNewLine) & code
+End Sub

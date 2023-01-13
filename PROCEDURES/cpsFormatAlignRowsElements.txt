@@ -1,0 +1,19 @@
+
+Sub cpsFormatAlignRowsElements(AlignString As String, Optional AlignAtColumn As Long)
+'@BlogPosted
+'@AssignedModule F_Vbe_Comments
+'@INCLUDE PROCEDURE StringFormatAlignRowsElements
+'@INCLUDE PROCEDURE cpsLinesCode
+'@INCLUDE PROCEDURE cpsLineFirst
+'@INCLUDE PROCEDURE cpsLinesCount
+'@INCLUDE PROCEDURE ActiveModule
+    Dim code As String
+        code = cpsLinesCode
+        code = StringFormatAlignRowsElements(code, AlignString, AlignAtColumn)
+    Dim LineFirst As Long
+        LineFirst = cpsLineFirst
+    
+    ActiveModule.CodeModule.DeleteLines LineFirst, cpsLinesCount
+    ActiveModule.CodeModule.InsertLines LineFirst, code
+    
+End Sub
