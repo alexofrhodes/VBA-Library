@@ -1,5 +1,6 @@
 
 Public Function ArrayRemoveEmptyElements(varArray As Variant) As Variant
+'@BlogPosted
 '@AssignedModule F_Array
     Dim tempArray() As Variant
     Dim oldIndex As Integer

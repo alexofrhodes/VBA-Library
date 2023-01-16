@@ -1,6 +1,7 @@
 
 Private Sub printDictionary(var As Variant)
-'@AssignedModule F_Vbe_DebugPrint
+'@BlogPosted
+'@AssignedModule F_Vbe_DebugPrintStop
 '@INCLUDE PROCEDURE dp
     Dim i As Long: Dim iCount As Long
     Dim arrKeys
@@ -21,4 +22,3 @@ Private Sub printDictionary(var As Variant)
         Next i
     End With
 End Sub
-

@@ -1,5 +1,6 @@
 
 Public Function ArrayDimensions(ByVal vArray As Variant) As Long
+'@BlogPosted
 '@AssignedModule F_Vbe_DebugPrintStop
     Dim dimnum      As Long
     Dim ErrorCheck As Long
@@ -10,4 +11,3 @@ Public Function ArrayDimensions(ByVal vArray As Variant) As Long
 FinalDimension:
     ArrayDimensions = dimnum - 1
 End Function
-

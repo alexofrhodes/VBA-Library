@@ -1,21 +1,21 @@
 
 Private Function CalculateByteCharacters(Mojiretu$)
+'@BlogPosted
 'https://gist.github.com/YujiFukami/15c922d41ff06c9b12ad450a14131080#file-
 '@AssignedModule F_Vbe_DebugPrintStop
     Dim MojiKosu%
     MojiKosu = Len(Mojiretu)
-    Dim output
-    ReDim output(1 To MojiKosu)
+    Dim Output
+    ReDim Output(1 To MojiKosu)
     Dim i&
     Dim TmpMoji$
     For i = 1 To MojiKosu
         TmpMoji = Mid(Mojiretu, i, 1)
         If i = 1 Then
-            output(i) = LenB(StrConv(TmpMoji, vbFromUnicode))
+            Output(i) = LenB(StrConv(TmpMoji, vbFromUnicode))
         Else
-            output(i) = LenB(StrConv(TmpMoji, vbFromUnicode)) + output(i - 1)
+            Output(i) = LenB(StrConv(TmpMoji, vbFromUnicode)) + Output(i - 1)
         End If
     Next i
-    CalculateByteCharacters = output
+    CalculateByteCharacters = Output
 End Function
-

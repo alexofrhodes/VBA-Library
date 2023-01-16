@@ -1,7 +1,8 @@
 
 Private Sub DebugPrintHairetu(ByVal Hairetu, Optional HyoujiMaxNagasa%, Optional HairetuName$)
+'@BlogPosted
 'https://gist.github.com/YujiFukami/15c922d41ff06c9b12ad450a14131080#file-
-'@AssignedModule F_Vbe_DebugPrint
+'@AssignedModule F_Vbe_DebugPrintStop
 '@INCLUDE PROCEDURE ShortenToByteCharacters
     Dim i&, j&, k&, M&, N&
     Dim TateMin&, TateMax&, YokoMin&, YokoMax&
@@ -33,12 +34,12 @@ Private Sub DebugPrintHairetu(ByVal Hairetu, Optional HyoujiMaxNagasa%, Optional
     M = UBound(WithTableHairetu, 2)
     ReDim NagasaList(1 To N, 1 To M)
     ReDim MaxNagasaList(1 To M)
-    Dim tmpstr$
+    Dim tmpStr$
     For j = 1 To M
         For i = 1 To N
             If j > 1 And HyoujiMaxNagasa <> 0 Then
-                tmpstr = WithTableHairetu(i, j)
-                WithTableHairetu(i, j) = ShortenToByteCharacters(tmpstr, HyoujiMaxNagasa)
+                tmpStr = WithTableHairetu(i, j)
+                WithTableHairetu(i, j) = ShortenToByteCharacters(tmpStr, HyoujiMaxNagasa)
             End If
             NagasaList(i, j) = LenB(StrConv(WithTableHairetu(i, j), vbFromUnicode))
             MaxNagasaList(j) = WorksheetFunction.Max(MaxNagasaList(j), NagasaList(i, j))
@@ -67,4 +68,3 @@ Private Sub DebugPrintHairetu(ByVal Hairetu, Optional HyoujiMaxNagasa%, Optional
         Debug.Print OutputList(i)
     Next i
 End Sub
-

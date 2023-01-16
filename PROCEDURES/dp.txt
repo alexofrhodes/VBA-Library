@@ -1,6 +1,8 @@
 
+
 Public Sub dp(var As Variant)
-'@AssignedModule F_Vbe_DebugPrint
+'@BlogPosted
+'@AssignedModule F_Vbe_DebugPrintStop
 '@INCLUDE PROCEDURE printRange
 '@INCLUDE PROCEDURE printArray
 '@INCLUDE PROCEDURE printCollection
@@ -24,4 +26,3 @@ Public Sub dp(var As Variant)
     Case Else
     End Select
 End Sub
-

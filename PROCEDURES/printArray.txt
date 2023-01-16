@@ -1,6 +1,7 @@
 
 Private Sub printArray(var As Variant)
-'@AssignedModule F_Vbe_DebugPrint
+'@BlogPosted
+'@AssignedModule F_Vbe_DebugPrintStop
 '@INCLUDE PROCEDURE DPH
 '@INCLUDE PROCEDURE ArrayDimensions
     If ArrayDimensions(var) = 1 Then
@@ -9,4 +10,3 @@ Private Sub printArray(var As Variant)
         DPH var
     End If
 End Sub
-

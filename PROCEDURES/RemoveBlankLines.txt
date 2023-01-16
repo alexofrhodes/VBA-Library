@@ -1,6 +1,7 @@
 
 
 Function RemoveBlankLines(txt As String) As String
+'@BlogPosted
 '@AssignedModule F_Strings
 '@INCLUDE PROCEDURE ArrayRemoveEmptyElements
     Dim var

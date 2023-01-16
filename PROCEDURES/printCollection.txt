@@ -1,10 +1,10 @@
 
 Private Sub printCollection(var As Variant)
-'@AssignedModule F_Vbe_DebugPrint
+'@BlogPosted
+'@AssignedModule F_Vbe_DebugPrintStop
 '@INCLUDE PROCEDURE dp
     Dim elem        As Variant
     For Each elem In var
         dp elem
     Next elem
 End Sub
-

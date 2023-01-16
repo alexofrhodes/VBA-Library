@@ -1,6 +1,7 @@
 
 Public Sub printRange(var As Variant)
-'@AssignedModule F_Vbe_DebugPrint
+'@BlogPosted
+'@AssignedModule F_Vbe_DebugPrintStop
 '@INCLUDE PROCEDURE Combine2Array
 '@INCLUDE PROCEDURE dp
     If var.Areas.Count = 1 Then
@@ -20,4 +21,3 @@ Public Sub printRange(var As Variant)
         dp out
     End If
 End Sub
-
