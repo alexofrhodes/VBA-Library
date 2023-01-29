@@ -1,0 +1,25 @@
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 06-12-2022 11:53    Alex                (AddLinkedLists)
+
+Sub AddLinkedLists(Optional TargetWorkbook As Workbook, _
+                    Optional Module As VBComponent, _
+                    Optional Procedure As String)
+'@BlogPosted
+'@INCLUDE PROCEDURE AddListOfLinkedDeclarationsToProcedure
+'@INCLUDE PROCEDURE AssignCPSvariables
+'@INCLUDE PROCEDURE AddListOfLinkedProceduresToProcedure
+'@INCLUDE PROCEDURE AddListOfLinkedClassesToProcedure
+'@INCLUDE PROCEDURE AddListOfLinkedUserformsToProcedure
+'@INCLUDE PROCEDURE ProcedureAssignedModuleAdd
+'@INCLUDE PROCEDURE ProcedureLinesRemoveInclude
+'@AssignedModule F_VbeLinkedProcedures
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Exit Sub
+    ProcedureLinesRemoveInclude TargetWorkbook, Module, Procedure
+    ProcedureAssignedModuleAdd TargetWorkbook, Module, Procedure
+    AddListOfLinkedProceduresToProcedure TargetWorkbook, Module, Procedure
+    AddListOfLinkedClassesToProcedure TargetWorkbook, Module, Procedure
+    AddListOfLinkedUserformsToProcedure TargetWorkbook, Module, Procedure
+    AddListOfLinkedDeclarationsToProcedure TargetWorkbook, Module, Procedure
+    
+End Sub

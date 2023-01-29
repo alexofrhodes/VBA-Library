@@ -1,0 +1,9 @@
+
+Function ClassNames(Optional TargetWorkbook As Workbook)
+'@BlogPosted
+'@AssignedModule F_VbeLinkedProcedures
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@INCLUDE PROCEDURE ComponentNames
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Set ClassNames = ComponentNames(vbext_ct_ClassModule, TargetWorkbook)
+End Function

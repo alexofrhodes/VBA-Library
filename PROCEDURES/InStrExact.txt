@@ -1,0 +1,31 @@
+
+Function InStrExact( _
+                   Start As Long, _
+                   sourceText As String, _
+                   WordToFind As String, _
+                   Optional CaseSensitive As Boolean = False, _
+                   Optional AllowAccentedCharacters As Boolean = False) As Long
+'@BlogPosted
+'@AssignedModule F_String
+    Dim x As Long, Str1 As String, str2 As String, Pattern As String
+    Const UpperAccentsOnly As String = "ÇÉÑ"
+    Const UpperAndLowerAccents As String = "ÇÉÑçéñ"
+    If CaseSensitive Then
+        Str1 = sourceText
+        str2 = WordToFind
+        Pattern = "[!A-Za-z0-9]"
+        If AllowAccentedCharacters Then Pattern = Replace(Pattern, "!", "!" & UpperAndLowerAccents)
+    Else
+        Str1 = UCase(sourceText)
+        str2 = UCase(WordToFind)
+        Pattern = "[!A-Z0-9]"
+        If AllowAccentedCharacters Then Pattern = Replace(Pattern, "!", "!" & UpperAccentsOnly)
+    End If
+    For x = Start To Len(Str1) - Len(str2) + 1
+        If Mid(" " & Str1 & " ", x, Len(str2) + 2) Like Pattern & str2 & Pattern _
+            And Not Mid(Str1, x) Like str2 & "'[" & Mid(Pattern, 3) & "*" Then
+            InStrExact = x
+            Exit Function
+        End If
+    Next
+End Function

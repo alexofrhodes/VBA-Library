@@ -1,6 +1,7 @@
 
 
 Public Function IsBlockEnd(strLine As String) As Boolean
+'@BlogPosted
 '@AssignedModule F_VBE
     strLine = Replace(strLine, Chr(13), "")
     Dim bOK As Boolean
@@ -17,4 +18,3 @@ Public Function IsBlockEnd(strLine As String) As Boolean
     End Select
     IsBlockEnd = bOK
 End Function
-

@@ -1,0 +1,30 @@
+
+Function LinkedDeclarations( _
+                           Optional TargetWorkbook As Workbook, _
+                           Optional Module As VBComponent, _
+                           Optional Procedure As String) As Collection
+'@BlogPosted
+'@INCLUDE PROCEDURE DeclarationsTableCreate
+'@INCLUDE PROCEDURE DeclarationsTableKeywords
+'@INCLUDE PROCEDURE RegexTest
+'@INCLUDE PROCEDURE AssignCPSvariables
+'@INCLUDE PROCEDURE ProcedureCode
+'@AssignedModule F_Vbe_Declararions
+
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
+    
+    DeclarationsTableCreate TargetWorkbook
+    
+    Dim TargetWorksheet As Worksheet: Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
+    Dim coll As New Collection
+    Dim Code As String: Code = ProcedureCode(TargetWorkbook, Module, Procedure)
+    Dim Element
+    For Each Element In DeclarationsTableKeywords
+        If RegexTest(Code, "\b ?" & CStr(Element) & "\b") Then
+            On Error Resume Next
+            coll.Add CStr(Element), CStr(Element)
+            On Error GoTo 0
+        End If
+    Next
+    Set LinkedDeclarations = coll
+End Function

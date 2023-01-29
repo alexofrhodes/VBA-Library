@@ -1,0 +1,38 @@
+
+Sub AddListOfLinkedProceduresToProcedure( _
+                                        Optional FromWorkbook As Workbook, _
+                                        Optional Module As VBComponent, _
+                                        Optional ProcedureName As String)
+'@BlogPosted
+'@INCLUDE PROCEDURE RegexTest
+'@INCLUDE PROCEDURE ProceduresOfWorkbook
+'@INCLUDE PROCEDURE ProcedureBodyLineFirstAfterComments
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@INCLUDE PROCEDURE ActiveProcedure
+'@INCLUDE PROCEDURE ProcedureCode
+'@INCLUDE PROCEDURE ModuleOfProcedure
+'@INCLUDE PROCEDURE LinkedProcedures
+'@AssignedModule F_VbeLinkedProcedures
+    If ProcedureName = "" Then ProcedureName = ActiveProcedure
+    If FromWorkbook Is Nothing Then Set FromWorkbook = ActiveCodepaneWorkbook
+    Dim Procedures As Collection: Set Procedures = LinkedProcedures(FromWorkbook, Module, ProcedureName)
+    
+    Dim ListOfImports As String
+    If Module Is Nothing Then Set Module = ModuleOfProcedure(FromWorkbook, ProcedureName)
+        
+    Dim ProcedureText As String
+    ProcedureText = ProcedureCode(FromWorkbook, Module, ProcedureName)
+    Dim Procedure As Variant
+    For Each Procedure In Procedures
+        If InStr(1, ProcedureText, "@INCLUDE PROCEDURE " & Procedure) = 0 And InStr(1, ListOfImports, "@INCLUDE PROCEDURE " & Procedure) = 0 Then
+            If ListOfImports = "" Then
+                ListOfImports = "'@INCLUDE PROCEDURE " & Procedure
+            Else
+                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE PROCEDURE " & Procedure
+            End If
+        End If
+    Next
+    If ListOfImports <> "" Then
+        Module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(Module, ProcedureName), ListOfImports
+    End If
+End Sub

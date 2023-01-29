@@ -1,0 +1,30 @@
+
+
+Sub DeclarationsTableSort()
+'@BlogPosted
+'@AssignedModule F_Vbe_Declararions
+
+    Dim TargetWorksheet As Worksheet
+    Set TargetWorksheet = ThisWorkbook.Worksheets("Declarations_Table")
+    
+    Dim sort1 As String: sort1 = "B1"
+    Dim sort2 As String: sort2 = "C1"
+    Dim sort3 As String ': sort3 = "D1"
+
+    With TargetWorksheet.Sort
+        .SortFields.clear
+        .SortFields.Add key:=TargetWorksheet.Range(sort1), Order:=xlAscending
+        
+        If Not sort2 = "" Then
+            .SortFields.Add key:=TargetWorksheet.Range(sort2), Order:=xlAscending
+        End If
+        If Not sort3 = "" Then
+            .SortFields.Add key:=TargetWorksheet.Range(sort3), Order:=xlAscending
+        End If
+
+        .SetRange TargetWorksheet.Range("A1").CurrentRegion
+        .header = xlYes
+        .Apply
+    End With
+    
+End Sub

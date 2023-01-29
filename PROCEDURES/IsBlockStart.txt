@@ -1,5 +1,6 @@
 
 Public Function IsBlockStart(strLine As String) As Boolean
+'@BlogPosted
 '@AssignedModule F_VBE
     strLine = Replace(strLine, Chr(13), "")
     Dim bOK As Boolean
@@ -12,7 +13,6 @@ Public Function IsBlockStart(strLine As String) As Boolean
     Case "With", "For", "Do", "While", "Select", "Case", "Else", "Else:", "#Else", "#Else:", "Sub", "Function", "Property", "Enum", "Type"
         bOK = True
     Case "If", "#If", "ElseIf", "#ElseIf"
-        '        bOK = (Len(strLine) = (InStr(1, strLine, " Then") + 4))
         bOK = (Right(strLine, 4) = "Then" Or Right(strLine, 1) = "_")
     Case "Private", "Public", "Friend"
         nPos = InStr(1, strLine, " Static ")
@@ -21,14 +21,13 @@ Public Function IsBlockStart(strLine As String) As Boolean
         Else
             nPos = InStr(Len(strTemp) + 1, strLine, " ")
         End If
-        On Error GoTo skip
+        On Error GoTo SKIP
         Select Case Mid$(strLine, nPos + 1, InStr(nPos + 1, strLine, " ") - nPos - 1)
         Case "Sub", "Function", "Property", "Enum", "Type"
             bOK = True
         End Select
-skip:
+SKIP:
         On Error GoTo 0
     End Select
     IsBlockStart = bOK
 End Function
-

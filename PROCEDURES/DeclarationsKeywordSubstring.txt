@@ -1,0 +1,77 @@
+
+Function DeclarationsKeywordSubstring(Str As Variant, Optional delim As String _
+                , Optional afterWord As String _
+                , Optional beforeWord As String _
+                , Optional counter As Integer _
+                , Optional outer As Boolean _
+                , Optional includeWords As Boolean) As String
+'@BlogPosted
+'@AssignedModule F_Vbe_Declararions
+    Dim i As Long
+    If afterWord = "" And beforeWord = "" And counter = 0 Then
+        MsgBox ("Pass at least 1 parameter betweenn -AfterWord- , -BeforeWord- , -counter-")
+        Exit Function
+    End If
+    If TypeName(Str) = "String" Then
+        If delim <> "" Then
+            Str = Split(Str, delim)
+            If UBound(Str) <> 0 Then
+                If afterWord = "" And beforeWord = "" And counter <> 0 Then
+                    If counter - 1 <= UBound(Str) Then
+                        DeclarationsKeywordSubstring = Str(counter - 1)
+                        Exit Function
+                    End If
+                End If
+                For i = LBound(Str) To UBound(Str)
+                    If afterWord <> "" And beforeWord = "" Then
+                        If i <> 0 Then
+                            If Str(i - 1) = afterWord Or Str(i - 1) = "#" & afterWord Then
+                                DeclarationsKeywordSubstring = Str(i)
+                                Exit Function
+                            End If
+                        End If
+                    ElseIf afterWord = "" And beforeWord <> "" Then
+                        If i <> UBound(Str) Then
+                            If Str(i + 1) = beforeWord Or Str(i + 1) = "#" & beforeWord Then
+                                DeclarationsKeywordSubstring = Str(i)
+                                Exit Function
+                            End If
+                        End If
+                    ElseIf afterWord <> "" And beforeWord <> "" Then
+                        If i <> 0 And i <> UBound(Str) Then
+                            If (Str(i - 1) = afterWord Or Str(i - 1) = "#" & afterWord) And (Str(i + 1) = beforeWord Or Str(i + 1) = "#" & beforeWord) Then
+                                DeclarationsKeywordSubstring = Str(i)
+                                Exit Function
+                            End If
+                        End If
+                    End If
+                Next i
+            End If
+        Else
+            If InStr(1, Str, afterWord) > 0 And InStr(1, Str, beforeWord) > 0 Then
+                If includeWords = False Then
+                    DeclarationsKeywordSubstring = Mid(Str, InStr(1, Str, afterWord) + Len(afterWord))
+                Else
+                    DeclarationsKeywordSubstring = Mid(Str, InStr(1, Str, afterWord))
+                End If
+                If outer = True Then
+                    If includeWords = False Then
+                        DeclarationsKeywordSubstring = left(DeclarationsKeywordSubstring, InStrRev(DeclarationsKeywordSubstring, beforeWord) - 1)
+                    Else
+                        DeclarationsKeywordSubstring = left(DeclarationsKeywordSubstring, InStrRev(DeclarationsKeywordSubstring, beforeWord) + Len(beforeWord) - 1)
+                    End If
+                Else
+                    If includeWords = False Then
+                        DeclarationsKeywordSubstring = left(DeclarationsKeywordSubstring, InStr(1, DeclarationsKeywordSubstring, beforeWord) - 1)
+                    Else
+                        DeclarationsKeywordSubstring = left(DeclarationsKeywordSubstring, InStr(1, DeclarationsKeywordSubstring, beforeWord) + Len(beforeWord) - 1)
+                    End If
+                End If
+                Exit Function
+            End If
+        End If
+    Else
+    '
+    End If
+    DeclarationsKeywordSubstring = vbNullString
+End Function

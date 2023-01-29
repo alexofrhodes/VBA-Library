@@ -1,0 +1,19 @@
+
+Public Function CollectionSort(colInput As Collection) As Collection
+'@BlogPosted
+'@AssignedModule F_Collection
+    Dim iCounter As Integer
+    Dim iCounter2 As Integer
+    Dim Temp As Variant
+    Set CollectionSort = New Collection
+    For iCounter = 1 To colInput.Count - 1
+        For iCounter2 = iCounter + 1 To colInput.Count
+            If colInput(iCounter) > colInput(iCounter2) Then
+                Temp = colInput(iCounter2)
+                colInput.Remove iCounter2
+                colInput.Add Temp, , iCounter
+            End If
+        Next iCounter2
+    Next iCounter
+    Set CollectionSort = colInput
+End Function

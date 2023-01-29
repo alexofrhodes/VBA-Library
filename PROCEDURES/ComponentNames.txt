@@ -1,0 +1,20 @@
+
+
+
+
+Function ComponentNames( _
+                       ModuleType As vbext_ComponentType, _
+                       Optional TargetWorkbook As Workbook)
+'@BlogPosted
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@AssignedModule F_VbeLinkedProcedures
+    Dim coll As New Collection
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    Dim Module As VBComponent
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        If Module.Type = ModuleType Then
+            coll.Add Module.name
+        End If
+    Next
+    Set ComponentNames = coll
+End Function

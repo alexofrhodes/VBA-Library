@@ -1,0 +1,54 @@
+
+Function classCallsOfModule(Module As VBComponent) As Variant
+'@BlogPosted
+'@INCLUDE PROCEDURE ClassNames
+'@AssignedModule F_VbeLinkedProcedures
+
+    'classCallsOfModule(0) is the class name
+    'classCallsOfModule(1) is the keyword for the class name (eg dim clsCal as new classCalendar)
+
+    Dim Code As Variant
+    Dim element As Variant
+    Dim keyword As Variant
+    Dim var As Variant
+    ReDim var(1 To 2, 1 To 1)
+    Dim counter As Long
+    counter = 0
+    If Module.CodeModule.CountOfDeclarationLines > 0 Then
+        Code = Module.CodeModule.Lines(1, Module.CodeModule.CountOfDeclarationLines)
+        Code = Replace(Code, "_" & vbNewLine, "")
+        Code = Split(Code, vbNewLine)
+        Code = Filter(Code, " As ", , vbTextCompare)
+        For Each element In Code
+            element = Trim(element)
+            If element Like "* As *" Then
+                keyword = Split(element, " As ")(0)
+                keyword = Split(keyword, " ")(UBound(Split(keyword, " ")))
+                element = Split(element, " As ")(1)
+                element = Replace(element, "New ", "")
+                
+                For Each ClassName In ClassNames
+                    If element = ClassName Then
+                        
+                        ReDim Preserve var(1 To 2, 1 To counter + 1)
+                        var(1, UBound(var, 2)) = element
+                        var(2, UBound(var, 2)) = keyword
+                        counter = counter + 1
+                    End If
+                Next
+            End If
+        Next
+        If var(1, 1) <> "" Then
+
+            If UBound(var, 2) > 1 Then
+                classCallsOfModule = WorksheetFunction.Transpose(var)
+            Else
+                Dim var2(1 To 1, 1 To 2)
+                var2(1, 1) = var(1, 1)
+                var2(1, 2) = var(2, 1)
+                classCallsOfModule = var2
+            End If
+        End If
+    End If
+
+End Function

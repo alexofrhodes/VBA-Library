@@ -1,0 +1,26 @@
+
+Sub AddProcedureCallsToCollection( _
+                                TargetWorkbook As Workbook, _
+                                Module As VBComponent, _
+                                ProcedureName As Variant, _
+                                AllProcedures As Collection, _
+                                ByRef OutputCollection As Collection)
+'@BlogPosted
+'@AssignedModule F_VbeLinkedProcedures
+'@INCLUDE PROCEDURE RegexTest
+'@INCLUDE PROCEDURE InStrExact
+'@INCLUDE PROCEDURE ProcedureCode
+'@INCLUDE PROCEDURE ArrayTrim
+    Dim Code As String
+        Code = ProcedureCode(TargetWorkbook, Module, ProcedureName)
+    Dim Procedure As Variant
+    For Each Procedure In AllProcedures
+        If CStr(Procedure) <> ProcedureName Then
+            If RegexTest(CStr(Code), "\W" & CStr(Procedure) & "[.(\W]") = True Then
+                On Error Resume Next
+                OutputCollection.Add CStr(Procedure), CStr(Procedure)
+                On Error GoTo 0
+            End If
+        End If
+    Next Procedure
+End Sub

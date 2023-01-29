@@ -1,0 +1,23 @@
+
+
+
+
+Function LinkedUserforms( _
+                        TargetWorkbook As Workbook, _
+                        Module As VBComponent, _
+                        Procedure As String) As Collection
+'@BlogPosted
+'@AssignedModule F_VbeLinkedProcedures
+'@LastModified 2301101010
+'@INCLUDE PROCEDURE RegexTest
+'@INCLUDE PROCEDURE UserformNames
+'@INCLUDE PROCEDURE ProcedureCode
+    Dim coll As New Collection
+    Dim Code As String
+        Code = ProcedureCode(TargetWorkbook, Module, Procedure)
+    Dim formName
+    For Each formName In UserformNames(TargetWorkbook)
+        If RegexTest(Code, "\W" & formName & "[.(\W]") = True Then coll.Add formName '& " " & "(Userform)"
+    Next
+    Set LinkedUserforms = coll
+End Function

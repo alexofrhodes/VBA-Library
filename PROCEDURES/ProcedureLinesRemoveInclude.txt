@@ -1,0 +1,12 @@
+
+Sub ProcedureLinesRemoveInclude( _
+                                Optional TargetWorkbook As Workbook, _
+                                Optional Module As VBComponent, _
+                                Optional Procedure As String)
+'@BlogPosted
+'@AssignedModule F_Vbe_Lines_Remove
+'@INCLUDE PROCEDURE AssignCPSvariables
+'@INCLUDE PROCEDURE ProcedureLinesRemove
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
+    ProcedureLinesRemove "'@INCLUDE", TargetWorkbook, Module, Procedure
+End Sub

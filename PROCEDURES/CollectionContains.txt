@@ -1,0 +1,40 @@
+
+Public Function CollectionContains( _
+                                  Kollection As Collection, _
+                                  Optional key As Variant, _
+                                  Optional item As Variant) As Boolean
+'@BlogPosted
+'@AssignedModule F_Collection
+    Dim strKey As String
+    Dim var As Variant
+    If Not IsMissing(key) Then
+        strKey = CStr(key)
+        On Error Resume Next
+        CollectionContains = True
+        var = Kollection(strKey)
+        If Err.number = 91 Then GoTo CheckForObject
+        If Err.number = 5 Then GoTo NotFound
+        On Error GoTo 0
+        Exit Function
+CheckForObject:
+        If IsObject(Kollection(strKey)) Then
+            CollectionContains = True
+            On Error GoTo 0
+            Exit Function
+        End If
+NotFound:
+        CollectionContains = False
+        On Error GoTo 0
+        Exit Function
+    ElseIf Not IsMissing(item) Then
+        CollectionContains = False
+        For Each var In Kollection
+            If var = item Then
+                CollectionContains = True
+                Exit Function
+            End If
+        Next var
+    Else
+        CollectionContains = False
+    End If
+End Function

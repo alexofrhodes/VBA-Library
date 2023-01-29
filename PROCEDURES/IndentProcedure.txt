@@ -2,16 +2,16 @@
 Public Sub IndentProcedure( _
                           Optional TargetWorkbook As Workbook, _
                           Optional Module As VBComponent, _
-                          Optional Procedure As String)
+                          Optional procedure As String)
+'@BlogPosted
 '@AssignedModule F_Vbe_Indent
 '@INCLUDE PROCEDURE AssignCPSvariables
 '@INCLUDE PROCEDURE ProcedureReplace
 '@INCLUDE PROCEDURE StringFormatIndent
 '@INCLUDE PROCEDURE ProcedureCode
-    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Exit Sub
+    If Not AssignCPSvariables(TargetWorkbook, Module, procedure) Then Exit Sub
     Dim code As String
-        code = ProcedureCode(TargetWorkbook, Module, Procedure)
+        code = ProcedureCode(TargetWorkbook, Module, procedure)
         code = StringFormatIndent(code)
-    ProcedureReplace Module, Procedure, code
+    ProcedureReplace Module, procedure, code
 End Sub
-

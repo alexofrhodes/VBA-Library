@@ -1,0 +1,18 @@
+
+
+Function DeclarationsTableKeywords() As Collection
+'@BlogPosted
+'@INCLUDE PROCEDURE getLastRow
+'@AssignedModule F_Vbe_Declararions
+    Dim TargetWorksheet As Worksheet
+    Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
+    Dim lr As Long: lr = getLastRow(TargetWorksheet)
+    Dim coll As New Collection
+    Dim Cell As Range
+    For Each Cell In TargetWorksheet.Range("C2:C" & lr)
+        On Error Resume Next
+        coll.Add Cell.TEXT, Cell.TEXT
+        On Error GoTo 0
+    Next
+    Set DeclarationsTableKeywords = coll
+End Function

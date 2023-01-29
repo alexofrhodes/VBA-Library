@@ -1,0 +1,15 @@
+
+Sub ProcedureAssignedModuleAdd( _
+                                Optional TargetWorkbook As Workbook, _
+                                Optional Module As VBComponent, _
+                                Optional Procedure As String)
+'@BlogPosted
+'@AssignedModule F_Vbe_Procedures
+'@INCLUDE PROCEDURE AssignCPSvariables
+'@INCLUDE PROCEDURE ProcedureBodyLineFirstAfterComments
+'@INCLUDE PROCEDURE ProcedureLinesRemove
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
+    ProcedureLinesRemove "'@AssignedModule *", TargetWorkbook, Module, Procedure
+    Module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(Module, Procedure), _
+                                  "'@AssignedModule " & Module.name
+End Sub

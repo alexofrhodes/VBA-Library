@@ -1,0 +1,20 @@
+
+Sub ProcedureLinesRemove( _
+                        myCriteria As String, _
+                        Optional TargetWorkbook As Workbook, _
+                        Optional Module As VBComponent, _
+                        Optional Procedure As String)
+'@BlogPosted
+'@AssignedModule F_Vbe_Lines_Remove
+'@INCLUDE PROCEDURE AssignCPSvariables
+'@INCLUDE PROCEDURE ProcedureLinesFirst
+'@INCLUDE PROCEDURE ProcedureLinesLast
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
+
+    Dim Code As String
+    Dim i As Long
+    For i = ProcedureLinesLast(Module, Procedure) To ProcedureLinesFirst(Module, Procedure) Step -1
+        Code = Trim(Module.CodeModule.Lines(i, 1))
+        If Code Like myCriteria Then Module.CodeModule.DeleteLines i
+    Next
+End Sub
