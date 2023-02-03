@@ -1,0 +1,21 @@
+
+
+
+
+
+Public Function TypeProcedureComment(ByVal StrDeclarationProcedure As String) As String
+'@BlogPosted
+    If StrDeclarationProcedure Like "*Sub*" Then
+        TypeProcedureComment = "* Sub        :"
+    ElseIf StrDeclarationProcedure Like "*Function*" Then
+        TypeProcedureComment = "* Function   :"
+    ElseIf StrDeclarationProcedure Like "*Property Set*" Then
+        TypeProcedureComment = "* Prop Set   :"
+    ElseIf StrDeclarationProcedure Like "*Property Get*" Then
+        TypeProcedureComment = "* Prop Get   :"
+    ElseIf StrDeclarationProcedure Like "*Property Let*" Then
+        TypeProcedureComment = "* Prop Let   :"
+    Else
+        TypeProcedureComment = "* Un Type    :"
+    End If
+End Function

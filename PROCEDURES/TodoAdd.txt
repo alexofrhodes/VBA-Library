@@ -1,0 +1,28 @@
+
+Sub TodoAdd()
+'@BlogPosted
+Rem Modified from VBATools
+'@INCLUDE PROCEDURE ActiveModule
+'@INCLUDE DECLARATION AUTHOR_NAME
+    Const tFormat = "dd-mm-yyyy hh:nn"
+    Dim Module As VBComponent
+    Set Module = ActiveModule
+    Dim txtName As String
+        txtName = AUTHOR_NAME
+    If txtName = vbNullString Then txtName = Environ("UserName")
+    Dim nLine As Long
+        nLine = cpsLineFirst
+        Do While nLine > 1 And Right(Module.CodeModule.Lines(nLine, 1), 1) = "_"
+            nLine = nLine - 1
+        Loop
+    Dim sLine As String
+        sLine = Module.CodeModule.Lines(nLine, 1)
+    Dim sSpec As String
+        sSpec = Space(Len(sLine) - Len(Trim(sLine)))
+    Dim sTodo As String
+        sTodo = sSpec & "'* @TODO Created: " & _
+                VBA.Format$(Now, tFormat) & _
+                " Author: " & txtName & vbCrLf & _
+                sSpec & "'* @TODO "
+        Module.CodeModule.InsertLines nLine, vbNewLine & sTodo & vbNewLine
+End Sub

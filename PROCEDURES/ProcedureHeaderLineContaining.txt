@@ -1,0 +1,13 @@
+
+Function ProcedureHeaderLineContaining(Module As VBComponent, Procedure As String, This As String) As Long
+'@BlogPosted
+'@INCLUDE PROCEDURE ProcedureHeaderLineFirst
+'@INCLUDE PROCEDURE ProcedureHeaderLineLast
+    Dim i As Long
+    For i = ProcedureHeaderLineFirst(Module, Procedure) To ProcedureHeaderLineLast(Module, Procedure)
+        If Module.CodeModule.Lines(i, 1) Like This Then
+            ProcedureHeaderLineContaining = i
+            Exit Function
+        End If
+    Next
+End Function

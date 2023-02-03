@@ -1,0 +1,30 @@
+
+Function AddStringParameterFromProcedureHeader(ByVal sPocDeclartion As String) As String
+'@BlogPosted
+    Const vbTab2 = vbTab & vbTab
+    Const vbTab4 = vbTab2 & vbTab2
+    Dim sDeclaration As String
+        sDeclaration = Right$(sPocDeclartion, Len(sPocDeclartion) - InStr(1, sPocDeclartion, "("))
+        sDeclaration = left$(sDeclaration, InStr(1, sDeclaration, ")") - 1)
+    If sDeclaration = vbNullString Then Exit Function
+    Dim arStr() As String
+        arStr = Split(sDeclaration, ",")
+    Dim iMaxLen As Byte
+        iMaxLen = 0
+    Dim iTempLen As Byte
+    Dim sTemp  As String
+    Dim i      As Byte
+    For i = 0 To UBound(arStr)
+        iTempLen = Len(Trim$(arStr(i)))
+        If iMaxLen < iTempLen Then iMaxLen = iTempLen
+    Next i
+    Dim numOfSpaces As Long
+        numOfSpaces = iMaxLen - Len(Trim$("'* Argument(s):"))
+    If numOfSpaces < 0 Then numOfSpaces = 0
+    sDeclaration = "'*" & vbLf & "'* Argument(s):" & Space(numOfSpaces) & vbTab2 & "Description" & vbCrLf & "'*" & vbCrLf
+    For i = 0 To UBound(arStr)
+        sTemp = "'* " & Trim$(arStr(i)) & Space(iMaxLen - Len(Trim$(arStr(i)))) & " :"
+        sDeclaration = sDeclaration & sTemp & vbCrLf
+    Next i
+    AddStringParameterFromProcedureHeader = sDeclaration & "'* " & vbCrLf
+End Function

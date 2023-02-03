@@ -1,0 +1,29 @@
+
+Function ProcedureLastModAdd( _
+                            Optional TargetWorkbook As Workbook, _
+                            Optional Module As VBComponent, _
+                            Optional Procedure As String, _
+                            Optional ModificationDate As Double)
+                       
+'argument ModificationDate passed like Format(Now, "yymmddhhnn")
+
+'@BlogPosted
+'@INCLUDE PROCEDURE AssignCPSvariables
+'@INCLUDE PROCEDURE ProcedureLineContaining
+'@INCLUDE PROCEDURE ProcedureBodyLineFirst
+'@INCLUDE PROCEDURE ProcedureLinesRemove
+
+If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Exit Function
+    If ModificationDate = 0 Then ModificationDate = Format(Now, "yymmddhhnn")
+    Dim LastModLine As Long
+        LastModLine = ProcedureLineContaining(Module, Procedure, "'@LastModified *")
+    If LastModLine = 0 Then GoTo PASS
+    Dim LDate As Double
+        LDate = Split(Module.CodeModule.Lines(LastModLine, 1), " ")(1)
+    ProcedureLinesRemove "'@LastModified *", TargetWorkbook, Module, Procedure
+PASS:
+    Module.CodeModule.InsertLines ProcedureBodyLineFirst(Module, Procedure), _
+                                  "'@LastModified " & ModificationDate
+    
+    ProcedureLastModAdd = ModificationDate
+End Function
