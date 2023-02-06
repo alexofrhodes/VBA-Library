@@ -1,6 +1,6 @@
 
 Sub AddListOfLinkedProceduresToProcedure( _
-                                        Optional FromWorkbook As Workbook, _
+                                        Optional TargetWorkbook As Workbook, _
                                         Optional Module As VBComponent, _
                                         Optional ProcedureName As String)
 '@BlogPosted
@@ -13,18 +13,16 @@ Sub AddListOfLinkedProceduresToProcedure( _
 '@INCLUDE PROCEDURE ModuleOfProcedure
 '@INCLUDE PROCEDURE LinkedProcedures
 '@AssignedModule F_VbeLinkedProcedures
-    If ProcedureName = "" Then ProcedureName = ActiveProcedure
-    If FromWorkbook Is Nothing Then Set FromWorkbook = ActiveCodepaneWorkbook
-    Dim Procedures As Collection: Set Procedures = LinkedProcedures(FromWorkbook, Module, ProcedureName)
-    
+
+    If Not AssignCPSvariables(TargetWorkbook, Module, ProcedureName) Then Stop
+    Dim Procedures As Collection
+    Set Procedures = LinkedProcedures(TargetWorkbook, Module, ProcedureName)
     Dim ListOfImports As String
-    If Module Is Nothing Then Set Module = ModuleOfProcedure(FromWorkbook, ProcedureName)
-        
-    Dim ProcedureText As String
-    ProcedureText = ProcedureCode(FromWorkbook, Module, ProcedureName)
+    Dim code As String
+        code = ProcedureCode(TargetWorkbook, Module, ProcedureName)
     Dim Procedure As Variant
     For Each Procedure In Procedures
-        If InStr(1, ProcedureText, "@INCLUDE PROCEDURE " & Procedure) = 0 And InStr(1, ListOfImports, "@INCLUDE PROCEDURE " & Procedure) = 0 Then
+        If InStr(1, code, "@INCLUDE PROCEDURE " & Procedure) = 0 And InStr(1, ListOfImports, "@INCLUDE PROCEDURE " & Procedure) = 0 Then
             If ListOfImports = "" Then
                 ListOfImports = "'@INCLUDE PROCEDURE " & Procedure
             Else

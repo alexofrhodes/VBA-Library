@@ -32,9 +32,7 @@ Sub ModAdd( _
         sSecondLine = sUPDATE & vbTab & sTime & vbTab & sUser & vbTab4 & "(" & sProc & ")"
     
     ProcedureLastModAdd TargetWorkbook, Module, Procedure, Format(sTime, "yymmddhhnn")
-    
-    On Error GoTo HELL
-    
+        
     If ProcedureHeaderContains("'* Created    :", False, True, False, _
                                TargetWorkbook, Module, Procedure) _
     And Not ProcedureHeaderContains("'* Module     :", False, True, False, _
@@ -50,15 +48,14 @@ Sub ModAdd( _
         Exit Sub
     End If
 
-    If Not Module.CodeModule.Lines(nLine - 2, 1) Like sUPDATE & "*" Then
+    If nLine < 4 Then
+        sSecondLine = vbLf & sFirstLine & sSecondLine
+    ElseIf Not Module.CodeModule.Lines(nLine - 2, 1) Like sUPDATE & "*" Then
         sSecondLine = vbLf & sFirstLine & sSecondLine
     End If
-    If nLine = 1 Then
-        Module.CodeModule.AddFromString sSecondLine & vbNewLine
-    ElseIf Len(Module.CodeModule.Lines(nLine - 1, 1)) = 0 And nLine > 1 Then
+    If Len(Module.CodeModule.Lines(nLine - 1, 1)) = 0 And nLine > 1 Then
         Module.CodeModule.InsertLines nLine - 1, sSecondLine
     Else
         Module.CodeModule.InsertLines nLine, sSecondLine & vbNewLine
     End If
-HELL:
 End Sub

@@ -13,25 +13,25 @@ Sub AddListOfLinkedClassesToProcedure( _
 '@INCLUDE PROCEDURE ModuleOfProcedure
 '@AssignedModule F_VbeLinkedProcedures
 
-    If ProcedureName = "" Then ProcedureName = ActiveProcedure
-    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    If Not AssignCPSvariables(TargetWorkbook, Module, ProcedureName) Then Stop
     Dim ListOfImports As String
-    If Module Is Nothing Then Set Module = ModuleOfProcedure(TargetWorkbook, ProcedureName)
-    Dim ProcedureText As String
-    ProcedureText = ProcedureCode(TargetWorkbook, Module, ProcedureName)
+    Dim code As String
+        code = ProcedureCode(TargetWorkbook, Module, ProcedureName)
     Dim myClasses As Collection
     Set myClasses = LinkedClasses(TargetWorkbook, Module, ProcedureName)
-    Dim Element As Variant
-    For Each Element In myClasses
-        If InStr(1, ProcedureText, "@INCLUDE CLASS " & Element) = 0 And InStr(1, ListOfImports, "@INCLUDE CLASS " & Element) = 0 Then
+    Dim element As Variant
+    For Each element In myClasses
+        If InStr(1, code, "@INCLUDE CLASS " & element) = 0 _
+        And InStr(1, ListOfImports, "@INCLUDE CLASS " & element) = 0 Then
             If ListOfImports = "" Then
-                ListOfImports = "'@INCLUDE CLASS " & Element
+                ListOfImports = "'@INCLUDE CLASS " & element
             Else
-                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE CLASS " & Element
+                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE CLASS " & element
             End If
         End If
     Next
     If ListOfImports <> "" Then
-        Module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(Module, ProcedureName), ListOfImports
+        Module.CodeModule.InsertLines _
+            ProcedureBodyLineFirstAfterComments(Module, ProcedureName), ListOfImports
     End If
 End Sub

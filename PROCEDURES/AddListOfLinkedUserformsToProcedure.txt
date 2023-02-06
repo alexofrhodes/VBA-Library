@@ -12,21 +12,20 @@ Sub AddListOfLinkedUserformsToProcedure( _
 '@INCLUDE PROCEDURE LinkedUserforms
 '@AssignedModule F_VbeLinkedProcedures
     
-    If ProcedureName = "" Then ProcedureName = ActiveProcedure
-    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    If Not AssignCPSvariables(TargetWorkbook, Module, ProcedureName) Then Stop
+
     Dim ListOfImports As String
-    If Module Is Nothing Then Set Module = ModuleOfProcedure(TargetWorkbook, ProcedureName)
-    Dim ProcedureText As String
-    ProcedureText = ProcedureCode(TargetWorkbook, Module, ProcedureName)
+    Dim code As String
+        code = ProcedureCode(TargetWorkbook, Module, ProcedureName)
     Dim myClasses As Collection
     Set myClasses = LinkedUserforms(TargetWorkbook, Module, ProcedureName)
-    Dim Element As Variant
-    For Each Element In myClasses
-        If InStr(1, ProcedureText, "@INCLUDE USERFORM " & Element) = 0 And InStr(1, ListOfImports, "@INCLUDE USERFORM " & Element) = 0 Then
+    Dim element As Variant
+    For Each element In myClasses
+        If InStr(1, code, "@INCLUDE USERFORM " & element) = 0 And InStr(1, ListOfImports, "@INCLUDE USERFORM " & element) = 0 Then
             If ListOfImports = "" Then
-                ListOfImports = "'@INCLUDE USERFORM " & Element
+                ListOfImports = "'@INCLUDE USERFORM " & element
             Else
-                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE USERFORM " & Element
+                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE USERFORM " & element
             End If
         End If
     Next
