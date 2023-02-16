@@ -1,9 +1,7 @@
 
-Public Function ModuleHeaderContains( _
-                                    Module As VBComponent, _
-                                    TargetString As String) As Boolean
+Function ModuleHeaderContains(Module As VBComponent, TargetString As String) As Boolean
+'@BlogPosted
 '@AssignedModule F_Vbe_Modules
 '@INCLUDE PROCEDURE ModuleHeader
     ModuleHeaderContains = (InStr(1, ModuleHeader(Module), TargetString) > 0)
 End Function
-

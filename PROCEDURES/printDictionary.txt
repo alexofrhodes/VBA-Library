@@ -13,11 +13,11 @@ Private Sub printDictionary(var As Variant)
         iCount = UBound(arrKeys, 1)
         For i = 0 To iCount
             sKey = arrKeys(i)
-            If IsObject(.item(sKey)) Then
+            If IsObject(.Item(sKey)) Then
                 Debug.Print sKey & " : "
-                dp (.item(sKey))
+                dp (.Item(sKey))
             Else
-                Debug.Print sKey & " : " & .item(sKey)
+                Debug.Print sKey & " : " & .Item(sKey)
             End If
         Next i
     End With

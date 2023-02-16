@@ -1,10 +1,12 @@
 
-Public Function ProcedureTitleLineCount( _
-                                        Module As VBComponent, _
-                                        Procedure As String) As Long
+Function ProcedureTitleLineCount( _
+                                Module As VBComponent, _
+                                Procedure As String) As Long
+'@BlogPosted
 '@AssignedModule F_Vbe_Procedures
 '@INCLUDE PROCEDURE ActiveProcedure
 '@INCLUDE PROCEDURE ProcedureTitleLineFirst
     ProcedureTitleLineCount = ProcedureTitleLineLast(Module, Procedure) - ProcedureTitleLineFirst(Module, Procedure) + 1
 End Function
+
 

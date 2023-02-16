@@ -1,7 +1,11 @@
 
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 19-10-2022 14:41    Alex                initial release (ProcedureHeader)
+
 Public Function ProcedureHeader( _
                                Module As VBComponent, _
                                Procedure As String) As String
+'@BlogPosted
 '@AssignedModule F_Vbe_Procedures
 '@INCLUDE PROCEDURE ProcedureLinesFirst
 '@INCLUDE PROCEDURE ProcedureHeaderLineCount
@@ -17,9 +21,8 @@ Public Function ProcedureHeader( _
     If ProcedureHeaderLineCount(Module, Procedure) = 0 Then
         sDeclarations = ""
     Else
-        sDeclarations = Module.CodeModule.Lines(startAt, endAt - startAt + 1)
+        sDeclarations = Module.codeModule.Lines(startAt, endAt - startAt + 1)
         sDeclarations = Join(Split(sDeclarations, vbLf), vbLf)
     End If
     ProcedureHeader = sDeclarations
 End Function
-

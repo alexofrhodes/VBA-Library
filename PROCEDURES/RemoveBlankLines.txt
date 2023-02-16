@@ -1,12 +1,16 @@
 
 
-Function RemoveBlankLines(txt As String) As String
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 31-10-2022 12:42    Alex                (RemoveBlankLines) Initial release
+
+Function RemoveBlankLines( _
+                         txt As String) As String
 '@BlogPosted
-'@AssignedModule F_Strings
+'@AssignedModule F_Vbe_Lines_Remove
 '@INCLUDE PROCEDURE ArrayRemoveEmptyElements
     Dim var
     var = Split(txt, vbNewLine)
     ArrayRemoveEmptyElements var
     RemoveBlankLines = Join(var, vbNewLine)
 End Function
-

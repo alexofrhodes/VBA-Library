@@ -1,6 +1,6 @@
 
-
 Public Function ActiveCodepaneWorkbook() As Workbook
+'@BlogPosted
 '@AssignedModule F_VBE
     On Error GoTo ErrorHandler
     Dim WorkbookName As String

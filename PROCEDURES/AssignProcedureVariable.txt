@@ -1,22 +1,22 @@
 
-Function AssignProcedureVariable(TargetWorkbook As Workbook, ByRef procedure As String) As Boolean
+Function AssignProcedureVariable(TargetWorkbook As Workbook, ByRef Procedure As String) As Boolean
 '@BlogPosted
 '@INCLUDE PROCEDURE CodepaneSelection
 '@INCLUDE PROCEDURE ActiveProcedure
 '@INCLUDE PROCEDURE ProcedureExists
 '@AssignedModule F_VbeFormat
-    If procedure = "" Then
+    If Procedure = "" Then
         Dim cps As String
         cps = CodepaneSelection
         If Len(cps) > 0 Then
-            procedure = cps
+            Procedure = cps
         Else
-            procedure = ActiveProcedure
+            Procedure = ActiveProcedure
         End If
-        If Not ProcedureExists(TargetWorkbook, procedure) Then
-            Debug.Print procedure & " not found in Workbook " & TargetWorkbook.name
+        If Not ProcedureExists(TargetWorkbook, Procedure) Then
+            Debug.Print Procedure & " not found in Workbook " & TargetWorkbook.Name
 '            procedure = ""
         End If
     End If
-    AssignProcedureVariable = Not procedure = ""
+    AssignProcedureVariable = Not Procedure = ""
 End Function

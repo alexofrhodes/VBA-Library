@@ -1,18 +1,21 @@
 
-Public Function ProceduresOfModule(Module As VBComponent) As Collection
+Public Function ProceduresOfModule( _
+                                  Module As VBComponent) As Collection
+'@BlogPosted
 '@AssignedModule F_Vbe_Procedures
     Dim ProcKind As VBIDE.vbext_ProcKind
-    Dim LineNum As Long
+    Dim lineNum As Long
     Dim coll As New Collection
     Dim Procedure As String
-    With Module.CodeModule
-        LineNum = .CountOfDeclarationLines + 1
-        Do Until LineNum >= .CountOfLines
-            ProcedureAs = .ProcOfLine(LineNum, ProcKind)
+    With Module.codeModule
+        lineNum = .CountOfDeclarationLines + 1
+        Do Until lineNum >= .CountOfLines
+            ProcedureAs = .ProcOfLine(lineNum, ProcKind)
             coll.Add ProcedureAs
-            LineNum = .ProcStartLine(ProcedureAs, ProcKind) + .ProcCountLines(ProcedureAs, ProcKind) + 1
+            lineNum = .procStartLine(ProcedureAs, ProcKind) + .ProcCountLines(ProcedureAs, ProcKind) + 1
         Loop
     End With
     Set ProceduresOfModule = coll
 End Function
-
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 09-01-2023 12:53    Alex                (cpsProceduresSelectedText)

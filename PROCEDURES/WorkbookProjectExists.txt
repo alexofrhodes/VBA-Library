@@ -1,8 +1,8 @@
 
-Function WorkbookProjectExists(wb As Workbook) As Boolean
+Function WorkbookProjectExists(WB As Workbook) As Boolean
+'@BlogPosted
     Dim WbProjComp As Object
     On Error Resume Next
-    Set WbProjComp = wb.VBProject.VBComponents
+    Set WbProjComp = WB.VBProject.VBComponents
     WorkbookProjectExists = Not WbProjComp Is Nothing
 End Function
-

@@ -2,7 +2,6 @@
 '--------------------
 '@EndFolder General
 
-
 '**********
 '@FOLDER Code
 '**********
@@ -12,23 +11,24 @@ Public Function ProcedureCode( _
                              Optional Module As VBComponent, _
                              Optional Procedure As Variant, _
                              Optional IncludeHeader As Boolean = True) As String
+'@BlogPosted
 '
 '@INCLUDE PROCEDURE AssignCPSvariables
 '@AssignedModule F_Vbe_Procedures
-    If Not AssignCPSvariables(TargetWorkbook, Module, CStr(Procedure)) Then Stop
+    If Not AssignCPSvariables(TargetWorkbook, Module, CStr(Procedure)) Then Exit Function
     Dim lProcStart            As Long
     Dim lProcBodyStart        As Long
     Dim lProcNoLines          As Long
     Const vbext_pk_Proc = 0
     On Error GoTo Error_Handler
-    lProcStart = Module.CodeModule.ProcStartLine(Procedure, vbext_pk_Proc)
-    lProcBodyStart = Module.CodeModule.ProcBodyLine(Procedure, vbext_pk_Proc)
-    lProcNoLines = Module.CodeModule.ProcCountLines(Procedure, vbext_pk_Proc)
+    lProcStart = Module.codeModule.procStartLine(Procedure, vbext_pk_Proc)
+    lProcBodyStart = Module.codeModule.ProcBodyLine(Procedure, vbext_pk_Proc)
+    lProcNoLines = Module.codeModule.ProcCountLines(Procedure, vbext_pk_Proc)
     If IncludeHeader = True Then
-        ProcedureCode = Module.CodeModule.Lines(lProcStart, lProcNoLines)
+        ProcedureCode = Module.codeModule.Lines(lProcStart, lProcNoLines)
     Else
         lProcNoLines = lProcNoLines - (lProcBodyStart - lProcStart)
-        ProcedureCode = Module.CodeModule.Lines(lProcBodyStart, lProcNoLines)
+        ProcedureCode = Module.codeModule.Lines(lProcBodyStart, lProcNoLines)
     End If
 Error_Handler_Exit:
     On Error Resume Next

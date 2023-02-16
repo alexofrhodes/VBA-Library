@@ -4,6 +4,7 @@
 Function ProcedureExists( _
                         TargetWorkbook As Workbook, _
                         ProcedureName As Variant) As Boolean
+'@BlogPosted
 '@INCLUDE PROCEDURE ProceduresOfWorkbook
 '@AssignedModule F_Vbe_Procedures
     Dim Procedures As Collection

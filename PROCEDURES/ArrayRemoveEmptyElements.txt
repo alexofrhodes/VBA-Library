@@ -2,17 +2,17 @@
 Public Function ArrayRemoveEmptyElements(varArray As Variant) As Variant
 '@BlogPosted
 '@AssignedModule F_Array
-    Dim tempArray() As Variant
-    Dim oldIndex As Integer
-    Dim newIndex As Integer
-    ReDim tempArray(LBound(varArray) To UBound(varArray))
-    For oldIndex = LBound(varArray) To UBound(varArray)
-        If Not Trim(varArray(oldIndex) & " ") = "" Then
-            tempArray(newIndex) = varArray(oldIndex)
-            newIndex = newIndex + 1
+    Dim TempArray() As Variant
+    Dim OldIndex As Integer
+    Dim NewIndex As Integer
+    ReDim TempArray(LBound(varArray) To UBound(varArray))
+    For OldIndex = LBound(varArray) To UBound(varArray)
+        If Not Trim(varArray(OldIndex) & " ") = "" Then
+            TempArray(NewIndex) = varArray(OldIndex)
+            NewIndex = NewIndex + 1
         End If
-    Next oldIndex
-    ReDim Preserve tempArray(LBound(varArray) To newIndex - 1)
-    ArrayRemoveEmptyElements = tempArray
-    varArray = tempArray
+    Next OldIndex
+    ReDim Preserve TempArray(LBound(varArray) To NewIndex - 1)
+    ArrayRemoveEmptyElements = TempArray
+    varArray = TempArray
 End Function

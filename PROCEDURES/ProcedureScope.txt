@@ -1,5 +1,10 @@
 
-Function ProcedureScope(Module As VBComponent, Procedure As String) As String
+
+
+Function ProcedureScope( _
+                       Module As VBComponent, _
+                       Procedure As String) As String
+'@BlogPosted
     Dim sTitle As String
         sTitle = ProcedureTitleClean(Module, Procedure)
     If UCase(sTitle) Like UCase("*" & "Public " & "*" & Procedure & "*") Then
@@ -15,4 +20,3 @@ Function ProcedureScope(Module As VBComponent, Procedure As String) As String
         End Select
     End If
 End Function
-

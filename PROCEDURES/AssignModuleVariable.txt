@@ -2,19 +2,19 @@
 Function AssignModuleVariable( _
                              ByVal TargetWorkbook As Workbook, _
                              ByRef Module As VBComponent, _
-                             Optional ByVal procedure As String) As Boolean
+                             Optional ByVal Procedure As String) As Boolean
 '@BlogPosted
 '@INCLUDE PROCEDURE CodepaneSelection
 '@INCLUDE PROCEDURE ActiveModule
 '@INCLUDE PROCEDURE ModuleOfProcedure
 '@AssignedModule F_VbeFormat
-    If procedure = "" Then
+    If Procedure = "" Then
         On Error Resume Next
         Set Module = ActiveModule
         On Error GoTo 0
     ElseIf Module Is Nothing Then
         On Error Resume Next
-        Set Module = ModuleOfProcedure(TargetWorkbook, procedure)
+        Set Module = ModuleOfProcedure(TargetWorkbook, Procedure)
         On Error GoTo 0
     End If
     AssignModuleVariable = Not Module Is Nothing

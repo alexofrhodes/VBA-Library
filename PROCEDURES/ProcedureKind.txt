@@ -2,6 +2,7 @@
 Public Function ProcedureKind( _
                              Module As VBComponent, _
                              ByVal Procedure As String) As Long
+'@BlogPosted
     Dim txt As String
         txt = ProcedureTitleClean(Module, Procedure)
     If InStr(1, txt, "Get " & Procedure) > 0 Then
@@ -16,4 +17,5 @@ Public Function ProcedureKind( _
         ProcedureKind = vbext_pk_Proc '0
     End If
 End Function
+
 

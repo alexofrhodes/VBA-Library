@@ -1,9 +1,11 @@
 
-Public Function ModuleCode(Module As VBComponent) As String
+
+
+Function ModuleCode(Module As VBComponent) As String
+'@BlogPosted
 '@AssignedModule F_Vbe_ReadCode
-    With Module.CodeModule
+    With Module.codeModule
         If .CountOfLines = 0 Then ModuleCode = "": Exit Function
         ModuleCode = .Lines(1, .CountOfLines)
     End With
 End Function
-

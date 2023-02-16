@@ -1,12 +1,16 @@
 
-Public Function ProcedureHeaderContains( _
-                                        FindWhat As String, _
-                                        WholeWord As Boolean, _
-                                        MatchCase As Boolean, _
-                                        Optional PatternSearch As Boolean, _
-                                        Optional TargetWorkbook As Workbook, _
-                                        Optional Module As VBComponent, _
-                                        Optional Procedure As String) As Boolean
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 22-12-2022 09:21    Alex                (ProcedureHeaderContains)
+
+Function ProcedureHeaderContains( _
+                                FindWhat As String, _
+                                WholeWord As Boolean, _
+                                MatchCase As Boolean, _
+                                Optional PatternSearch As Boolean, _
+                                Optional TargetWorkbook As Workbook, _
+                                Optional Module As VBComponent, _
+                                Optional Procedure As String)
+'@BlogPosted
 '
 '@INCLUDE PROCEDURE AssignCPSvariables
 '@INCLUDE PROCEDURE ProcedureHeaderLineFirst
@@ -15,7 +19,7 @@ Public Function ProcedureHeaderContains( _
 '@AssignedModule F_Vbe_ReadCode
     If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
     If ProcedureHeaderLineCount(Module, Procedure) = 0 Then Exit Function
-    ProcedureHeaderContains = Module.CodeModule.Find( _
+    ProcedureHeaderContains = Module.codeModule.Find( _
                                                     FindWhat, _
                                                     ProcedureHeaderLineFirst(Module, _
                                                     Procedure), _
@@ -27,4 +31,3 @@ Public Function ProcedureHeaderContains( _
                                                     MatchCase, _
                                                     PatternSearch)
 End Function
-

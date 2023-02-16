@@ -5,5 +5,5 @@ Function cpsLinesCode() As String
 '@INCLUDE PROCEDURE cpsLineFirst
 '@INCLUDE PROCEDURE cpsLinesCount
 '@INCLUDE PROCEDURE ActiveModule
-    cpsLinesCode = ActiveModule.CodeModule.CodePane.CodeModule.Lines(cpsLineFirst, cpsLinesCount)
+    cpsLinesCode = ActiveModule.codeModule.CodePane.codeModule.Lines(cpsLineFirst, cpsLinesCount)
 End Function

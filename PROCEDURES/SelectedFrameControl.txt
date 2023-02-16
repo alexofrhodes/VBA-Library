@@ -1,5 +1,5 @@
 
-Function SelectedFrameControl() As msforms.control
+Function SelectedFrameControl() As MSForms.control
 '@BlogPosted
     Dim ctl    As control, c As control
     Dim out As New Collection

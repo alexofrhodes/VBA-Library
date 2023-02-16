@@ -1,6 +1,6 @@
 
-
 Function ModuleTypeToString(componentType As VBIDE.vbext_ComponentType) As String
+'@BlogPosted
 '@AssignedModule F_Vbe_Modules
     Select Case componentType
     Case vbext_ct_ActiveXDesigner
@@ -17,4 +17,3 @@ Function ModuleTypeToString(componentType As VBIDE.vbext_ComponentType) As Strin
         ModuleTypeToString = "Unknown Type: " & CStr(componentType)
     End Select
 End Function
-

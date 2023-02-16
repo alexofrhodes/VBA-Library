@@ -2,6 +2,7 @@
 Public Function ModuleExists( _
                             TargetName As String, _
                             TargetWorkbook As Workbook) As Boolean
+'@BlogPosted
 '@AssignedModule F_Vbe_Modules
     Dim Module As VBComponent
     On Error Resume Next
@@ -9,4 +10,3 @@ Public Function ModuleExists( _
     On Error GoTo 0
     ModuleExists = Not Module Is Nothing
 End Function
-

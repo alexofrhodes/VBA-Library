@@ -1,5 +1,5 @@
 
-Function SelectedControl() As msforms.control
+Function SelectedControl() As MSForms.control
 '@BlogPosted
     Dim Module As VBComponent
     Set Module = ActiveModule

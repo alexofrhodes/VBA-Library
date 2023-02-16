@@ -1,10 +1,10 @@
 
 Function ModuleHeader(Module As VBComponent) As String
+'@BlogPosted
 '@AssignedModule F_Vbe_Modules
     ModuleHeader = ""
-    If Module.CodeModule.CountOfDeclarationLines = 0 Then Exit Function
-    With Module.CodeModule
+    If Module.codeModule.CountOfDeclarationLines = 0 Then Exit Function
+    With Module.codeModule
         ModuleHeader = .Lines(1, .CountOfDeclarationLines)
     End With
 End Function
-

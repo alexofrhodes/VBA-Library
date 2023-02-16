@@ -1,6 +1,6 @@
 
-
 Function ModuleExtension(Module As VBComponent) As String
+'@BlogPosted
 '@AssignedModule F_Vbe_Modules
     Dim ext As String
     Select Case Module.Type
@@ -9,10 +9,9 @@ Function ModuleExtension(Module As VBComponent) As String
         Case vbext_ct_ClassModule
             ext = ".cls"
         Case vbext_ct_Document
-            If Module.name = "ThisWorkbook" Then
+            If Module.Name = "ThisWorkbook" Then
                 extension = ".wbcls"
             Else
-                'explanation for this elsewhere
                 extension = ".doccls"
             End If
         Case vbext_ct_StdModule
@@ -22,4 +21,3 @@ Function ModuleExtension(Module As VBComponent) As String
     End Select
     ModuleExtension = ext
 End Function
-

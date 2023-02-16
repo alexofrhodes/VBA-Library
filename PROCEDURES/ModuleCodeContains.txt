@@ -1,23 +1,26 @@
 
-Public Function ModuleCodeContains( _
-                                    Module As VBComponent, _
-                                    FindWhat As String, _
-                                    WholeWord As Boolean, _
-                                    MatchCase As Boolean) As Boolean
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 22-12-2022 10:32    Alex                (ModuleCodeContains)
+
+Function ModuleCodeContains( _
+                           Module As VBComponent, _
+                           FindWhat As String, _
+                           WholeWord As Boolean, _
+                           MatchCase As Boolean)
+'@BlogPosted
 '
 '@INCLUDE PROCEDURE AssignCPSvariables
 '@INCLUDE PROCEDURE ProcedureLinesFirst
 '@INCLUDE PROCEDURE ProcedureLinesLast
 '@AssignedModule F_Vbe_ReadCode
-    If Module.CodeModule.CountOfLines = 0 Then Exit Function
-    ModuleCodeContains = Module.CodeModule.Find( _
+    If Module.codeModule.CountOfLines = 0 Then Exit Function
+    ModuleCodeContains = Module.codeModule.Find( _
                                                FindWhat, _
                                                1, _
                                                1, _
-                                               Module.CodeModule.CountOfLines, _
+                                               Module.codeModule.CountOfLines, _
                                                10000, _
                                                WholeWord, _
                                                MatchCase, _
                                                PatternSearch)
 End Function
-
