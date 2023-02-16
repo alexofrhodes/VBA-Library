@@ -1,0 +1,14 @@
+
+Function ProcedureLineContaining(Module As VBComponent, Procedure As String, This As String) As Long
+'@BlogPosted
+'@AssignedModule F_Vbe_Insert
+'@INCLUDE PROCEDURE ProcedureLinesFirst
+'@INCLUDE PROCEDURE ProcedureLinesLast
+    Dim i As Long
+    For i = ProcedureLinesFirst(Module, Procedure) To ProcedureLinesLast(Module, Procedure)
+        If Module.codeModule.Lines(i, 1) Like This Then
+            ProcedureLineContaining = i
+            Exit Function
+        End If
+    Next
+End Function

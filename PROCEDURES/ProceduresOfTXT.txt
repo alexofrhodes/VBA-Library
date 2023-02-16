@@ -1,0 +1,47 @@
+
+Function ProceduresOfTXT( _
+                        code As String) As Collection
+'@BlogPosted
+'@AssignedModule F_Vbe_Procedures_Of
+'@INCLUDE PROCEDURE ArrayDuplicatesRemove
+'@INCLUDE PROCEDURE ArrayToCollection
+'@INCLUDE PROCEDURE cleanArray
+'@INCLUDE PROCEDURE ArrayAppend
+'@INCLUDE PROCEDURE ArrayQuickSort
+
+    'code is not a filePath
+    'it can be the contents eg txtread(filepath)
+    'or codepaneselection or whatever
+
+    code = Replace(code, vbNewLine, vbLf)
+    Dim var
+        var = Split(code, vbLf)
+
+    Dim out
+        out = ArrayAppend(Filter(var, "Sub" & SPACE(1), True, vbBinaryCompare), Filter(var, "Function ", True, vbBinaryCompare))
+    If TypeName(out) = "Empty" Then Exit Function
+    out = Filter(out, "(", True)
+    out = Filter(out, "Declare", False)
+    out = Filter(out, Chr(34) & "Sub", False)
+    out = Filter(out, Chr(34) & "Function", False)
+    out = Filter(out, "End Sub", False)
+    out = Filter(out, "End Function", False)
+
+    Dim i As Long
+    For i = LBound(out) To UBound(out)
+        out(i) = left(out(i), InStr(1, out(i), "(") - 1)
+        out(i) = Replace(out(i), "Private ", "")
+        out(i) = Replace(out(i), "Public ", "")
+        out(i) = Replace(out(i), "Sub ", "")
+        out(i) = Replace(out(i), "Function ", "")
+        If UBound(Split(out(i), " ")) > 0 Then
+            out(i) = ""
+        End If
+    Next
+
+    ArrayQuickSort out
+    out = cleanArray(out)
+    out = ArrayDuplicatesRemove(out)
+    Set ProceduresOfTXT = ArrayToCollection(out)
+    Rem ProceduresOfTXT = Join(out, Chr(10))
+End Function

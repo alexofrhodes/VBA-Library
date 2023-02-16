@@ -1,0 +1,77 @@
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 10-01-2023 11:56    Alex                added comparison for proc and file last mod date (ImportProcedure)
+
+Sub ImportProcedure( _
+                    Optional Procedure As String, _
+                    Optional TargetWorkbook As Workbook, _
+                    Optional Module As VBComponent, _
+                    Optional Overwrite As Boolean)
+'@BlogPosted
+'@LastModified 2301101156
+'@AssignedModule F_Vbe_Procedures_Import
+'@INCLUDE PROCEDURE TxtOverwrite
+'@INCLUDE PROCEDURE TxtRead
+'@INCLUDE PROCEDURE TXTReadFromUrl
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@INCLUDE PROCEDURE CodepaneSelection
+'@INCLUDE PROCEDURE ProcedureExists
+'@INCLUDE PROCEDURE ModuleOfProcedure
+'@INCLUDE PROCEDURE ModuleAddOrSet
+'@INCLUDE PROCEDURE ProcedureMoveToAssignedModule
+'@INCLUDE PROCEDURE ProcedureLastModified
+'@INCLUDE PROCEDURE StringLastModified
+'@INCLUDE PROCEDURE ImportImports
+'@INCLUDE PROCEDURE ProcedureReplace
+'@INCLUDE PROCEDURE StringProcedureAssignedModule
+'@INCLUDE DECLARATION GITHUB_LIBRARY_PROCEDURES
+'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_PROCEDURES
+
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    If Procedure = "" Then Procedure = CodepaneSelection
+    If Procedure = "" Or InStr(1, Procedure, " ") > 0 Then Exit Sub
+    Dim ProcedurePath As String
+        ProcedurePath = GITHUB_LOCAL_LIBRARY_PROCEDURES & Procedure & ".txt"
+
+    Dim code As String
+    On Error Resume Next
+    code = TxtRead(ProcedurePath)
+    On Error GoTo 0
+
+    If Len(code) = 0 Then
+        On Error Resume Next
+        code = TXTReadFromUrl(GITHUB_LIBRARY_PROCEDURES & Procedure & ".txt")
+        On Error GoTo 0
+        If Len(code) > 0 And Not UCase(code) Like ("*NOT FOUND*") Then
+            TxtOverwrite ProcedurePath, code
+        Else
+            MsgBox "File " & Procedure & ".txt not found neither localy nor online"
+            Exit Sub
+        End If
+    End If
+
+    Dim filelastmod
+        filelastmod = StringLastModified(code)
+    Dim proclastmod
+
+    If ProcedureExists(TargetWorkbook, Procedure) = True Then
+        Set Module = ModuleOfProcedure(TargetWorkbook, Procedure)
+        proclastmod = ProcedureLastModified(TargetWorkbook, Module, Procedure)
+        If Overwrite = True Then
+            If proclastmod = 0 Or proclastmod < filelastmod Then
+                ProcedureReplace Module, Procedure, TxtRead(ProcedurePath)
+            End If
+        End If
+    Else
+        If Module Is Nothing Then
+            Dim ModuleName As String
+                ModuleName = StringProcedureAssignedModule(code)
+            If ModuleName = "" Then ModuleName = "vbArcImports"
+            Set Module = ModuleAddOrSet(TargetWorkbook, ModuleName, vbext_ct_StdModule)
+        End If
+        Module.codeModule.AddFromFile ProcedurePath
+    End If
+
+    ImportImports Procedure, TargetWorkbook, Module, Overwrite
+    ProcedureMoveToAssignedModule TargetWorkbook, Module, Procedure
+End Sub

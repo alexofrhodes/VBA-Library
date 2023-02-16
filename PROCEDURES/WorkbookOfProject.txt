@@ -1,0 +1,8 @@
+
+Function WorkbookOfProject(vbProj As VBProject) As Workbook
+'@BlogPosted
+'@AssignedModule F_VBE
+    tmpStr = vbProj.filename
+    tmpStr = Right(tmpStr, Len(tmpStr) - InStrRev(tmpStr, "\"))
+    Set WorkbookOfProject = Workbooks(tmpStr)
+End Function

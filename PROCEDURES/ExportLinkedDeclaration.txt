@@ -1,0 +1,25 @@
+
+Sub ExportLinkedDeclaration(TargetWorkbook As Workbook, DeclarationName As String)
+'@BlogPosted
+'@LastModified 2301101010
+'@AssignedModule F_Vbe_LinkedLists
+'@INCLUDE PROCEDURE DeclarationsTableCreate
+'@INCLUDE PROCEDURE TxtOverwrite
+'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_DECLARATIONS
+    DeclarationsTableCreate TargetWorkbook
+    Dim TargetWorksheet As Worksheet
+    Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
+
+    Dim codeName As String
+    Dim codeText As String
+    Dim Cell As Range
+    On Error Resume Next
+    Set Cell = TargetWorksheet.Columns(3).Find(DeclarationName, LookAt:=xlWhole)
+    On Error GoTo 0
+    If Cell Is Nothing Then Exit Sub
+
+    codeName = DeclarationName
+    codeText = Cell.OFFSET(0, 1).TEXT
+    TxtOverwrite GITHUB_LOCAL_LIBRARY_DECLARATIONS & DeclarationName & ".txt", codeText
+
+End Sub

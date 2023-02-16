@@ -1,0 +1,29 @@
+
+Public Sub ArraySort(vArray As Variant, inLow As Long, inHi As Long)
+'@BlogPosted
+'@AssignedModule F_Array
+    Dim Pivot   As Variant
+    Dim tmpSwap As Variant
+    Dim tmpLow  As Long
+    Dim tmpHi   As Long
+    tmpLow = inLow
+    tmpHi = inHi
+    Pivot = vArray((inLow + inHi) \ 2)
+    While (tmpLow <= tmpHi)
+        While (vArray(tmpLow) < Pivot And tmpLow < inHi)
+            tmpLow = tmpLow + 1
+        Wend
+        While (Pivot < vArray(tmpHi) And tmpHi > inLow)
+            tmpHi = tmpHi - 1
+        Wend
+        If (tmpLow <= tmpHi) Then
+            tmpSwap = vArray(tmpLow)
+            vArray(tmpLow) = vArray(tmpHi)
+            vArray(tmpHi) = tmpSwap
+            tmpLow = tmpLow + 1
+            tmpHi = tmpHi - 1
+        End If
+    Wend
+    If (inLow < tmpHi) Then ArraySort vArray, inLow, tmpHi
+    If (tmpLow < inHi) Then ArraySort vArray, tmpLow, inHi
+End Sub

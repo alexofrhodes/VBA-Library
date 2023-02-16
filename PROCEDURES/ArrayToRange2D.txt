@@ -1,0 +1,15 @@
+
+Public Sub ArrayToRange2D(arr2d As Variant, Cell As Range)
+'@BlogPosted
+    If ArrayDimensionLength(arr2d) = 1 Then arr2d = WorksheetFunction.Transpose(arr2d)
+    Dim dif As Long
+        dif = IIf(LBound(arr2d, 1) = 0, 1, 0)
+    Dim rng As Range
+    Set rng = Cell.RESIZE(UBound(arr2d, 1) + dif, UBound(arr2d, 2) + dif)
+
+    If Application.WorksheetFunction.CountA(rng) > 0 Then
+        Exit Sub
+    End If
+
+    rng.Value = arr2d
+End Sub

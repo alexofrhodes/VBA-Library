@@ -1,0 +1,13 @@
+
+Function CreateOrSetSheet(SheetName As String, TargetWorkbook As Workbook) As Worksheet
+'@BlogPosted
+'@AssignedModule F_Worksheet
+'@INCLUDE PROCEDURE WorksheetExists
+    Dim NewSheet As Worksheet
+    If WorksheetExists(SheetName, TargetWorkbook) = True Then
+        Set CreateOrSetSheet = TargetWorkbook.SHEETS(SheetName)
+    Else
+        Set CreateOrSetSheet = TargetWorkbook.SHEETS.Add
+        CreateOrSetSheet.Name = SheetName
+    End If
+End Function

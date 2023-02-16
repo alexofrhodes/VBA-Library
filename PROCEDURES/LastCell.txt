@@ -1,0 +1,16 @@
+
+Function LastCell(rng As Range, Optional booCol As Boolean) As Range
+'@BlogPosted
+    Dim WS As Worksheet
+    Set WS = rng.parent
+    Dim Cell As Range
+    If booCol = False Then
+        Set Cell = WS.Cells(rows.Count, rng.Column).End(xlUp)
+        If Cell.MergeCells Then Set Cell = Cells(Cell.row + Cell.rows.Count - 1, Cell.Column)
+    Else
+        Set Cell = WS.Cells(rng.row, Columns.Count).End(xlToLeft)
+        If Cell.MergeCells Then Set Cell = Cells(Cell.row, Cell.Column + Cell.Columns.Count - 1)
+    End If
+
+    Set LastCell = Cell
+End Function

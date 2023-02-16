@@ -1,0 +1,16 @@
+
+Function StringProcedureAssignedModule(txt As String) As String
+'@BlogPosted
+'@AssignedModule F_Vbe_Procedures_Import
+'@INCLUDE PROCEDURE ArrayAllocated
+        Dim ComponentName As Variant
+        ComponentName = Split(txt, vbLf)
+        ComponentName = Filter(ComponentName, "'@AssignedModule")
+        If Not ArrayAllocated(ComponentName) Then Exit Function
+        Dim UB As Long
+            UB = UBound(Split(ComponentName(0), " "))
+        ComponentName = Split(ComponentName(0), " ")(UB)
+        StringProcedureAssignedModule = ComponentName
+End Function
+
+

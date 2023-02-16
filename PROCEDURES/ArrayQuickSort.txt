@@ -1,6 +1,7 @@
 
 Public Sub ArrayQuickSort(ByRef SortableArray As Variant, Optional lngMin As Long = -1, Optional lngMax As Long = -1)
-'@AssignedModule F_Arrays
+'@BlogPosted
+'@AssignedModule M_DataEntry
     On Error Resume Next
     Dim i As Long
     Dim j As Long
@@ -62,4 +63,3 @@ Public Sub ArrayQuickSort(ByRef SortableArray As Variant, Optional lngMin As Lon
     If (lngMin < j) Then Call ArrayQuickSort(SortableArray, lngMin, j)
     If (i < lngMax) Then Call ArrayQuickSort(SortableArray, i, lngMax)
 End Sub
-

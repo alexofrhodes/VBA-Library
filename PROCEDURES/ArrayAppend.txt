@@ -1,0 +1,38 @@
+
+Function ArrayAppend(ByVal arr1 As Variant, ByVal arr2 As Variant) As Variant
+'@BlogPosted
+'@AssignedModule F_Array
+    Dim holdarr As Variant
+    Dim ub1 As Long
+    Dim ub2 As Long
+    Dim i As Long
+    Dim newind As Long
+    If IsEmpty(arr1) Or Not IsArray(arr1) Then
+        arr1 = Array()
+    End If
+    If IsEmpty(arr2) Or Not IsArray(arr2) Then
+        arr2 = Array()
+    End If
+    ub1 = UBound(arr1)
+    ub2 = UBound(arr2)
+    If ub1 = -1 Then
+        ArrayAppend = arr2
+        Exit Function
+    End If
+    If ub2 = -1 Then
+        ArrayAppend = arr1
+        Exit Function
+    End If
+    holdarr = arr1
+    ReDim Preserve holdarr(ub1 + ub2 + 1)
+    newind = UBound(arr1) + 1
+    For i = 0 To ub2
+        If VarType(arr2(i)) = vbObject Then
+            Set holdarr(newind) = arr2(i)
+        Else
+            holdarr(newind) = arr2(i)
+        End If
+        newind = newind + 1
+    Next i
+    ArrayAppend = holdarr
+End Function
