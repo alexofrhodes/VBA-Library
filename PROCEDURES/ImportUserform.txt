@@ -1,0 +1,50 @@
+
+Sub ImportUserform( _
+                    Optional UserformName As String, _
+                    Optional TargetWorkbook As Workbook, _
+                    Optional Overwrite As Boolean)
+'@BlogPosted
+'@LastModified 2301101010
+'@AssignedModule F_VbeLinkedProcedures
+'@INCLUDE PROCEDURE LIBRARY_FOLDER
+'@INCLUDE PROCEDURE TxtOverwrite
+'@INCLUDE PROCEDURE TxtRead
+'@INCLUDE PROCEDURE CheckPath
+'@INCLUDE PROCEDURE TXTReadFromUrl
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@INCLUDE PROCEDURE ModuleAddOrSet
+'@INCLUDE PROCEDURE ModuleExists
+'@INCLUDE PROCEDURE CodepaneSelection
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    If UserformName = "" Then UserformName = CodepaneSelection
+    If UserformName = "" Or InStr(1, UserformName, " ") > 0 Then Exit Sub
+    Dim FilePathFrM As String
+        FilePathFrM = GITHUB_LOCAL_LIBRARY_USERFORMS & UserformName & ".frm"
+    Dim FilePathFrX As String
+        FilePathFrX = GITHUB_LOCAL_LIBRARY_USERFORMS & UserformName & ".frx"
+
+    If CheckPath(FilePathFrM) = "I" Then
+        On Error Resume Next
+        Dim codeFrM As String
+            codeFrM = TXTReadFromUrl(GITHUB_LIBRARY_USERFORMS & UserformName & ".frm")
+        Dim codeFrX As String
+            codeFrX = TXTReadFromUrl(GITHUB_LIBRARY_USERFORMS & UserformName & ".frx")
+        On Error GoTo 0
+        If Len(codeFrM) > 0 And Len(codeFrX) > 0 Then
+            TxtOverwrite FilePathFrM, codeFrM
+            TxtOverwrite FilePathFrX, codeFrX
+        Else
+            MsgBox "File " & UserformName & ".frm/.frx not found neither localy nor online"
+            Exit Sub
+        End If
+    End If
+
+    If ModuleExists(UserformName, TargetWorkbook) Then
+        If Overwrite = True Then
+            TargetWorkbook.VBProject.VBComponents.Remove TargetWorkbook.VBProject.VBComponents(UserformName)
+        Else
+            Exit Sub
+        End If
+    End If
+    TargetWorkbook.VBProject.VBComponents.Import FilePathFrM
+End Sub

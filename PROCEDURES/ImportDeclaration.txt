@@ -1,0 +1,46 @@
+
+Sub ImportDeclaration( _
+                        Optional DeclarationName As String, _
+                        Optional Module As VBComponent, _
+                        Optional TargetWorkbook As Workbook)
+'@BlogPosted
+'@LastModified 2301101010
+'@AssignedModule F_VbeLinkedProcedures
+'@INCLUDE PROCEDURE LIBRARY_FOLDER
+'@INCLUDE PROCEDURE TxtOverwrite
+'@INCLUDE PROCEDURE TxtRead
+'@INCLUDE PROCEDURE CheckPath
+'@INCLUDE PROCEDURE TXTReadFromUrl
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@INCLUDE PROCEDURE ModuleAddOrSet
+'@INCLUDE PROCEDURE CodepaneSelection
+
+    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
+    If DeclarationName = "" Then DeclarationName = CodepaneSelection
+    If DeclarationName = "" Or InStr(1, DeclarationName, " ") > 0 Then Exit Sub
+    Dim filePath As String
+    filePath = GITHUB_LOCAL_LIBRARY_DECLARATIONS & DeclarationName & ".txt"
+    Dim code As String
+    On Error Resume Next
+    code = TxtRead(filePath)
+    On Error GoTo 0
+
+    If Len(code) = 0 Then 'CheckPath(filePath) = "I" Then
+        On Error Resume Next
+        code = TXTReadFromUrl(GITHUB_LIBRARY_DECLARATIONS & DeclarationName & ".txt")
+        On Error GoTo 0
+        If Len(code) > 0 And Not UCase(code) Like ("*NOT FOUND*") Then
+            code = FormatVBA7(code)
+            TxtOverwrite filePath, code
+        Else
+            Debug.Print "File " & DeclarationName & ".txt not found localy or online"
+            Exit Sub
+        End If
+    Else
+
+    End If
+    If InStr(1, workbookCode(TargetWorkbook), code, vbTextCompare) > 0 Then Exit Sub
+    If Module Is Nothing Then Set Module = ModuleAddOrSet(TargetWorkbook, "vbArcImports", vbext_ct_StdModule)
+    Module.codeModule.AddFromString code
+
+End Sub
