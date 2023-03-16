@@ -1,0 +1,9 @@
+
+Public Function GetSheetByCodeName(WB As Workbook, codeName As String) As Worksheet
+'@BlogPosted
+'@AssignedModule F_VBE
+    Dim sh As Worksheet
+    For Each sh In WB.Worksheets
+        If UCase(sh.codeName) = UCase(codeName) Then Set GetSheetByCodeName = sh: Exit For
+    Next sh
+End Function

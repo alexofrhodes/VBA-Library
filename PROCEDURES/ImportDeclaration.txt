@@ -1,4 +1,5 @@
 
+
 Sub ImportDeclaration( _
                         Optional DeclarationName As String, _
                         Optional Module As VBComponent, _
@@ -14,6 +15,7 @@ Sub ImportDeclaration( _
 '@INCLUDE PROCEDURE ActiveCodepaneWorkbook
 '@INCLUDE PROCEDURE ModuleAddOrSet
 '@INCLUDE PROCEDURE CodepaneSelection
+'@INCLUDE PROCEDURE FormatVBA7
 
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     If DeclarationName = "" Then DeclarationName = CodepaneSelection

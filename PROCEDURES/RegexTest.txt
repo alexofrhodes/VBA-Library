@@ -13,7 +13,7 @@ Public Function RegexTest( _
         .Global = globalFlag
         .IgnoreCase = ignoreCaseFlag
         .MultiLine = multilineFlag
-        .Pattern = stringPattern
+        .pattern = stringPattern
     End With
     RegexTest = REGEX.test(string1)
 End Function

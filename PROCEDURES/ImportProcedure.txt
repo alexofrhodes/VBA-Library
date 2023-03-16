@@ -26,7 +26,7 @@ Sub ImportProcedure( _
 '@INCLUDE PROCEDURE ProcedureMoveToAssignedModule
 '@INCLUDE PROCEDURE ProcedureLastModified
 '@INCLUDE PROCEDURE StringLastModified
-'@INCLUDE PROCEDURE ImportImports
+'@INCLUDE PROCEDURE ImportProcedureDependencies
 '@INCLUDE PROCEDURE ProcedureReplace
 '@INCLUDE PROCEDURE StringProcedureAssignedModule
 '@INCLUDE DECLARATION GITHUB_LIBRARY_PROCEDURES
@@ -77,6 +77,6 @@ Sub ImportProcedure( _
         Module.codeModule.AddFromFile ProcedurePath
     End If
 
-    ImportImports Procedure, TargetWorkbook, Module, Overwrite
+    ImportProcedureDependencies Procedure, TargetWorkbook, Module, Overwrite
     ProcedureMoveToAssignedModule TargetWorkbook, Module, Procedure
 End Sub

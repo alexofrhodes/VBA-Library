@@ -1,0 +1,19 @@
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 20-10-2022 12:52    Alex                initial release (LinkedProceduresMoveHere)
+
+Sub LinkedProceduresMoveHere(Optional Procedure As String)
+'@BlogPosted
+'@AssignedModule F_Vbe_Procedures_Move
+'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+'@INCLUDE PROCEDURE AssignProcedureVariable
+'@INCLUDE PROCEDURE LinkedProceduresDeep
+'@INCLUDE PROCEDURE ProcedureMoveHere
+    Dim TargetWorkbook As Workbook
+    Set TargetWorkbook = ActiveCodepaneWorkbook
+    If Not AssignProcedureVariable(TargetWorkbook, Procedure) Then Exit Sub
+    Dim el
+    For Each el In LinkedProceduresDeep(Procedure, TargetWorkbook)
+        ProcedureMoveHere CStr(el)
+    Next
+End Sub

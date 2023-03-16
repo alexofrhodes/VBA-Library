@@ -1,0 +1,15 @@
+
+Sub ModuleProceduresMoveToAssignedModule( _
+                                    TargetWorkbook As Workbook, _
+                                    Module As VBComponent)
+'@BlogPosted
+'@AssignedModule F_Vbe_Procedures_Move
+'@INCLUDE PROCEDURE ProcedureMoveToAssignedModule
+'@INCLUDE PROCEDURE ProceduresOfModule
+    Dim Procedures
+        Procedures = ProceduresOfModule(Module)
+    Dim Procedure
+    For Each Procedure In Procedures
+        ProcedureMoveToAssignedModule TargetWorkbook, Module, CStr(Procedure)
+    Next
+End Sub

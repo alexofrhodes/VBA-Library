@@ -1,6 +1,8 @@
 
 Public Sub ArrayToRange2D(arr2d As Variant, Cell As Range)
 '@BlogPosted
+'@INCLUDE PROCEDURE ArrayDimensionLength
+
     If ArrayDimensionLength(arr2d) = 1 Then arr2d = WorksheetFunction.Transpose(arr2d)
     Dim dif As Long
         dif = IIf(LBound(arr2d, 1) = 0, 1, 0)
