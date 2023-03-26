@@ -1,4 +1,3 @@
-Attribute VB_Name = "LinkedInputOutput"
 
 #If VBA7 Then
     Public Declare PtrSafe Function CloseClipboard Lib "user32" () As Long
@@ -10,31 +9,27 @@ Attribute VB_Name = "LinkedInputOutput"
     Public Declare Function OpenClipboard Lib "user32" (ByVal hwnd As Long) As Long
 #End If
 
-'----This is not the url for the repo but for the txt file ---------
-Public Const GITHUB_LIBRARY = "https://raw.githubusercontent.com/alexofrhodes/VBA-Library/"
-'------------------------------------------------------------------------------
+'____MODIFY THESE TO MATCH YOUR LOCAL AND GITHUB DIRECTORIES________
+
+Public Const GITHUB_LIBRARY = "https://raw.githubusercontent.com/USERNAME/RepoName/"	'<---
     Public Const GITHUB_LIBRARY_DECLARATIONS = GITHUB_LIBRARY & "Declarations/"
     Public Const GITHUB_LIBRARY_PROCEDURES = GITHUB_LIBRARY & "Procedures/"
     Public Const GITHUB_LIBRARY_USERFORMS = GITHUB_LIBRARY & "Userforms/"
     Public Const GITHUB_LIBRARY_CLASSES = GITHUB_LIBRARY & "Classes/"
 
-'------------------------------------------------------------------------------
-Public Const GITHUB_LOCAL_LIBRARY = "C:\Users\acer\Documents\GitHub\VBA-Library\"
-'------------------------------------------------------------------------------
+Public Const GITHUB_LOCAL_LIBRARY = "C:\Users\USERNAME\Documents\GitHub\VBA-Library\"   '<---
     Public Const GITHUB_LOCAL_LIBRARY_DECLARATIONS = GITHUB_LOCAL_LIBRARY & "Declarations\"
     Public Const GITHUB_LOCAL_LIBRARY_PROCEDURES = GITHUB_LOCAL_LIBRARY & "Procedures\"
     Public Const GITHUB_LOCAL_LIBRARY_USERFORMS = GITHUB_LOCAL_LIBRARY & "Userforms\"
     Public Const GITHUB_LOCAL_LIBRARY_CLASSES = GITHUB_LOCAL_LIBRARY & "Classes\"
-'------------------------------------------------------------------------------
 
+'___________________________________________________________________
 
 Sub AddLinkedListsToActiveProcedure()
-    'click inside a procedure you want and call from immediate
     AddLinkedLists ThisWorkbook, ActiveModule, ActiveProcedure
 End Sub
 
 Sub ExportActiveProcedure()
-    'click inside a procedure you want and call from immediate
     ExportProcedure ThisWorkbook, ActiveModule, ActiveProcedure, ExportMergedTxt:=True
 End Sub
 
@@ -43,10 +38,8 @@ Sub ExportAllProceduresOfThisWorkbook()
 End Sub
 
 Sub ImportActiveProcedureDependencies()
-    'click inside a procedure you want and call from immediate
     ImportProcedureDependencies ThisWorkbook, ActiveModule, ActiveProcedure, Overwrite:=True
 End Sub
-
 
 Sub ExportAllProcedures(TargetWorkbook As Workbook)
     Dim procedure
@@ -60,9 +53,18 @@ Sub ExportAllProcedures(TargetWorkbook As Workbook)
     Next module
 End Sub
 
+Sub RemoveComments(TargetWorkbook As Workbook)
+    Dim module As VBComponent
+    Dim s As String
+    Dim i As Long
+    For Each module In TargetWorkbook.VBProject.VBComponents
+        For i = module.CodeModule.CountOfLines To 1 Step -1
+            s = Trim(module.CodeModule.Lines(i, 1))
+            If s Like "'*" Or s Like "Rem *" Then module.CodeModule.DeleteLines i, 1
+        Next i
+    Next
+End Sub
 Function ArrayAppend(ByVal arr1 As Variant, ByVal arr2 As Variant) As Variant
-'@BlogPosted
-'@AssignedModule F_Array
     Dim holdarr As Variant
     Dim ub1 As Long
     Dim ub2 As Long
@@ -99,8 +101,6 @@ Function ArrayAppend(ByVal arr1 As Variant, ByVal arr2 As Variant) As Variant
 End Function
 
 Public Sub ArrayQuickSort(ByRef SortableArray As Variant, Optional lngMin As Long = -1, Optional lngMax As Long = -1)
-'@BlogPosted
-'@AssignedModule M_DataEntry
     On Error Resume Next
     Dim i As Long
     Dim j As Long
@@ -164,10 +164,6 @@ Public Sub ArrayQuickSort(ByRef SortableArray As Variant, Optional lngMin As Lon
 End Sub
 
 Public Function cleanArray(varArray As Variant) As Variant()
-'@BlogPosted
-'@AssignedModule F_Array
-'@INCLUDE PROCEDURE ArrayAllocated
-'@INCLUDE PROCEDURE CleanTrim
   Dim TempArray() As Variant
   Dim OldIndex As Integer
   Dim NewIndex As Integer
@@ -186,26 +182,20 @@ Public Function cleanArray(varArray As Variant) As Variant()
 End Function
 
 Function ArrayDuplicatesRemove(myArray As Variant) As Variant
-'@BlogPosted
-'@AssignedModule F_Array
-'@INCLUDE PROCEDURE ArrayAllocated
     Dim nFirst As Long, nLast As Long, i As Long
     Dim Item As String
 
     Dim arrTemp() As String
     Dim coll As New Collection
     If Not ArrayAllocated(myArray) Then Exit Function
-    'Get First and Last Array Positions
     nFirst = LBound(myArray)
     nLast = UBound(myArray)
     ReDim arrTemp(nFirst To nLast)
 
-    'Convert Array to String
     For i = nFirst To nLast
         arrTemp(i) = CStr(myArray(i))
     Next i
 
-    'Populate Temporary Collection
     On Error Resume Next
     For i = nFirst To nLast
         coll.Add arrTemp(i), arrTemp(i)
@@ -213,24 +203,18 @@ Function ArrayDuplicatesRemove(myArray As Variant) As Variant
     Err.Clear
     On Error GoTo 0
 
-    'Resize Array
     nLast = coll.Count + nFirst - 1
     ReDim arrTemp(nFirst To nLast)
 
-    'Populate Array
     For i = nFirst To nLast
         arrTemp(i) = coll(i - nFirst + 1)
     Next i
 
-    'Output Array
     ArrayDuplicatesRemove = arrTemp
 
 End Function
 
 Public Function ArrayToCollection(Items As Variant) As Collection
-'@BlogPosted
-'@AssignedModule F_Array
-'@INCLUDE PROCEDURE ArrayAllocated
     If Not ArrayAllocated(Items) Then Exit Function
     Dim coll As New Collection
     Dim i As Integer
@@ -241,8 +225,6 @@ Public Function ArrayToCollection(Items As Variant) As Collection
 End Function
 
 Function CleanTrim(ByVal s As String, Optional ConvertNonBreakingSpace As Boolean = True) As String
-'@BlogPosted
-'@AssignedModule F_String
     Dim X As Long, CodesToClean As Variant
     CodesToClean = Array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, _
                          21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 127, 129, 141, 143, 144, 157)
@@ -260,15 +242,6 @@ End Function
 Sub AddLinkedLists(Optional TargetWorkbook As Workbook, _
                     Optional module As VBComponent, _
                     Optional procedure As String)
-'@BlogPosted
-'@INCLUDE PROCEDURE AddListOfLinkedDeclarationsToProcedure
-'@INCLUDE PROCEDURE AssignCPSvariables
-'@INCLUDE PROCEDURE AddListOfLinkedProceduresToProcedure
-'@INCLUDE PROCEDURE AddListOfLinkedClassesToProcedure
-'@INCLUDE PROCEDURE AddListOfLinkedUserformsToProcedure
-'@INCLUDE PROCEDURE ProcedureAssignedModuleAdd
-'@INCLUDE PROCEDURE ProcedureLinesRemoveInclude
-'@AssignedModule F_VbeLinkedProcedures
     If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Exit Sub
     ProcedureLinesRemoveInclude TargetWorkbook, module, procedure
     ProcedureAssignedModuleAdd TargetWorkbook, module, procedure
@@ -284,14 +257,6 @@ Sub AddListOfLinkedClassesToProcedure( _
                                      Optional TargetWorkbook As Workbook, _
                                      Optional module As VBComponent, _
                                      Optional ProcedureName As String)
-'@BlogPosted
-'@INCLUDE PROCEDURE LinkedClasses
-'@INCLUDE PROCEDURE ProcedureBodyLineFirstAfterComments
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE ActiveProcedure
-'@INCLUDE PROCEDURE ProcedureCode
-'@INCLUDE PROCEDURE ModuleOfProcedure
-'@AssignedModule F_VbeLinkedProcedures
 
     If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Stop
     Dim ListOfImports As String
@@ -320,14 +285,6 @@ Sub AddListOfLinkedDeclarationsToProcedure( _
                                           Optional TargetWorkbook As Workbook, _
                                           Optional module As VBComponent, _
                                           Optional ProcedureName As String)
-'@BlogPosted
-'@AssignedModule F_Vbe_Declararions
-'@INCLUDE PROCEDURE LinkedDeclarations
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE ActiveProcedure
-'@INCLUDE PROCEDURE ProcedureCode
-'@INCLUDE PROCEDURE ProcedureBodyLineFirstAfterComments
-'@INCLUDE PROCEDURE ModuleOfProcedure
 
     If ProcedureName = "" Then ProcedureName = ActiveProcedure
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
@@ -357,16 +314,6 @@ Sub AddListOfLinkedProceduresToProcedure( _
                                         Optional TargetWorkbook As Workbook, _
                                         Optional module As VBComponent, _
                                         Optional ProcedureName As String)
-'@BlogPosted
-'@INCLUDE PROCEDURE RegexTest
-'@INCLUDE PROCEDURE ProceduresOfWorkbook
-'@INCLUDE PROCEDURE ProcedureBodyLineFirstAfterComments
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE ActiveProcedure
-'@INCLUDE PROCEDURE ProcedureCode
-'@INCLUDE PROCEDURE ModuleOfProcedure
-'@INCLUDE PROCEDURE LinkedProcedures
-'@AssignedModule F_VbeLinkedProcedures
 
     If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Stop
     Dim Procedures As Collection
@@ -393,14 +340,6 @@ Sub AddListOfLinkedUserformsToProcedure( _
                                        Optional TargetWorkbook As Workbook, _
                                        Optional module As VBComponent, _
                                        Optional ProcedureName As String)
-'@BlogPosted
-'@INCLUDE PROCEDURE ProcedureBodyLineFirstAfterComments
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE ActiveProcedure
-'@INCLUDE PROCEDURE ProcedureCode
-'@INCLUDE PROCEDURE ModuleOfProcedure
-'@INCLUDE PROCEDURE LinkedUserforms
-'@AssignedModule F_VbeLinkedProcedures
     
     If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Stop
 
@@ -425,21 +364,15 @@ Sub AddListOfLinkedUserformsToProcedure( _
 End Sub
 
 Public Function ActiveProcedure() As String
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
     Application.VBE.ActiveCodePane.GetSelection L1&, c1&, L2&, c2&
     ActiveProcedure = Application.VBE.ActiveCodePane.CodeModule.ProcOfLine(L1&, vbext_pk_Proc)
 End Function
 
 Public Function ActiveModule() As VBComponent
-'@BlogPosted
-'@AssignedModule F_Vbe_Modules
     Set ActiveModule = Application.VBE.SelectedVBComponent
 End Function
 
 Public Function ActiveCodepaneWorkbook() As Workbook
-'@BlogPosted
-'@AssignedModule F_VBE
     On Error GoTo ErrorHandler
     Dim WorkbookName As String
     WorkbookName = Application.VBE.SelectedVBComponent.Collection.Parent.FileName
@@ -451,13 +384,11 @@ ErrorHandler:
 End Function
 
 Public Function ArrayAllocated(ByVal arr As Variant) As Boolean
-'@BlogPosted
     On Error Resume Next
     ArrayAllocated = IsArray(arr) And (Not IsError(LBound(arr, 1))) And LBound(arr, 1) <= UBound(arr, 1)
 End Function
 
 Public Function ArrayDimensionLength(SourceArray As Variant) As Integer
-'@BlogPosted
     Dim i As Integer
     Dim test As Long
     On Error GoTo Catch
@@ -470,8 +401,6 @@ Catch:
 End Function
 
 Public Sub ArrayToRange2D(arr2d As Variant, Cell As Range)
-'@BlogPosted
-'@INCLUDE PROCEDURE ArrayDimensionLength
 
     If ArrayDimensionLength(arr2d) = 1 Then arr2d = WorksheetFunction.Transpose(arr2d)
     Dim dif As Long
@@ -490,11 +419,6 @@ Function AssignCPSvariables( _
                             ByRef TargetWorkbook As Workbook, _
                             ByRef module As VBComponent, _
                             ByRef procedure As String) As Boolean
-    '
-'@INCLUDE PROCEDURE AssignWorkbookVariable
-'@INCLUDE PROCEDURE AssignProcedureVariable
-'@INCLUDE PROCEDURE AssignModuleVariable
-'@AssignedModule F_VbeFormat
 
     If Not AssignWorkbookVariable(TargetWorkbook) Then Exit Function
     If Not AssignModuleVariable(TargetWorkbook, module) Then Exit Function
@@ -507,11 +431,6 @@ Function AssignModuleVariable( _
                              ByVal TargetWorkbook As Workbook, _
                              ByRef module As VBComponent, _
                              Optional ByVal procedure As String) As Boolean
-'@BlogPosted
-'@INCLUDE PROCEDURE CodepaneSelection
-'@INCLUDE PROCEDURE ActiveModule
-'@INCLUDE PROCEDURE ModuleOfProcedure
-'@AssignedModule F_VbeFormat
     If procedure = "" Then
         On Error Resume Next
         Set module = ActiveModule
@@ -525,11 +444,6 @@ Function AssignModuleVariable( _
 End Function
 
 Function AssignProcedureVariable(TargetWorkbook As Workbook, ByRef procedure As String) As Boolean
-'@BlogPosted
-'@INCLUDE PROCEDURE CodepaneSelection
-'@INCLUDE PROCEDURE ActiveProcedure
-'@INCLUDE PROCEDURE ProcedureExists
-'@AssignedModule F_VbeFormat
     If procedure = "" Then
         Dim cps As String
         cps = CodepaneSelection
@@ -540,16 +454,12 @@ Function AssignProcedureVariable(TargetWorkbook As Workbook, ByRef procedure As 
         End If
         If Not ProcedureExists(TargetWorkbook, procedure) Then
             Debug.Print procedure & " not found in Workbook " & TargetWorkbook.Name
-'            procedure = ""
         End If
     End If
     AssignProcedureVariable = Not procedure = ""
 End Function
 
 Function AssignWorkbookVariable(ByRef TargetWorkbook As Workbook) As Boolean
-'@BlogPosted
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@AssignedModule F_VbeFormat
      If TargetWorkbook Is Nothing Then
         On Error Resume Next
         Set TargetWorkbook = ActiveCodepaneWorkbook
@@ -559,11 +469,6 @@ Function AssignWorkbookVariable(ByRef TargetWorkbook As Workbook) As Boolean
 End Function
 
 Function CheckPath(Path) As String
-'@BlogPosted
-'@AssignedModule F_Unsorted
-'@INCLUDE PROCEDURE FileExists
-'@INCLUDE PROCEDURE FolderExists
-'@INCLUDE PROCEDURE URLExists
     Dim retval
     retval = "I"
     If (retval = "I") And FileExists(Path) Then retval = "F"
@@ -573,18 +478,11 @@ Function CheckPath(Path) As String
 End Function
 
 Function ClassNames(Optional TargetWorkbook As Workbook)
-'@BlogPosted
-'@AssignedModule F_VbeLinkedProcedures
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE ComponentNames
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     Set ClassNames = ComponentNames(vbext_ct_ClassModule, TargetWorkbook)
 End Function
 
 Public Function CodepaneSelection() As String
-'@BlogPosted
-'for relative macros i'll use -> cps <- because CodepaneSelection is too long
-'@AssignedModule F_Vbe_Selection
     Dim startLine As Long, StartColumn As Long, endLine As Long, EndColumn As Long
     Application.VBE.ActiveCodePane.GetSelection startLine, StartColumn, endLine, EndColumn
     If endLine - startLine = 0 Then
@@ -609,8 +507,6 @@ Public Function CollectionContains( _
                                   Kollection As Collection, _
                                   Optional key As Variant, _
                                   Optional Item As Variant) As Boolean
-'@BlogPosted
-'@AssignedModule F_Collection
     Dim strKey As String
     Dim var As Variant
     If Not IsMissing(key) Then
@@ -646,8 +542,6 @@ NotFound:
 End Function
 
 Public Function CollectionSort(colInput As Collection) As Collection
-'@BlogPosted
-'@AssignedModule F_Collection
     Dim iCounter As Integer
     Dim iCounter2 As Integer
     Dim Temp As Variant
@@ -665,7 +559,6 @@ Public Function CollectionSort(colInput As Collection) As Collection
 End Function
 
 Function CollectionsToArray2D(collections As Collection) As Variant
-'@BlogPosted
     If collections.Count = 0 Then Exit Function
     Dim columnCount As Long
     columnCount = collections.Count
@@ -689,9 +582,6 @@ End Function
 Function ComponentNames( _
                        ModuleType As vbext_ComponentType, _
                        Optional TargetWorkbook As Workbook)
-'@BlogPosted
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@AssignedModule F_VbeLinkedProcedures
     Dim coll As New Collection
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     Dim module As VBComponent
@@ -709,8 +599,6 @@ Function DeclarationsKeywordSubstring(Str As Variant, Optional delim As String _
                 , Optional counter As Integer _
                 , Optional outer As Boolean _
                 , Optional includeWords As Boolean) As String
-'@BlogPosted
-'@AssignedModule F_Vbe_Declararions
     Dim i As Long
     If afterWord = "" And beforeWord = "" And counter = 0 Then
         MsgBox ("Pass at least 1 parameter betweenn -AfterWord- , -BeforeWord- , -counter-")
@@ -775,25 +663,16 @@ Function DeclarationsKeywordSubstring(Str As Variant, Optional delim As String _
             End If
         End If
     Else
-    '
     End If
     DeclarationsKeywordSubstring = vbNullString
 End Function
 
 Sub DeclarationsTableCreate(TargetWorkbook As Workbook)
-'@BlogPosted
-'@INCLUDE PROCEDURE ArrayToRange2D
-'@INCLUDE PROCEDURE CollectionsToArray2D
-'@INCLUDE PROCEDURE DeclarationsWorksheetCreate
-'@INCLUDE PROCEDURE DeclarationsTableSort
-'@INCLUDE PROCEDURE getDeclarations
-'@AssignedModule F_Vbe_Declararions
 
     DeclarationsWorksheetCreate
     
     Dim TargetWorksheet As Worksheet
     Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
-    'if sheet was created within the hour, you probably don't have new declarations
     If Format(Now, "YYMMDDHHNN") - TargetWorksheet.Range("Z1").Value < 60 Then Exit Sub
     
     TargetWorksheet.Range("A2").CurrentRegion.Offset(1).Clear
@@ -815,9 +694,6 @@ End Sub
 
 
 Function DeclarationsTableKeywords() As Collection
-'@BlogPosted
-'@INCLUDE PROCEDURE getLastRow
-'@AssignedModule F_Vbe_Declararions
     Dim TargetWorksheet As Worksheet
     Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
     Dim lr As Long: lr = getLastRow(TargetWorksheet)
@@ -833,8 +709,6 @@ End Function
 
 
 Sub DeclarationsTableSort()
-'@BlogPosted
-'@AssignedModule F_Vbe_Declararions
 
     Dim TargetWorksheet As Worksheet
     Set TargetWorksheet = ThisWorkbook.Worksheets("Declarations_Table")
@@ -864,9 +738,6 @@ End Sub
 
 
 Function DeclarationsWorksheetCreate() As Boolean
-'@BlogPosted
-'@INCLUDE PROCEDURE WorksheetExists
-'@AssignedModule F_Vbe_Declararions
     If WorksheetExists("Declarations_Table", ThisWorkbook) Then Exit Function
     Dim TargetWorksheet As Worksheet
     Set TargetWorksheet = ThisWorkbook.Sheets.Add
@@ -880,12 +751,6 @@ Function DeclarationsWorksheetCreate() As Boolean
 End Function
 
 Sub ExportLinkedDeclaration(TargetWorkbook As Workbook, DeclarationName As String)
-'@BlogPosted
-'@LastModified 2301101010
-'@AssignedModule F_Vbe_LinkedLists
-'@INCLUDE PROCEDURE DeclarationsTableCreate
-'@INCLUDE PROCEDURE TxtOverwrite
-'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_DECLARATIONS
     DeclarationsTableCreate TargetWorkbook
     Dim TargetWorksheet As Worksheet
     Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
@@ -911,18 +776,6 @@ Function ExportProcedure( _
                     Optional module As VBComponent, _
                     Optional ProcedureName As String, _
                     Optional ExportMergedTxt As Boolean) As String
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures_Export
-'@INCLUDE PROCEDURE TxtOverwrite
-'@INCLUDE PROCEDURE TxtRead
-'@INCLUDE PROCEDURE FollowLink
-'@INCLUDE PROCEDURE AssignCPSvariables
-'@INCLUDE PROCEDURE LinkedProceduresDeep
-'@INCLUDE PROCEDURE ProcedureCode
-'@INCLUDE PROCEDURE ProjetFoldersCreate
-'@INCLUDE PROCEDURE TxtPrependContainedProcedures
-'@INCLUDE PROCEDURE ExportTargetProcedure
-'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_PROCEDURES
 
     If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Exit Function
 
@@ -973,24 +826,6 @@ Sub ExportTargetProcedure( _
         Optional TargetWorkbook As Workbook, _
         Optional module As VBComponent, _
         Optional procedure As String)
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures_Export
-'@INCLUDE PROCEDURE LinkedDeclarations
-'@INCLUDE PROCEDURE FileExists
-'@INCLUDE PROCEDURE TxtOverwrite
-'@INCLUDE PROCEDURE TxtRead
-'@INCLUDE PROCEDURE AssignCPSvariables
-'@INCLUDE PROCEDURE ExportLinkedDeclaration
-'@INCLUDE PROCEDURE LinkedClasses
-'@INCLUDE PROCEDURE LinkedUserforms
-'@INCLUDE PROCEDURE ProcedureCode
-'@INCLUDE PROCEDURE ProcedureLastModAdd
-'@INCLUDE PROCEDURE ProcedureLastModified
-'@INCLUDE PROCEDURE StringLastModified
-'@INCLUDE PROCEDURE AddLinkedLists
-'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_CLASSES
-'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_PROCEDURES
-'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_USERFORMS
 
     If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Exit Sub
 
@@ -1030,24 +865,17 @@ Sub ExportTargetProcedure( _
 End Sub
 
 Public Function FileExists(ByVal FileName As String) As Boolean
-'@BlogPosted
-'@AssignedModule F_FileFolder
     If InStr(1, FileName, "\") = 0 Then Exit Function
     If Right(FileName, 1) = "\" Then FileName = Left(FileName, Len(FileName) - 1)
     FileExists = (Dir(FileName, vbArchive + vbHidden + vbReadOnly + vbSystem) <> "")
 End Function
 
 Function FolderExists(ByVal strPath As String) As Boolean
-'@BlogPosted
-'@AssignedModule F_FileFolder
     On Error Resume Next
     FolderExists = ((GetAttr(strPath) And vbDirectory) = vbDirectory)
 End Function
 
 Sub FoldersCreate(FolderPath As String)
-'@BlogPosted
-'@AssignedModule F_FileFolder
-'@INCLUDE PROCEDURE FolderExists
     On Error Resume Next
     Dim individualFolders() As String
     Dim tempFolderPath As String
@@ -1062,8 +890,6 @@ Sub FoldersCreate(FolderPath As String)
 End Sub
 
 Sub FollowLink(FolderPath As String)
-'@BlogPosted
-'@AssignedModule F_Unsorted
     If Right(FolderPath, 1) = "\" Then FolderPath = Left(FolderPath, Len(FolderPath) - 1)
     On Error Resume Next
     Dim oShell As Object
@@ -1080,10 +906,6 @@ End Sub
 
 
 Function FormatVBA7(Str As String) As String
-'@BlogPosted
-'@AssignedModule F_Vbe_Codepane
-'@INCLUDE PROCEDURE collectionToString
-'@INCLUDE PROCEDURE CollectionSort
     Dim selectedText
         selectedText = Str
         selectedText = Replace(selectedText, " _" & vbNewLine, "")
@@ -1117,7 +939,6 @@ Function FormatVBA7(Str As String) As String
 End Function
 
 Function GetMotherBoardProp() As String
-'@BlogPosted
 
     Dim strComputer As String
     Dim objSvcs As Object
@@ -1134,8 +955,6 @@ Function GetMotherBoardProp() As String
 End Function
 
 Public Function GetSheetByCodeName(wb As Workbook, codeName As String) As Worksheet
-'@BlogPosted
-'@AssignedModule F_VBE
     Dim sh As Worksheet
     For Each sh In wb.Worksheets
         If UCase(sh.codeName) = UCase(codeName) Then Set GetSheetByCodeName = sh: Exit For
@@ -1146,19 +965,7 @@ Sub ImportClass( _
                     Optional ClassName As String, _
                     Optional TargetWorkbook As Workbook, _
                     Optional Overwrite As Boolean)
-'@BlogPosted
-'@LastModified 2301101010
 
-'@AssignedModule F_VbeLinkedProcedures
-'@INCLUDE PROCEDURE LIBRARY_FOLDER
-'@INCLUDE PROCEDURE TxtOverwrite
-'@INCLUDE PROCEDURE TxtRead
-'@INCLUDE PROCEDURE CheckPath
-'@INCLUDE PROCEDURE TXTReadFromUrl
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE ModuleAddOrSet
-'@INCLUDE PROCEDURE ModuleExists
-'@INCLUDE PROCEDURE CodepaneSelection
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     If ClassName = "" Then ClassName = CodepaneSelection
     If ClassName = "" Or InStr(1, ClassName, " ") > 0 Then Exit Sub
@@ -1192,18 +999,6 @@ Sub ImportDeclaration( _
                         Optional DeclarationName As String, _
                         Optional module As VBComponent, _
                         Optional TargetWorkbook As Workbook)
-'@BlogPosted
-'@LastModified 2301101010
-'@AssignedModule F_VbeLinkedProcedures
-'@INCLUDE PROCEDURE LIBRARY_FOLDER
-'@INCLUDE PROCEDURE TxtOverwrite
-'@INCLUDE PROCEDURE TxtRead
-'@INCLUDE PROCEDURE CheckPath
-'@INCLUDE PROCEDURE TXTReadFromUrl
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE ModuleAddOrSet
-'@INCLUDE PROCEDURE CodepaneSelection
-'@INCLUDE PROCEDURE FormatVBA7
 
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     If DeclarationName = "" Then DeclarationName = CodepaneSelection
@@ -1240,33 +1035,12 @@ End Sub
 
 
 
-'* Modified   : Date and Time       Author              Description
-'* Updated    : 10-01-2023 11:56    Alex                added comparison for proc and file last mod date (ImportProcedure)
 
 Sub ImportProcedure( _
                     Optional procedure As String, _
                     Optional TargetWorkbook As Workbook, _
                     Optional module As VBComponent, _
                     Optional Overwrite As Boolean)
-'@BlogPosted
-'@LastModified 2301101156
-'@AssignedModule F_Vbe_Procedures_Import
-'@INCLUDE PROCEDURE TxtOverwrite
-'@INCLUDE PROCEDURE TxtRead
-'@INCLUDE PROCEDURE TXTReadFromUrl
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE CodepaneSelection
-'@INCLUDE PROCEDURE ProcedureExists
-'@INCLUDE PROCEDURE ModuleOfProcedure
-'@INCLUDE PROCEDURE ModuleAddOrSet
-'@INCLUDE PROCEDURE ProcedureMoveToAssignedModule
-'@INCLUDE PROCEDURE ProcedureLastModified
-'@INCLUDE PROCEDURE StringLastModified
-'@INCLUDE PROCEDURE ImportProcedureDependencies
-'@INCLUDE PROCEDURE ProcedureReplace
-'@INCLUDE PROCEDURE StringProcedureAssignedModule
-'@INCLUDE DECLARATION GITHUB_LIBRARY_PROCEDURES
-'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_PROCEDURES
 
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     If procedure = "" Then procedure = CodepaneSelection
@@ -1322,19 +1096,6 @@ Sub ImportProcedureDependencies( _
                  Optional TargetWorkbook As Workbook, _
                  Optional module As VBComponent, _
                  Optional Overwrite As Boolean)
-'@BlogPosted
-'@LastModified 2301101010
-'@AssignedModule F_Vbe_Procedures_Import
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE CodepaneSelection
-'@INCLUDE PROCEDURE ActiveProcedure
-'@INCLUDE PROCEDURE ProcedureExists
-'@INCLUDE PROCEDURE ProcedureCode
-'@INCLUDE PROCEDURE ModuleOfProcedure
-'@INCLUDE PROCEDURE ImportDeclaration
-'@INCLUDE PROCEDURE ImportUserform
-'@INCLUDE PROCEDURE ImportClass
-'@INCLUDE PROCEDURE ImportProcedure
 
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     If procedure = "" Then
@@ -1378,18 +1139,6 @@ Sub ImportUserform( _
                     Optional UserformName As String, _
                     Optional TargetWorkbook As Workbook, _
                     Optional Overwrite As Boolean)
-'@BlogPosted
-'@LastModified 2301101010
-'@AssignedModule F_VbeLinkedProcedures
-'@INCLUDE PROCEDURE LIBRARY_FOLDER
-'@INCLUDE PROCEDURE TxtOverwrite
-'@INCLUDE PROCEDURE TxtRead
-'@INCLUDE PROCEDURE CheckPath
-'@INCLUDE PROCEDURE TXTReadFromUrl
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE ModuleAddOrSet
-'@INCLUDE PROCEDURE ModuleExists
-'@INCLUDE PROCEDURE CodepaneSelection
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     If UserformName = "" Then UserformName = CodepaneSelection
     If UserformName = "" Or InStr(1, UserformName, " ") > 0 Then Exit Sub
@@ -1425,10 +1174,6 @@ Sub ImportUserform( _
 End Sub
 
 Function LIBRARY_FOLDER() As String
-'@BlogPosted
-'@AssignedModule A_Base
-'@INCLUDE PROCEDURE GetMotherBoardProp
-'@INCLUDE DECLARATION VBARC_MOTHERBOARD
     If GetMotherBoardProp = VBARC_MOTHERBOARD Then
         LIBRARY_FOLDER = "C:\Users\acer\Documents\GitHub\VBA-Library\"
     Else
@@ -1437,7 +1182,6 @@ Function LIBRARY_FOLDER() As String
 End Function
 
 Function LastCell(rng As Range, Optional booCol As Boolean) As Range
-'@BlogPosted
     Dim WS As Worksheet
     Set WS = rng.Parent
     Dim Cell As Range
@@ -1455,8 +1199,6 @@ End Function
 Public Function Len2( _
     ByVal val As Variant) _
     As Integer
-'@BlogPosted
-'@AssignedModule F_Array
     If IsArray(val) And Right(TypeName(val), 2) = "()" Then
         Len2 = UBound(val) - LBound(val) + 1
     ElseIf TypeName(val) = "String" Then
@@ -1475,12 +1217,6 @@ Function LinkedClasses( _
                       TargetWorkbook As Workbook, _
                       module As VBComponent, _
                       procedure As String) As Collection
-'@BlogPosted
-'@AssignedModule F_VbeLinkedProcedures
-'@INCLUDE PROCEDURE WorkbookOfModule
-'@INCLUDE PROCEDURE ClassNames
-'@INCLUDE PROCEDURE classCallsOfModule
-'@INCLUDE PROCEDURE ProcedureCode
 
     Dim coll As New Collection
     Dim var As Variant
@@ -1510,13 +1246,6 @@ Function LinkedDeclarations( _
                            Optional TargetWorkbook As Workbook, _
                            Optional module As VBComponent, _
                            Optional procedure As String) As Collection
-'@BlogPosted
-'@INCLUDE PROCEDURE DeclarationsTableCreate
-'@INCLUDE PROCEDURE DeclarationsTableKeywords
-'@INCLUDE PROCEDURE RegexTest
-'@INCLUDE PROCEDURE AssignCPSvariables
-'@INCLUDE PROCEDURE ProcedureCode
-'@AssignedModule F_Vbe_Declararions
 
     If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Stop
     
@@ -1540,15 +1269,6 @@ Function LinkedProcedures( _
                          Optional TargetWorkbook As Workbook, _
                          Optional module As VBComponent, _
                          Optional ProcedureName As String) As Collection
-'@BlogPosted
-'@LastModified 2301101010
-'@AssignedModule F_VbeLinkedProcedures
-'@INCLUDE PROCEDURE ProceduresOfWorkbook
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE ActiveProcedure
-'@INCLUDE PROCEDURE ProcedureCode
-'@INCLUDE PROCEDURE ModuleOfProcedure
-'@INCLUDE PROCEDURE RegexTest
     If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Stop
     Dim Procedures As Collection
     Set Procedures = ProceduresOfWorkbook(TargetWorkbook)
@@ -1569,12 +1289,6 @@ End Function
 Function LinkedProceduresDeep( _
                              ProcedureName As Variant, _
                              TargetWorkbook As Workbook) As Collection
-'@BlogPosted
-'@AssignedModule F_Vbe_LinkedLists
-'@INCLUDE PROCEDURE CollectionSort
-'@INCLUDE PROCEDURE CollectionContains
-'@INCLUDE PROCEDURE LinkedProcedures
-'@INCLUDE PROCEDURE ProceduresOfWorkbook
 
     Dim AllProcedures As Collection:       Set AllProcedures = ProceduresOfWorkbook(TargetWorkbook)
     Dim Processed As Collection:           Set Processed = New Collection
@@ -1612,16 +1326,8 @@ repeat:
     Set LinkedProceduresDeep = CollectionSort(CalledProcedures)
 End Function
 
-'* Modified   : Date and Time       Author              Description
-'* Updated    : 20-10-2022 12:52    Alex                initial release (LinkedProceduresMoveHere)
 
 Sub LinkedProceduresMoveHere(Optional procedure As String)
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures_Move
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE AssignProcedureVariable
-'@INCLUDE PROCEDURE LinkedProceduresDeep
-'@INCLUDE PROCEDURE ProcedureMoveHere
     Dim TargetWorkbook As Workbook
     Set TargetWorkbook = ActiveCodepaneWorkbook
     If Not AssignProcedureVariable(TargetWorkbook, procedure) Then Exit Sub
@@ -1638,12 +1344,6 @@ Function LinkedUserforms( _
                         TargetWorkbook As Workbook, _
                         module As VBComponent, _
                         procedure As String) As Collection
-'@BlogPosted
-'@AssignedModule F_VbeLinkedProcedures
-'@LastModified 2301101010
-'@INCLUDE PROCEDURE RegexTest
-'@INCLUDE PROCEDURE UserformNames
-'@INCLUDE PROCEDURE ProcedureCode
     Dim coll As New Collection
     Dim Code As String
         Code = ProcedureCode(TargetWorkbook, module, procedure)
@@ -1658,12 +1358,7 @@ Function ModuleAddOrSet( _
                        TargetWorkbook As Workbook, _
                        TargetName As String, _
                        ModuleType As VBIDE.vbext_ComponentType) As VBComponent
-'@AssignedModule F_Vbe_Modules
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
 
-'Example
-'Dim Module as vbComponent
-'set Module=ModuleAddOrSet(TargetWorkbook,"NewModule",vbext_ct_StdModule)
 
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     Dim module As VBComponent
@@ -1681,8 +1376,6 @@ End Function
 
 
 Function ModuleCode(module As VBComponent) As String
-'@BlogPosted
-'@AssignedModule F_Vbe_ReadCode
     With module.CodeModule
         If .CountOfLines = 0 Then ModuleCode = "": Exit Function
         ModuleCode = .Lines(1, .CountOfLines)
@@ -1692,8 +1385,6 @@ End Function
 Public Function ModuleExists( _
                             TargetName As String, _
                             TargetWorkbook As Workbook) As Boolean
-'@BlogPosted
-'@AssignedModule F_Vbe_Modules
     Dim module As VBComponent
     On Error Resume Next
     Set module = TargetWorkbook.VBProject.VBComponents(TargetName)
@@ -1704,8 +1395,6 @@ End Function
 Public Function ModuleOfProcedure( _
                                  TargetWorkbook As Workbook, _
                                  ProcedureName As Variant) As VBComponent
-'@BlogPosted
-'@AssignedModule F_Vbe_Modules
     Dim ProcKind As VBIDE.vbext_ProcKind
     Dim lineNum As Long, NumProc As Long
     Dim procedure As String
@@ -1726,10 +1415,6 @@ Public Function ModuleOfProcedure( _
 End Function
 
 Function ModuleOrSheetName(module As VBComponent) As String
-'@BlogPosted
-'@AssignedModule F_Vbe_Modules
-'@INCLUDE PROCEDURE GetSheetByCodeName
-'@INCLUDE PROCEDURE WorkbookOfModule
     If module.Type = vbext_ct_Document Then
         If module.Name = "ThisWorkbook" Then
             ModuleOrSheetName = module.Name
@@ -1742,8 +1427,6 @@ Function ModuleOrSheetName(module As VBComponent) As String
 End Function
 
 Function ModuleTypeToString(componentType As VBIDE.vbext_ComponentType) As String
-'@BlogPosted
-'@AssignedModule F_Vbe_Modules
     Select Case componentType
     Case vbext_ct_ActiveXDesigner
         ModuleTypeToString = "ActiveX Designer"
@@ -1764,11 +1447,6 @@ Function ProcedureAssignedModule( _
                                 TargetWorkbook As Workbook, _
                                 module As VBComponent, _
                                 procedure As String) As VBComponent
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures_Move
-'@INCLUDE PROCEDURE Len2
-'@INCLUDE PROCEDURE ProcedureCode
-'@INCLUDE PROCEDURE ModuleAddOrSet
         Dim ComponentName As Variant
         ComponentName = Split(ProcedureCode(TargetWorkbook, module, procedure), vbNewLine)
         ComponentName = Filter(ComponentName, "'@AssignedModule")
@@ -1783,11 +1461,6 @@ Sub ProcedureAssignedModuleAdd( _
                                 Optional TargetWorkbook As Workbook, _
                                 Optional module As VBComponent, _
                                 Optional procedure As String)
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
-'@INCLUDE PROCEDURE AssignCPSvariables
-'@INCLUDE PROCEDURE ProcedureBodyLineFirstAfterComments
-'@INCLUDE PROCEDURE ProcedureLinesRemove
     If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Stop
     ProcedureLinesRemove "'@AssignedModule *", TargetWorkbook, module, procedure
     module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(module, procedure), _
@@ -1797,19 +1470,12 @@ End Sub
 Function ProcedureBodyLineFirst( _
                                module As VBComponent, _
                                procedure As String) As Long
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
-'@INCLUDE PROCEDURE ProcedureTitleLineFirst
-'@INCLUDE PROCEDURE ProcedureTitleLineCount
     ProcedureBodyLineFirst = ProcedureTitleLineFirst(module, procedure) + ProcedureTitleLineCount(module, procedure)
 End Function
 
 Function ProcedureBodyLineFirstAfterComments( _
                                             module As VBComponent, _
                                             procedure As String) As Long
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
-'@INCLUDE PROCEDURE ProcedureBodyLineFirst
     Dim N As Long
     Dim s As String
     For N = ProcedureBodyLineFirst(module, procedure) To module.CodeModule.CountOfLines
@@ -1827,22 +1493,13 @@ Function ProcedureBodyLineFirstAfterComments( _
     ProcedureBodyLineFirstAfterComments = N
 End Function
 
-'--------------------
-'@EndFolder General
 
-'**********
-'@FOLDER Code
-'**********
 
 Public Function ProcedureCode( _
                              Optional TargetWorkbook As Workbook, _
                              Optional module As VBComponent, _
                              Optional procedure As Variant, _
                              Optional IncludeHeader As Boolean = True) As String
-'@BlogPosted
-'
-'@INCLUDE PROCEDURE AssignCPSvariables
-'@AssignedModule F_Vbe_Procedures
     If Not AssignCPSvariables(TargetWorkbook, module, CStr(procedure)) Then Exit Function
     Dim lProcStart            As Long
     Dim lProcBodyStart        As Long
@@ -1862,21 +1519,15 @@ Error_Handler_Exit:
     On Error Resume Next
     Exit Function
 Error_Handler:
-    Rem debug.Print _
     "Error Source: ProcedureCode" & vbCrLf & _
     "Error Description: " & err.Description & _
     Switch(Erl = 0, vbNullString, Erl <> 0, vbCrLf & "Line No: " & Erl)
     Resume Error_Handler_Exit
 End Function
 
-'@FOLDER General
-'--------------------
 Function ProcedureExists( _
                         TargetWorkbook As Workbook, _
                         ProcedureName As Variant) As Boolean
-'@BlogPosted
-'@INCLUDE PROCEDURE ProceduresOfWorkbook
-'@AssignedModule F_Vbe_Procedures
     Dim Procedures As Collection
     Set Procedures = ProceduresOfWorkbook(TargetWorkbook)
     Dim procedure As Variant
@@ -1894,13 +1545,7 @@ Function ProcedureLastModAdd( _
                             Optional procedure As String, _
                             Optional ModificationDate As Double)
                        
-'argument ModificationDate passed like Format(Now, "yymmddhhnn")
 
-'@BlogPosted
-'@INCLUDE PROCEDURE AssignCPSvariables
-'@INCLUDE PROCEDURE ProcedureLineContaining
-'@INCLUDE PROCEDURE ProcedureBodyLineFirst
-'@INCLUDE PROCEDURE ProcedureLinesRemove
 
 If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Exit Function
     If ModificationDate = 0 Then ModificationDate = Format(Now, "yymmddhhnn")
@@ -1921,12 +1566,6 @@ Function ProcedureLastModified( _
                             Optional TargetWorkbook As Workbook, _
                             Optional module As VBComponent, _
                             Optional procedure As String)
-'@BlogPosted
-'@LastModified 2301101010
-'@AssignedModule F_Vbe_Procedures_Modified
-'@INCLUDE PROCEDURE AssignCPSvariables
-'@INCLUDE PROCEDURE ProcedureCode
-'@INCLUDE PROCEDURE StringLastModified
     If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Stop
     ProcedureLastModified = StringLastModified(ProcedureCode(TargetWorkbook, module, procedure))
 End Function
@@ -1934,33 +1573,22 @@ End Function
 Function ProcedureLinesCount( _
                             module As VBComponent, _
                             procedure As String) As Long
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
-'@INCLUDE PROCEDURE ProcedureLinesFirst
-'@INCLUDE PROCEDURE ProcedureLinesLast
-'    ProcedureLinesCount = ProcedureLinesLast(Module, Procedure) - ProcedureLinesFirst(Module, Procedure) + 1
     ProcedureLinesCount = module.CodeModule.ProcCountLines(procedure, vbext_pk_Proc)
 End Function
 
 Public Function ProcedureLinesFirst( _
                                    module As VBComponent, _
                                    procedure As String) As Long
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
     Dim ProcKind As VBIDE.vbext_ProcKind
         ProcKind = vbext_pk_Proc
     ProcedureLinesFirst = module.CodeModule.ProcStartLine(procedure, ProcKind)
 End Function
 
-'* Modified   : Date and Time       Author              Description
-'* Updated    : 17-10-2022 12:21    Alex                Added option to exclude comments after End Sub/Function (ProcedureLinesLast)
 
 Public Function ProcedureLinesLast( _
                                   module As VBComponent, _
                                   procedure As String, _
                                   Optional IncludeTail As Boolean) As Long
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
     Dim ProcKind As VBIDE.vbext_ProcKind
         ProcKind = vbext_pk_Proc
     Dim startAt As Long
@@ -1982,11 +1610,6 @@ Sub ProcedureLinesRemove( _
                         Optional TargetWorkbook As Workbook, _
                         Optional module As VBComponent, _
                         Optional procedure As String)
-'@BlogPosted
-'@AssignedModule F_Vbe_Lines_Remove
-'@INCLUDE PROCEDURE AssignCPSvariables
-'@INCLUDE PROCEDURE ProcedureLinesFirst
-'@INCLUDE PROCEDURE ProcedureLinesLast
     If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Stop
 
     Dim Code As String
@@ -2001,31 +1624,13 @@ Sub ProcedureLinesRemoveInclude( _
                                 Optional TargetWorkbook As Workbook, _
                                 Optional module As VBComponent, _
                                 Optional procedure As String)
-'@BlogPosted
-'@AssignedModule F_Vbe_Lines_Remove
-'@INCLUDE PROCEDURE AssignCPSvariables
-'@INCLUDE PROCEDURE ProcedureLinesRemove
     If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Stop
     ProcedureLinesRemove "'@INCLUDE", TargetWorkbook, module, procedure
 End Sub
 
-'* Modified   : Date and Time       Author              Description
-'* Updated    : 20-10-2022 12:52    Alex                initial release (ProcedureMoveHere)
 
 Sub ProcedureMoveHere( _
                      Optional procedure As String)
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures_Move
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE AssignProcedureVariable
-'@INCLUDE PROCEDURE ActiveProcedure
-'@INCLUDE PROCEDURE ProcedureLinesFirst
-'@INCLUDE PROCEDURE ProcedureLinesLast
-'@INCLUDE PROCEDURE ProcedureCode
-'@INCLUDE PROCEDURE ProcedureLinesRemove
-'@INCLUDE PROCEDURE ActiveModule
-'@INCLUDE PROCEDURE ModuleOfProcedure
-'@INCLUDE PROCEDURE ProcedureAssignedModuleAdd
 
     
     Dim TargetWorkbook As Workbook
@@ -2039,7 +1644,6 @@ Sub ProcedureMoveHere( _
         If InStr(1, s, "'@AssignedModule") = 0 Then
             ProcedureAssignedModuleAdd TargetWorkbook, module, procedure
             s = ProcedureCode(TargetWorkbook, module, procedure)
-'            ProcedureLinesRemove "'@AssignedModule", Procedure, Module, TargetWorkbook
         End If
 
     Dim sl As Long, cl As Long
@@ -2053,13 +1657,6 @@ Sub ProcedureMoveToAssignedModule( _
                                  Optional TargetWorkbook As Workbook, _
                                  Optional module As VBComponent, _
                                  Optional procedure As String)
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures_Move
-'@INCLUDE PROCEDURE AssignCPSvariables
-'@INCLUDE PROCEDURE ProcedureAssignedModule
-'@INCLUDE PROCEDURE ProcedureMoveToModule
-'@INCLUDE PROCEDURE LinkedProceduresMoveHere
-'@INCLUDE PROCEDURE ProcedureMoveHere
     If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Exit Sub
     Dim MoveToModule As VBComponent
     Set MoveToModule = ProcedureAssignedModule(TargetWorkbook, module, procedure)
@@ -2072,11 +1669,6 @@ Sub ProcedureMoveToModule( _
                          module As VBComponent, _
                          procedure As String, _
                          MoveToModule As VBComponent)
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures_Move
-'@INCLUDE PROCEDURE ProcedureLinesFirst
-'@INCLUDE PROCEDURE ProcedureLinesCount
-'@INCLUDE PROCEDURE ProcedureCode
     Dim Code As String
         Code = ProcedureCode(TargetWorkbook, module, procedure)
     Dim startLine As Long
@@ -2092,10 +1684,6 @@ Public Sub ProcedureReplace( _
                             module As VBComponent, _
                             procedure As String, _
                             Code As String)
-'@BlogPosted
-'@LastModified 2301101010
-'@INCLUDE PROCEDURE ModuleOfProcedure
-'@AssignedModule F_VbeLinkedProcedures
 
     Dim startLine As Integer
     Dim NumLines As Integer
@@ -2110,9 +1698,6 @@ End Sub
 Function ProcedureTitle( _
                        module As VBComponent, _
                        procedure As String) As String
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
-'@INCLUDE PROCEDURE ProcedureTitleLineFirst
     Dim titleLine As Long
         titleLine = ProcedureTitleLineFirst(module, procedure)
     Dim title As String
@@ -2130,11 +1715,6 @@ End Function
 Function ProcedureTitleLineCount( _
                                 module As VBComponent, _
                                 procedure As String) As Long
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
-'@INCLUDE PROCEDURE ActiveProcedure
-'@INCLUDE PROCEDURE ProcedureTitleLineFirst
-'@INCLUDE PROCEDURE ProcedureTitleLineLast
 
     ProcedureTitleLineCount = ProcedureTitleLineLast(module, procedure) - ProcedureTitleLineFirst(module, procedure) + 1
 End Function
@@ -2144,25 +1724,17 @@ End Function
 Public Function ProcedureTitleLineFirst( _
                                        module As VBComponent, _
                                        procedure As String) As Long
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
     ProcedureTitleLineFirst = module.CodeModule.ProcBodyLine(procedure, vbext_pk_Proc)
 End Function
 
 Function ProcedureTitleLineLast( _
                                module As VBComponent, _
                                procedure As String) As Long
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
-'@INCLUDE PROCEDURE ProcedureTitle
-'@INCLUDE PROCEDURE ProcedureTitleLineFirst
     ProcedureTitleLineLast = ProcedureTitleLineFirst(module, procedure) + UBound(Split(ProcedureTitle(module, procedure), vbNewLine))
 End Function
 
 Public Function ProceduresOfModule( _
                                   module As VBComponent) As Collection
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
     Dim ProcKind As VBIDE.vbext_ProcKind
     Dim lineNum As Long
     Dim coll As New Collection
@@ -2177,22 +1749,10 @@ Public Function ProceduresOfModule( _
     End With
     Set ProceduresOfModule = coll
 End Function
-'* Modified   : Date and Time       Author              Description
-'* Updated    : 09-01-2023 12:53    Alex                (cpsProceduresSelectedText)
 
 Function ProceduresOfTXT( _
                         Code As String) As Collection
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures_Of
-'@INCLUDE PROCEDURE ArrayDuplicatesRemove
-'@INCLUDE PROCEDURE ArrayToCollection
-'@INCLUDE PROCEDURE cleanArray
-'@INCLUDE PROCEDURE ArrayAppend
-'@INCLUDE PROCEDURE ArrayQuickSort
 
-    'code is not a filePath
-    'it can be the contents eg txtread(filepath)
-    'or codepaneselection or whatever
 
     Code = Replace(Code, vbNewLine, vbLf)
     Dim var
@@ -2224,7 +1784,6 @@ Function ProceduresOfTXT( _
     out = cleanArray(out)
     out = ArrayDuplicatesRemove(out)
     Set ProceduresOfTXT = ArrayToCollection(out)
-    Rem ProceduresOfTXT = Join(out, Chr(10))
 End Function
 
 Function ProceduresOfWorkbook( _
@@ -2232,8 +1791,6 @@ Function ProceduresOfWorkbook( _
                              Optional ExcludeDocument As Boolean = True, _
                              Optional ExcludeClass As Boolean = True, _
                              Optional ExcludeForm As Boolean = True) As Collection
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
     Dim module As VBComponent
     Dim ProcKind As VBIDE.vbext_ProcKind
     Dim lineNum As Long
@@ -2247,7 +1804,6 @@ Function ProceduresOfWorkbook( _
             lineNum = .CountOfDeclarationLines + 1
             Do Until lineNum >= .CountOfLines
                 ProcedureName = .ProcOfLine(lineNum, ProcKind)
-                ' _ is used in events. Events may have the same name in different components
                 If InStr(1, ProcedureName, "_") = 0 Then
                     coll.Add ProcedureName
                 End If
@@ -2260,12 +1816,6 @@ SKIP:
 End Function
 
 Sub ProjetFoldersCreate()
-'@BlogPosted
-'@AssignedModule A_Base
-'@INCLUDE PROCEDURE FoldersCreate
-'@INCLUDE PROCEDURE GetMotherBoardProp
-'@INCLUDE PROCEDURE vbarcFolders
-'@INCLUDE DECLARATION VBARC_MOTHERBOARD
     Dim Element
     For Each Element In vbarcFolders
         FoldersCreate CStr(Element)
@@ -2278,8 +1828,6 @@ Public Function RegexTest( _
                          Optional ByVal globalFlag As Boolean, _
                          Optional ByVal ignoreCaseFlag As Boolean, _
                          Optional ByVal multilineFlag As Boolean) As Boolean
-'@BlogPosted
-'@AssignedModule F_Regex
     Dim REGEX As Object
     Set REGEX = CreateObject("VBScript.RegExp")
     With REGEX
@@ -2291,15 +1839,8 @@ Public Function RegexTest( _
     RegexTest = REGEX.test(string1)
 End Function
 
-'* Modified   : Date and Time       Author              Description
-'* Updated    : 10-01-2023 07:26    Alex                (ProcedureLastModified)
 
 Function StringLastModified(txt As String)
-'@BlogPosted
-'@LastModified 2301101010
-'@AssignedModule F_Vbe_Procedures_Modified
-'@INCLUDE PROCEDURE ArrayAllocated
-'@INCLUDE PROCEDURE ProcedureLastModified
 
     Dim Code As Variant
         Code = Filter(Split(txt, vbLf), "'@LastModified ")
@@ -2310,7 +1851,6 @@ Function StringLastModified(txt As String)
             lastDate = DateSerial(Left(lastDate, 2), Mid(lastDate, 3, 2), Mid(lastDate, 5, 2)) _
                        & " " & TimeSerial(Mid(lastDate, 7, 2), Mid(lastDate, 9, 2), 0)
             StringLastModified = Split(Code(0), " ")(1)
-    '        StringLastModified = lastDate
         End If
     Else
 
@@ -2320,9 +1860,6 @@ End Function
 
 
 Function StringProcedureAssignedModule(txt As String) As String
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures_Import
-'@INCLUDE PROCEDURE ArrayAllocated
         Dim ComponentName As Variant
         ComponentName = Split(txt, vbLf)
         ComponentName = Filter(ComponentName, "'@AssignedModule")
@@ -2336,8 +1873,6 @@ End Function
 
 
 Function TXTReadFromUrl(url As String) As String
-'@BlogPosted
-'@AssignedModule F_Unsorted
     On Error GoTo Err_GetFromWebpage
     Dim objWeb As Object
     Dim strXML As String
@@ -2361,8 +1896,6 @@ Err_GetFromWebpage:
 End Function
 
 Sub TxtOverwrite(sFile As String, sText As String)
-'@BlogPosted
-'@AssignedModule F_FileFolder
     On Error GoTo ERR_HANDLER
     Dim FileNumber As Integer
     FileNumber = FreeFile
@@ -2380,10 +1913,6 @@ ERR_HANDLER:
 End Sub
 
 Sub TxtPrepend(filePath As String, txt As String)
-'@BlogPosted
-'@AssignedModule F_FileFolder
-'@INCLUDE PROCEDURE TxtOverwrite
-'@INCLUDE PROCEDURE TxtRead
     Dim s As String
     s = TxtRead(filePath)
     TxtOverwrite filePath, txt & vbNewLine & s
@@ -2392,12 +1921,6 @@ End Sub
 
 
 Sub TxtPrependContainedProcedures(FileName As String)
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures_Of
-'@INCLUDE PROCEDURE collectionToString
-'@INCLUDE PROCEDURE TxtPrepend
-'@INCLUDE PROCEDURE TxtRead
-'@INCLUDE PROCEDURE ProceduresOfTXT
     Dim s As String: s = TxtRead(FileName)
     Dim v As New Collection
     Set v = ProceduresOfTXT(s)
@@ -2409,8 +1932,6 @@ Sub TxtPrependContainedProcedures(FileName As String)
 End Sub
 
 Function TxtRead(sPath As Variant) As String
-'@BlogPosted
-'@AssignedModule F_FileFolder
     Dim sTXT As String
     If Dir(sPath) = "" Then
         Debug.Print "File was not found."
@@ -2431,8 +1952,6 @@ Function TxtRead(sPath As Variant) As String
 End Function
 
 Function URLExists(url) As Boolean
-'@BlogPosted
-'@AssignedModule F_Unsorted
     Dim Request As Object
     Dim ff As Integer
     Dim rc As Variant
@@ -2453,10 +1972,6 @@ EndNow:
 End Function
 
 Function UserformNames(TargetWorkbook As Workbook)
-'@BlogPosted
-'@AssignedModule F_VbeLinkedProcedures
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE ComponentNames
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     Set UserformNames = ComponentNames(vbext_ct_MSForm, TargetWorkbook)
 End Function
@@ -2467,10 +1982,6 @@ End Function
 
 
 Function WorkbookCode(TargetWorkbook) As String
-'@BlogPosted
-'@AssignedModule F_Vbe_ReadCode
-'@INCLUDE PROCEDURE ModuleCode
-'@INCLUDE PROCEDURE ModuleOrSheetName
     If TypeName(TargetWorkbook) <> "Workbook" Then Stop
     Dim module As VBComponent
     Dim txt
@@ -2488,15 +1999,10 @@ End Function
 
 
 Function WorkbookOfModule(vbComp As VBComponent) As Workbook
-'@BlogPosted
-'@AssignedModule F_VBE
-'@INCLUDE PROCEDURE WorkbookOfProject
     Set WorkbookOfModule = WorkbookOfProject(vbComp.Collection.Parent)
 End Function
 
 Function WorkbookOfProject(vbProj As VBProject) As Workbook
-'@BlogPosted
-'@AssignedModule F_VBE
     tmpStr = vbProj.FileName
     tmpStr = Right(tmpStr, Len(tmpStr) - InStrRev(tmpStr, "\"))
     Set WorkbookOfProject = Workbooks(tmpStr)
@@ -2505,8 +2011,6 @@ End Function
 
 
 Function WorksheetExists(SheetName As String, TargetWorkbook As Workbook) As Boolean
-'@BlogPosted
-'@AssignedModule F_Worksheet
     Dim TargetWorksheet  As Worksheet
     On Error Resume Next
     Set TargetWorksheet = TargetWorkbook.Sheets(SheetName)
@@ -2515,12 +2019,7 @@ Function WorksheetExists(SheetName As String, TargetWorkbook As Workbook) As Boo
 End Function
 
 Function classCallsOfModule(module As VBComponent) As Variant
-'@BlogPosted
-'@INCLUDE PROCEDURE ClassNames
-'@AssignedModule F_VbeLinkedProcedures
 
-    'classCallsOfModule(0) is the class name
-    'classCallsOfModule(1) is the keyword for the class name (eg dim clsCal as new classCalendar)
 
     Dim Code As Variant
     Dim Element As Variant
@@ -2569,8 +2068,6 @@ Function classCallsOfModule(module As VBComponent) As Variant
 End Function
 
 Function collectionToString(coll As Collection, delim As String) As String
-'@BlogPosted
-'@AssignedModule F_Collection
     Dim Element
     Dim out As String
     For Each Element In coll
@@ -2587,11 +2084,6 @@ Function getDeclarations( _
                         Optional includeDeclarations As Boolean, _
                         Optional includeComponentName As Boolean, _
                         Optional includeComponentType As Boolean) As Collection
-'@BlogPosted
-'@INCLUDE PROCEDURE DeclarationsKeywordSubstring
-'@INCLUDE PROCEDURE RegexTest
-'@INCLUDE PROCEDURE ModuleTypeToString
-'@AssignedModule F_Vbe_Declararions
 
     Dim ComponentCollection     As New Collection
     Dim ComponentTypecollection As New Collection
@@ -2704,40 +2196,14 @@ Function getDeclarations( _
 End Function
 
 Function getLastRow(TargetSheet As Worksheet)
-'@BlogPosted
-'@AssignedModule F_Range
-'@INCLUDE PROCEDURE LastCell
     Dim LastCell As Range
     Set LastCell = TargetSheet.Cells.Find("*", SearchOrder:=xlByRows, SearchDirection:=xlPrevious)
     getLastRow = LastCell.Row
 End Function
 
 Function vbarcFolders() As Collection
-'@BlogPosted
-'@AssignedModule A_Base
-'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_CLASSES
-'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_DECLARATIONS
-'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_PROCEDURES
-'@INCLUDE DECLARATION GITHUB_LOCAL_LIBRARY_USERFORMS
 
 
-'eg
-''------------------------------------------------------------------------------
-'Public Const GITHUB_LIBRARY = "https://raw.githubusercontent.com/alexofrhodes/VBA-Library/"
-''------------------------------------------------------------------------------
-'    Public Const GITHUB_LIBRARY_DECLARATIONS = GITHUB_LIBRARY & "Declarations/"
-'    Public Const GITHUB_LIBRARY_PROCEDURES = GITHUB_LIBRARY & "Procedures/"
-'    Public Const GITHUB_LIBRARY_USERFORMS = GITHUB_LIBRARY & "Userforms/"
-'    Public Const GITHUB_LIBRARY_CLASSES = GITHUB_LIBRARY & "Classes/"
-'
-''------------------------------------------------------------------------------
-'Public Const GITHUB_LOCAL_LIBRARY = "C:\Users\username\Documents\GitHub\VBA-Library\"
-''------------------------------------------------------------------------------
-'    Public Const GITHUB_LOCAL_LIBRARY_DECLARATIONS = GITHUB_LOCAL_LIBRARY & "Declarations\"
-'    Public Const GITHUB_LOCAL_LIBRARY_PROCEDURES = GITHUB_LOCAL_LIBRARY & "Procedures\"
-'    Public Const GITHUB_LOCAL_LIBRARY_USERFORMS = GITHUB_LOCAL_LIBRARY & "Userforms\"
-'    Public Const GITHUB_LOCAL_LIBRARY_CLASSES = GITHUB_LOCAL_LIBRARY & "Classes\"
-''------------------------------------------------------------------------------
 
     Dim coll As New Collection
     coll.Add GITHUB_LOCAL_LIBRARY_PROCEDURES
@@ -2753,10 +2219,6 @@ Function vbarcFolders() As Collection
 End Function
 
 Function ProcedureLineContaining(module As VBComponent, procedure As String, This As String) As Long
-'@BlogPosted
-'@AssignedModule F_Vbe_Insert
-'@INCLUDE PROCEDURE ProcedureLinesFirst
-'@INCLUDE PROCEDURE ProcedureLinesLast
     Dim i As Long
     For i = ProcedureLinesFirst(module, procedure) To ProcedureLinesLast(module, procedure)
         If module.CodeModule.Lines(i, 1) Like This Then
