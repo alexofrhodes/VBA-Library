@@ -1,8 +1,10 @@
-'AUTHOR		Anastasiou Alex
-'EMAIL		anastasioualex@gmail.com
-'Blog	  	https://alexofrhodes.github.io/
-'Repos		https://github.com/alexofrhodes/
-'YouTube	https://bit.ly/3aLZU9M
+Attribute VB_Name = "Dependencies"
+
+'AUTHOR         Anastasiou Alex
+'EMAIL          anastasioualex@gmail.com
+'Blog           https://alexofrhodes.github.io/
+'Repos          https://github.com/alexofrhodes/
+'YouTube        https://bit.ly/3aLZU9M
 
 #If VBA7 Then
     Public Declare PtrSafe Function CloseClipboard Lib "user32" () As Long
@@ -16,7 +18,7 @@
 
 '____MODIFY THESE TO MATCH YOUR LOCAL AND GITHUB DIRECTORIES________
 
-Public Const GITHUB_LIBRARY = "https://raw.githubusercontent.com/USERNAME/RepoName/"	'<---
+Public Const GITHUB_LIBRARY = "https://raw.githubusercontent.com/USERNAME/RepoName/"    '<---
     Public Const GITHUB_LIBRARY_DECLARATIONS = GITHUB_LIBRARY & "Declarations/"
     Public Const GITHUB_LIBRARY_PROCEDURES = GITHUB_LIBRARY & "Procedures/"
     Public Const GITHUB_LIBRARY_USERFORMS = GITHUB_LIBRARY & "Userforms/"
