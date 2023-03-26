@@ -1,15 +1,15 @@
 ### one click export/import system
 
-Have a look at the code of ImportExort.xlsm
+You can import LinkedInputOutput.bas in your project
+and call the procedures by immediate window / vbe commandbars or other way
 
-It's funcitonal but i've been moving my code to classes.
-This will be updated and will work with my vbaGUI
+Theese macros allow you to:
+
+- add a list of dependencies to procedures (calls to declarations, other macros, userforms or classes)
+- export target procedure and all dependencies at  once
+- import procedure dependencies from local storage or github repo (can work as Update too)
 
 
-| |Macro  | Description |
-|-| ----------------- | ------------- |
-|1|addLinkedLists | Insert in Procedure-to-Export a list of linked procedures, userforms, classes, declarations |
-|2|ExporProcedure  | implements 1 recursively  and exports the LinkedProcedures and other elements to the local github folder - manually atm, todo  |
-|3|ImportProcedure  | Import target procedure and its linked elements from local folder or download it from github | 
-|4|UpdateProcedure | implements 3 |
-|5|GetDependencies  | implements 3 |
+Note:
+I've been busy moving my code to classes (in the repo VBA-Playground), which contains other VBE related stuff.
+As I can't test everything I'm really grateful for any feedback and suggestions, message me!
