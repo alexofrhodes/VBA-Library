@@ -1,6 +1,9 @@
 ### one click export/import system
 
-#### working on big update, almost ready to share
+Have a look at the code of ImportExort.xlsm
+
+It's funcitonal but i've been moving my code to classes.
+This will be updated and will work with my vbaGUI
 
 
 | |Macro  | Description |
