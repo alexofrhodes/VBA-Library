@@ -1,3 +1,8 @@
+'AUTHOR		Anastasiou Alex
+'EMAIL		anastasioualex@gmail.com
+'Blog	  	https://alexofrhodes.github.io/
+'Repos		https://github.com/alexofrhodes/
+'YouTube	https://bit.ly/3aLZU9M
 
 #If VBA7 Then
     Public Declare PtrSafe Function CloseClipboard Lib "user32" () As Long
