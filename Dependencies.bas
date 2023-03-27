@@ -1,10 +1,13 @@
 Attribute VB_Name = "Dependencies"
 
-'AUTHOR         Anastasiou Alex
-'EMAIL          anastasioualex@gmail.com
-'Blog           https://alexofrhodes.github.io/
-'Repos          https://github.com/alexofrhodes/
-'YouTube        https://bit.ly/3aLZU9M
+
+Rem do not alter this module programmatically
+
+Rem AUTHOR         Anastasiou Alex
+Rem EMAIL          anastasioualex@gmail.com
+Rem Blog           https://alexofrhodes.github.io/
+Rem Repos          https://github.com/alexofrhodes/
+Rem YouTube        https://bit.ly/3aLZU9M
 
 #If VBA7 Then
     Public Declare PtrSafe Function CloseClipboard Lib "user32" () As Long
@@ -16,21 +19,19 @@ Attribute VB_Name = "Dependencies"
     Public Declare Function OpenClipboard Lib "user32" (ByVal hwnd As Long) As Long
 #End If
 
-'____MODIFY THESE TO MATCH YOUR LOCAL AND GITHUB DIRECTORIES________
-
-Public Const GITHUB_LIBRARY = "https://raw.githubusercontent.com/USERNAME/RepoName/"    '<---
+Rem ___CHANGE THESE TO MATCH YOUR FOLDER AND REPO____
+Public Const GITHUB_LIBRARY = "https://raw.githubusercontent.com/alexofrhodes/vba-library/"    '<---
     Public Const GITHUB_LIBRARY_DECLARATIONS = GITHUB_LIBRARY & "Declarations/"
     Public Const GITHUB_LIBRARY_PROCEDURES = GITHUB_LIBRARY & "Procedures/"
     Public Const GITHUB_LIBRARY_USERFORMS = GITHUB_LIBRARY & "Userforms/"
     Public Const GITHUB_LIBRARY_CLASSES = GITHUB_LIBRARY & "Classes/"
 
-Public Const GITHUB_LOCAL_LIBRARY = "C:\Users\USERNAME\Documents\GitHub\VBA-Library\"   '<---
+Public Const GITHUB_LOCAL_LIBRARY = "C:\Users\acer\Documents\GitHub\VBA-Library\"   '<---
     Public Const GITHUB_LOCAL_LIBRARY_DECLARATIONS = GITHUB_LOCAL_LIBRARY & "Declarations\"
     Public Const GITHUB_LOCAL_LIBRARY_PROCEDURES = GITHUB_LOCAL_LIBRARY & "Procedures\"
     Public Const GITHUB_LOCAL_LIBRARY_USERFORMS = GITHUB_LOCAL_LIBRARY & "Userforms\"
     Public Const GITHUB_LOCAL_LIBRARY_CLASSES = GITHUB_LOCAL_LIBRARY & "Classes\"
-
-'___________________________________________________________________
+Rem __________________________________________________
 
 Sub AddLinkedListsToActiveProcedure()
     AddLinkedLists ThisWorkbook, ActiveModule, ActiveProcedure
@@ -45,7 +46,20 @@ Sub ExportAllProceduresOfThisWorkbook()
 End Sub
 
 Sub ImportActiveProcedureDependencies()
-    ImportProcedureDependencies ThisWorkbook, ActiveModule, ActiveProcedure, Overwrite:=True
+    ImportProcedureDependencies ActiveProcedure, ThisWorkbook, ActiveModule, Overwrite:=True
+End Sub
+
+Sub AddLinkedListsToAllProcedures(TargetWorkbook As Workbook)
+    Dim procedure
+    Dim module As VBComponent
+    For Each module In TargetWorkbook.VBProject.VBComponents
+        If module.Type = vbext_ct_StdModule And module.Name <> "Dependencies" Then
+            For Each procedure In ProceduresOfModule(module)
+                AddLinkedLists TargetWorkbook, module, CStr(procedure)
+            Next procedure
+        End If
+    Next module
+    MsgBox "Done"
 End Sub
 
 Sub ExportAllProcedures(TargetWorkbook As Workbook)
@@ -53,8 +67,8 @@ Sub ExportAllProcedures(TargetWorkbook As Workbook)
     Dim module As VBComponent
     For Each module In TargetWorkbook.VBProject.VBComponents
         If module.Type = vbext_ct_StdModule Then
-            For Each procedure In ProceduresOfModule
-                ExportProcedure TargetWorkbook, module, procedure, False
+            For Each procedure In ProceduresOfModule(module)
+                ExportProcedure TargetWorkbook, module, CStr(procedure), False
             Next procedure
         End If
     Next module
@@ -67,10 +81,11 @@ Sub RemoveComments(TargetWorkbook As Workbook)
     For Each module In TargetWorkbook.VBProject.VBComponents
         For i = module.CodeModule.CountOfLines To 1 Step -1
             s = Trim(module.CodeModule.Lines(i, 1))
-            If s Like "'*" Or s Like "Rem *" Then module.CodeModule.DeleteLines i, 1
+            If s Like "'*" Then module.CodeModule.DeleteLines i, 1
         Next i
     Next
 End Sub
+
 Function ArrayAppend(ByVal arr1 As Variant, ByVal arr2 As Variant) As Variant
     Dim holdarr As Variant
     Dim ub1 As Long
@@ -428,7 +443,7 @@ Function AssignCPSvariables( _
                             ByRef procedure As String) As Boolean
 
     If Not AssignWorkbookVariable(TargetWorkbook) Then Exit Function
-    If Not AssignModuleVariable(TargetWorkbook, module) Then Exit Function
+    If Not AssignModuleVariable(TargetWorkbook, module, procedure) Then Exit Function
     If Not AssignProcedureVariable(TargetWorkbook, procedure) Then Exit Function
     AssignCPSvariables = True
     
@@ -438,11 +453,10 @@ Function AssignModuleVariable( _
                              ByVal TargetWorkbook As Workbook, _
                              ByRef module As VBComponent, _
                              Optional ByVal procedure As String) As Boolean
-    If procedure = "" Then
-        On Error Resume Next
-        Set module = ActiveModule
-        On Error GoTo 0
-    ElseIf module Is Nothing Then
+    If module Is Nothing Then
+        If procedure = "" Then
+            Set module = ActiveModule
+        End If
         On Error Resume Next
         Set module = ModuleOfProcedure(TargetWorkbook, procedure)
         On Error GoTo 0
@@ -778,13 +792,13 @@ End Sub
 
 
 
-Function ExportProcedure( _
+Sub ExportProcedure( _
                     Optional TargetWorkbook As Workbook, _
                     Optional module As VBComponent, _
                     Optional ProcedureName As String, _
-                    Optional ExportMergedTxt As Boolean) As String
+                    Optional ExportMergedTxt As Boolean)
 
-    If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Exit Function
+    If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Exit Sub
 
     ProjetFoldersCreate
 
@@ -799,35 +813,29 @@ Function ExportProcedure( _
     Next
 
     If ExportedProcedures.Count > 1 Then
-    
-        Dim MergedName As String
-            MergedName = "Merged_" & ProcedureName
-        Dim FileName As String
-            FileName = GITHUB_LOCAL_LIBRARY_PROCEDURES & MergedName & ".txt"
-        Dim MergedString As String
-
         For Each procedure In ExportedProcedures
-            MergedString = MergedString & vbNewLine & ProcedureCode(TargetWorkbook, , procedure)
+            ExportTargetProcedure TargetWorkbook, , CStr(procedure)
         Next
-        ExportProcedure = MergedString
-        
         If ExportMergedTxt Then
+            Dim MergedName As String:   MergedName = "Merged_" & ProcedureName
+            Dim FileName As String:     FileName = GITHUB_LOCAL_LIBRARY_PROCEDURES & MergedName & ".txt"
+            Dim MergedString As String
+    
+            For Each procedure In ExportedProcedures
+                MergedString = MergedString & vbNewLine & ProcedureCode(TargetWorkbook, , procedure)
+            Next
             Debug.Print "OVERWROTE " & MergedName
             TxtOverwrite FileName, MergedString
             TxtPrependContainedProcedures FileName
         End If
-
-        For Each procedure In ExportedProcedures
-            ExportTargetProcedure TargetWorkbook, , CStr(procedure)
-        Next
     End If
-
+    
     FollowLink GITHUB_LOCAL_LIBRARY_PROCEDURES
     
-    Exit Function
+    Exit Sub
 ErrorHandler:
     MsgBox "An error occured in Sub ExportProcedure"
-End Function
+End Sub
 
 Sub ExportTargetProcedure( _
         Optional TargetWorkbook As Workbook, _
@@ -1526,8 +1534,8 @@ Error_Handler_Exit:
     On Error Resume Next
     Exit Function
 Error_Handler:
-    "Error Source: ProcedureCode" & vbCrLf & _
-    "Error Description: " & err.Description & _
+    Debug.Print "Error Source: ProcedureCode" & vbCrLf & _
+    "Error Description: " & Err.Description & _
     Switch(Erl = 0, vbNullString, Erl <> 0, vbCrLf & "Line No: " & Erl)
     Resume Error_Handler_Exit
 End Function
@@ -2255,4 +2263,5 @@ Public Function CLIP(Optional StoreText As String) As String
         End With
     End With
 End Function
+
 
