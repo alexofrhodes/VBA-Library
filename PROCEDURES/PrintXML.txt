@@ -1,0 +1,5 @@
+
+Sub PrintXML(var)
+'@BlogPosted
+    Debug.Print var.xml
+End Sub

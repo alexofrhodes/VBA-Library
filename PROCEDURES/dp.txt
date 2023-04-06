@@ -1,6 +1,4 @@
 
-
-
 Public Sub dp(var As Variant)
 '@BlogPosted
 '@AssignedModule F_Vbe_DebugPrintStop
@@ -8,7 +6,7 @@ Public Sub dp(var As Variant)
 '@INCLUDE PROCEDURE printArray
 '@INCLUDE PROCEDURE printCollection
 '@INCLUDE PROCEDURE printDictionary
-    Dim element     As Variant
+    Dim Element     As Variant
     Dim i As Long
 '    Debug.Print TypeName(var)
     Select Case TypeName(var)
@@ -24,6 +22,8 @@ Public Sub dp(var As Variant)
         printRange var
     Case Is = "Date"
         Debug.Print var
+    Case Is = "IXMLDOMElement"
+        PrintXML var
     Case Else
     End Select
 End Sub
