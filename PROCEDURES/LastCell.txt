@@ -1,16 +1,48 @@
 
 Function LastCell(rng As Range, Optional booCol As Boolean) As Range
 '@BlogPosted
-    Dim WS As Worksheet
-    Set WS = rng.parent
-    Dim Cell As Range
+    Dim ws As Worksheet
+    Set ws = rng.Parent
+    Dim cell As Range
     If booCol = False Then
-        Set Cell = WS.Cells(rows.Count, rng.Column).End(xlUp)
-        If Cell.MergeCells Then Set Cell = Cells(Cell.row + Cell.rows.Count - 1, Cell.Column)
+        Set cell = ws.Cells(rows.Count, rng.Column).End(xlUp)
+        If cell.MergeCells Then Set cell = Cells(cell.Row + cell.rows.Count - 1, cell.Column)
     Else
-        Set Cell = WS.Cells(rng.row, Columns.Count).End(xlToLeft)
-        If Cell.MergeCells Then Set Cell = Cells(Cell.row, Cell.Column + Cell.Columns.Count - 1)
+        Set cell = ws.Cells(rng.Row, Columns.Count).End(xlToLeft)
+        If cell.MergeCells Then Set cell = Cells(cell.Row, cell.Column + cell.Columns.Count - 1)
     End If
 
-    Set LastCell = Cell
+    Set LastCell = cell
+End Function
+
+Function LastCell(rng As Range, Optional booCol As Boolean) As Range
+'@BlogPosted
+    Dim ws As Worksheet
+    Set ws = rng.Parent
+    Dim cell As Range
+    If booCol = False Then
+        Set cell = ws.Cells(rows.Count, rng.Column).End(xlUp)
+        If cell.MergeCells Then Set cell = Cells(cell.Row + cell.rows.Count - 1, cell.Column)
+    Else
+        Set cell = ws.Cells(rng.Row, Columns.Count).End(xlToLeft)
+        If cell.MergeCells Then Set cell = Cells(cell.Row, cell.Column + cell.Columns.Count - 1)
+    End If
+
+    Set LastCell = cell
+End Function
+
+Function LastCell(rng As Range, Optional booCol As Boolean) As Range
+'@BlogPosted
+    Dim ws As Worksheet
+    Set ws = rng.Parent
+    Dim cell As Range
+    If booCol = False Then
+        Set cell = ws.Cells(rows.Count, rng.Column).End(xlUp)
+        If cell.MergeCells Then Set cell = Cells(cell.Row + cell.rows.Count - 1, cell.Column)
+    Else
+        Set cell = ws.Cells(rng.Row, Columns.Count).End(xlToLeft)
+        If cell.MergeCells Then Set cell = Cells(cell.Row, cell.Column + cell.Columns.Count - 1)
+    End If
+
+    Set LastCell = cell
 End Function

@@ -63,3 +63,68 @@ Public Sub ArrayQuickSort(ByRef SortableArray As Variant, Optional lngMin As Lon
     If (lngMin < j) Then Call ArrayQuickSort(SortableArray, lngMin, j)
     If (i < lngMax) Then Call ArrayQuickSort(SortableArray, i, lngMax)
 End Sub
+
+Public Sub ArrayQuickSort(ByRef SortableArray As Variant, Optional lngMin As Long = -1, Optional lngMax As Long = -1)
+'@BlogPosted
+'@AssignedModule M_DataEntry
+    On Error Resume Next
+    Dim i As Long
+    Dim j As Long
+    Dim varMid As Variant
+    Dim varX As Variant
+    If IsEmpty(SortableArray) Then
+        Exit Sub
+    End If
+    If InStr(TypeName(SortableArray), "()") < 1 Then
+        Exit Sub
+    End If
+    If lngMin = -1 Then
+        lngMin = LBound(SortableArray)
+    End If
+    If lngMax = -1 Then
+        lngMax = UBound(SortableArray)
+    End If
+    If lngMin >= lngMax Then
+        Exit Sub
+    End If
+    i = lngMin
+    j = lngMax
+    varMid = Empty
+    varMid = SortableArray((lngMin + lngMax) \ 2)
+    If IsObject(varMid) Then
+        i = lngMax
+        j = lngMin
+    ElseIf IsEmpty(varMid) Then
+        i = lngMax
+        j = lngMin
+    ElseIf IsNull(varMid) Then
+        i = lngMax
+        j = lngMin
+    ElseIf varMid = "" Then
+        i = lngMax
+        j = lngMin
+    ElseIf VarType(varMid) = vbError Then
+        i = lngMax
+        j = lngMin
+    ElseIf VarType(varMid) > 17 Then
+        i = lngMax
+        j = lngMin
+    End If
+    While i <= j
+        While SortableArray(i) < varMid And i < lngMax
+            i = i + 1
+        Wend
+        While varMid < SortableArray(j) And j > lngMin
+            j = j - 1
+        Wend
+        If i <= j Then
+            varX = SortableArray(i)
+            SortableArray(i) = SortableArray(j)
+            SortableArray(j) = varX
+            i = i + 1
+            j = j - 1
+        End If
+    Wend
+    If (lngMin < j) Then Call ArrayQuickSort(SortableArray, lngMin, j)
+    If (i < lngMax) Then Call ArrayQuickSort(SortableArray, i, lngMax)
+End Sub

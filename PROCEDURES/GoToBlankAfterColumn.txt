@@ -1,0 +1,16 @@
+
+Sub GoToBlankAfterColumn()
+    Application.ScreenUpdating = False
+    If TypeName(Selection) <> "Range" Or _
+        Selection.Cells.Count > 1 Then
+        MsgBox "Choose 1 cell"
+        Exit Sub
+    End If
+    Dim lastRow As Long
+    lastRow = Cells(rows.Count, ActiveCell.Column).End(xlUp).Row
+    Cells(lastRow, ActiveCell.Column).OFFSET(1, 0).Select
+    With ActiveCell.OFFSET(-1)
+        If .TEXT = "" Then .Select
+    End With
+    Application.ScreenUpdating = True
+End Sub

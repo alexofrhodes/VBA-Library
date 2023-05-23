@@ -20,3 +20,25 @@ Public Function cleanArray(varArray As Variant) As Variant()
  ReDim Preserve TempArray(LBound(varArray) To NewIndex - 1)
  cleanArray = TempArray
 End Function
+
+Public Function cleanArray(varArray As Variant) As Variant()
+'@BlogPosted
+'@AssignedModule F_Array
+'@INCLUDE PROCEDURE ArrayAllocated
+'@INCLUDE PROCEDURE CleanTrim
+  Dim TempArray() As Variant
+  Dim OldIndex As Integer
+  Dim NewIndex As Integer
+  Dim Output As String
+  If Not ArrayAllocated(varArray) Then Exit Function
+  ReDim TempArray(LBound(varArray) To UBound(varArray))
+  For OldIndex = LBound(varArray) To UBound(varArray)
+    Output = CleanTrim(varArray(OldIndex))
+    If Not Output = "" Then
+        TempArray(NewIndex) = Output
+        NewIndex = NewIndex + 1
+    End If
+ Next OldIndex
+ ReDim Preserve TempArray(LBound(varArray) To NewIndex - 1)
+ cleanArray = TempArray
+End Function

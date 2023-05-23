@@ -1,0 +1,37 @@
+
+Sub SwapSelectedRanges()
+    Dim rng As Range
+    Dim tempRng As Variant
+    Dim areaCount As Long
+    Dim areaRows As Long
+    Dim areaCols As Long
+    Dim i As Integer
+    Dim j As Integer
+    Set rng = Selection
+    areaCount = rng.Areas.Count
+    If areaCount < 2 Then
+        MsgBox "Please select atleast two ranges."
+        Exit Sub
+    End If
+    areaRows = rng.Areas(1).rows.Count
+    areaCols = rng.Areas(1).Columns.Count
+    For i = 2 To areaCount
+        If rng.Areas(i).rows.Count <> areaRows Or _
+            rng.Areas(i).Columns.Count <> areaCols Then
+            MsgBox "All ranges must have the same number of rows and columns."
+            Exit Sub
+        End If
+    Next i
+    For j = 1 To areaCount - 1
+        For i = 1 + j To areaCount
+            If Not Intersect(rng.Areas(i), rng.Areas(j)) Is Nothing Then
+                MsgBox "Selected areas must not overlap."
+            End If
+        Next i
+    Next j
+    tempRng = rng.Areas(areaCount).Cells.Formula
+    For i = areaCount To 2 Step -1
+        rng.Areas(i).Cells.Formula = rng.Areas(i - 1).Cells.Formula
+    Next i
+    rng.Areas(1).Cells.Formula = tempRng
+End Sub

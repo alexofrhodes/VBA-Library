@@ -1,0 +1,4 @@
+
+Function ValidExpand(Optional a As Long, Optional b As Long) As Boolean
+    If a >= 1 And b >= 1 Then ValidExpand = True
+End Function

@@ -1,0 +1,72 @@
+
+Public Function RandBetween( _
+    ByVal minNumber As Long, _
+    ByVal maxNumber As Long) _
+As Variant
+
+    '@Description: This function returns a random number between the min and max numbers
+    '@Author: Anthony Mancini
+    '@Version: 1.0.0
+    '@License: MIT
+    '@Param: minNumber is the minimum number in the range
+    '@Param: maxNumber is the maximum number in the range
+    '@Returns: Returns a random number between the range
+    '@Example: =RandBetween(1, 20) -> 5
+    '@Example: =RandBetween(1, 20) -> 9
+    '@Example: =RandBetween(1, 20) -> 13
+    '@Example: =RandBetween(1, 20) -> 2
+    '@Example: =RandBetween(1, 20) -> 20
+    '@Example: =RandBetween(1, 20) -> 6
+
+    RandBetween = Fix(Rnd * (maxNumber - minNumber + 1) + minNumber)
+
+End Function
+
+
+Public Function RandBetween( _
+    ByVal minNumber As Long, _
+    ByVal maxNumber As Long) _
+As Variant
+
+    '@Description: This function returns a random number between the min and max numbers
+    '@Author: Anthony Mancini
+    '@Version: 1.0.0
+    '@License: MIT
+    '@Param: minNumber is the minimum number in the range
+    '@Param: maxNumber is the maximum number in the range
+    '@Returns: Returns a random number between the range
+    '@Example: =RandBetween(1, 20) -> 5
+    '@Example: =RandBetween(1, 20) -> 9
+    '@Example: =RandBetween(1, 20) -> 13
+    '@Example: =RandBetween(1, 20) -> 2
+    '@Example: =RandBetween(1, 20) -> 20
+    '@Example: =RandBetween(1, 20) -> 6
+
+    RandBetween = Fix(Rnd * (maxNumber - minNumber + 1) + minNumber)
+
+End Function
+
+
+Public Function RandBetween( _
+    ByVal minNumber As Long, _
+    ByVal maxNumber As Long) _
+As Variant
+
+    '@Description: This function returns a random number between the min and max numbers
+    '@Author: Anthony Mancini
+    '@Version: 1.0.0
+    '@License: MIT
+    '@Param: minNumber is the minimum number in the range
+    '@Param: maxNumber is the maximum number in the range
+    '@Returns: Returns a random number between the range
+    '@Example: =RandBetween(1, 20) -> 5
+    '@Example: =RandBetween(1, 20) -> 9
+    '@Example: =RandBetween(1, 20) -> 13
+    '@Example: =RandBetween(1, 20) -> 2
+    '@Example: =RandBetween(1, 20) -> 20
+    '@Example: =RandBetween(1, 20) -> 6
+
+    RandBetween = Fix(Rnd * (maxNumber - minNumber + 1) + minNumber)
+
+End Function
+

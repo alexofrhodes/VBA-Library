@@ -1,0 +1,36 @@
+
+Function Parser_Tab(ByVal s As String) As String
+'@LastModified 2305220859
+'@AssignedModule F_String
+    'https://sites.google.com/site/e90e50/random-topics/tool-for-parsing-formulas-in-excel
+    Dim SS As String, ch As String
+    Dim t As Long, z As Long, x As Long
+
+    SS = String(10000, " ")
+
+    t = 1
+    z = 1
+    For x = 1 To Len(s)
+        ch = Mid(s, x, 1)
+        If ch = vbCr And x > 1 Then
+
+            If Mid(s, x - 1, 1) = "(" Then
+                z = z + 1
+            Else
+                If Mid(s, x + 1, 1) = ")" Then
+                    z = z - 1
+                End If
+            End If
+
+            Mid(SS, t, z + 1) = ch & Application.Rept(vbTab, z)
+
+            t = t + z
+        Else
+            Mid(SS, t, 1) = ch
+            t = t + 1
+        End If
+    Next
+    s = Left(SS, t - 1)
+    Parser_Tab = s
+
+End Function

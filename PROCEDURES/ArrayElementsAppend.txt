@@ -1,0 +1,9 @@
+Function ArrayElementsAppend( _
+                     ByVal inputArray As Variant, _
+                     this As String)
+    Dim i As Long
+    For i = LBound(inputArray) To UBound(inputArray)
+        inputArray(i) = inputArray(i) & this
+    Next
+    ArrayElementsAppend = inputArray
+End Function

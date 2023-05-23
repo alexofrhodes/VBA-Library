@@ -1,0 +1,30 @@
+
+Function ContainsIllegalCharacter(strin As String) As Boolean
+    Dim strSpecialChars As String: strSpecialChars = "~""#%@&*:<>?!{|}/\[]" & Chr(10) & Chr(13)
+    Dim strOut As String: strOut = strin
+    Dim i As Long
+    For i = 1 To Len(strSpecialChars)
+        strOut = Replace(strOut, Mid$(strSpecialChars, i, 1), "")
+        If Len(strin) <> Len(strOut) Then ContainsIllegalCharacter = True: Exit Function
+    Next
+End Function
+
+Function ContainsIllegalCharacter(strin As String) As Boolean
+    Dim strSpecialChars As String: strSpecialChars = "~""#%@&*:<>?!{|}/\[]" & Chr(10) & Chr(13)
+    Dim strOut As String: strOut = strin
+    Dim i As Long
+    For i = 1 To Len(strSpecialChars)
+        strOut = Replace(strOut, Mid$(strSpecialChars, i, 1), "")
+        If Len(strin) <> Len(strOut) Then ContainsIllegalCharacter = True: Exit Function
+    Next
+End Function
+
+Function ContainsIllegalCharacter(strin As String) As Boolean
+    Dim strSpecialChars As String: strSpecialChars = "~""#%@&*:<>?!{|}/\[]" & Chr(10) & Chr(13)
+    Dim strOut As String: strOut = strin
+    Dim i As Long
+    For i = 1 To Len(strSpecialChars)
+        strOut = Replace(strOut, Mid$(strSpecialChars, i, 1), "")
+        If Len(strin) <> Len(strOut) Then ContainsIllegalCharacter = True: Exit Function
+    Next
+End Function

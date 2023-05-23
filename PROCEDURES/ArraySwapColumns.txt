@@ -1,0 +1,31 @@
+
+Public Sub ArraySwapColumns(ByRef arr As Variant, ByVal idx1 As Long, idx2 As Long)
+    '<<<<Need some Conditional Check ..Like Idx is greater than Ubound or Less than Lbound
+    'This sub swap element of an array by column in place.
+    'This is applicable for 2D array.
+    Dim el As Variant                      'For temporary data holding..
+    Dim CurrentRow As Long           'This one for running loop
+
+    If IsArray(arr) = False Then                                                'Check if pass argument is an array or not..
+        MsgBox "Need array to swap Columns"
+        Exit Sub
+    End If
+
+    If NumberOfArrayDimensions(arr:=arr) <> 2 Then          'Check array dimension.
+        MsgBox "Input array must need to be a 2D array"
+        Exit Sub
+    End If
+
+    If idx1 > UBound(arr, 2) Or idx2 > UBound(arr, 2) Or idx1 < LBound(arr, 2) Or idx2 < LBound(arr, 2) Then  'Check if Index is in range of lower bound and upper bound.
+        MsgBox "Check passed index and Lower bound and upper bound"
+        Exit Sub
+    End If
+
+    If idx1 = idx2 Then Exit Sub            'If both Idx are equal then just exit sub.
+
+    For CurrentRow = LBound(arr, 1) To UBound(arr, 1)
+        el = arr(CurrentRow, idx1)      'Hold data to the temporary variable.
+         arr(CurrentRow, idx1) = arr(CurrentRow, idx2)            'Swip value.
+         arr(CurrentRow, idx2) = el                                         'Replace the value..
+    Next CurrentRow
+End Sub

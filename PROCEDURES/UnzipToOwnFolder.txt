@@ -1,0 +1,26 @@
+
+Public Sub UnzipToOwnFolder(ZippedFile As String, DeleteExistingFiles As Boolean, DeleteZip As Boolean)
+    Rem for each cell in selection.cells: UnzipToOwnFolder cell.text,False,false :next
+    Dim FileCollection As New Collection
+    FilesAndOrFoldersInFolderOrZip ZippedFile, False, True, False, FileCollection
+    Dim FolderCollection As New Collection
+    FilesAndOrFoldersInFolderOrZip ZippedFile, True, False, False, FolderCollection
+    Dim shell_app           As Object:     Set shell_app = CreateObject("Shell.Application")
+    Rem   Dim FilesInZip          As Long:        FilesInZip = shell_app.Namespace(CVar(ZippedFile)).items.Count
+    Dim LastSlash            As Long:       LastSlash = InStrRev(ZippedFile, "\")
+    Dim Dot                      As Long:      Dot = InStrRev(ZippedFile, ".")
+    Dim ParentFolder       As String:     ParentFolder = Left(ZippedFile, LastSlash)
+    Dim UnzipToFolder   As String
+    If FolderCollection.Count = 1 And FileCollection.Count = 0 Then
+        UnzipToFolder = ParentFolder
+    ElseIf FolderCollection.Count > 1 Or FileCollection.Count > 0 Then
+        UnzipToFolder = Left(ZippedFile, Dot - 1) & "\"
+        If DeleteExistingFiles Then
+            If FolderExists(UnzipToFolder) Then RecycleSafe UnzipToFolder
+        End If
+        FoldersCreate UnzipToFolder
+    End If
+    shell_app.Namespace(CVar(UnzipToFolder)).CopyHere shell_app.Namespace(CVar(ZippedFile)).Items
+    If DeleteZip Then RecycleSafe ZippedFile
+    Set shell_app = Nothing
+End Sub

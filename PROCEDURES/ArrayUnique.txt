@@ -1,0 +1,56 @@
+
+
+Public Function ArrayUnique(ByVal inputArr As Variant, Optional idx As Long = -1, Optional ByColumn As Boolean = True _
+        , Optional FromAllElement As Boolean = False) As Variant
+        'This function return Unique value from an array..(Return a vector)..
+        'So you need to Use Transpose(But if you have more than 65536 data then it will cut the rest of the data)..
+        'So use Vector to array.(A loop)..If you want to paste data to a sheet then you need to convert to array.
+        'There is a difference between distinct and unique..
+        'For example : If you have data like : a,b,c,a,d,b
+        'Then Distinct >  a,b,c,d(Take only one time)  And Unique >  c,d (Comes only one time)
+        'This is case insensitive..
+        'Applicable for 2D array(in default..If you define FromAllElement to true then it will be applicable for any dimension).
+        'Output will not be stable(not First come first seen in output because array for each go from like this Column1(all row)>Column2>....>ColumnN
+        'If your array has no unique value and as you are assingning the output to an array then it will return an error : Run time error: Type mismatch
+
+        If IsArray(inputArr) = False Then                           'Check if Input is an array or not.
+            MsgBox "Need array to extract Unique value"
+            ArrayUnique = Null
+            Exit Function
+        End If
+        Dim dict As Object                             'Declare collection to hold value.
+        Dim element As Variant                     'For running loop.
+        Dim CurrentIdx As Long                   'For running loop
+        Dim WhichDimension As Byte          'Check which dimension.
+
+        Set dict = CreateObject("Scripting.Dictionary")             'Set dictionary object..Late binding.
+        If FromAllElement = True Then        'Check if user select all the element or not.
+            For Each element In inputArr        'Run loop for each element
+                dict(element) = dict(element) + 1
+            Next element
+        Else                                                    'If all element is not selected then Check by which (Column/Row) he need to extract unique.
+            If ByColumn = True Then             'If by column then use some identifier for running loop.
+                WhichDimension = 1                 'For running loop for each element in given column.
+                If idx = -1 Then idx = LBound(inputArr, 2)      'If idx is not given then take the first column.
+            Else                                                                        'If by row then use some identifier for running loop.
+                WhichDimension = 2                                          'For running loop for each element in given column.
+                If idx = -1 Then idx = LBound(inputArr, 1)       'If idx is not given then take the first row.
+            End If
+
+            'Run the loop to add in the dictionary..
+            For CurrentIdx = LBound(inputArr, WhichDimension) To UBound(inputArr, WhichDimension)
+                If ByColumn = True Then
+                    dict(inputArr(CurrentIdx, idx)) = dict(inputArr(CurrentIdx, idx)) + 1           'Add data to collection.
+                Else
+                    dict(inputArr(idx, CurrentIdx)) = dict(inputArr(idx, CurrentIdx)) + 1
+                End If
+            Next CurrentIdx
+        End If
+
+        'Remove those element which comes more than once.
+        For Each element In dict.Keys
+             If dict(element) <> 1 Then dict.Remove element
+        Next element
+        If dict.Count = 0 Then MsgBox "No Unique": ArrayUnique = Null: Exit Function           'Check if there has no unique.
+        ArrayUnique = dict.Keys()                                                                                              'Set function value.It will return a vector
+    End Function

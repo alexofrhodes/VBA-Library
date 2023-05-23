@@ -1,0 +1,14 @@
+
+
+
+Sub ListboxSelectValue(LBox As MSForms.ListBox, str As String, Optional clr As Boolean = True)
+    '@INCLUDE ListboxClearSelection
+    Dim i As Long
+    If clr = True Then ListboxClearSelection (LBox)
+    For i = 0 To LBox.ListCount - 1
+        If LBox.list(i) = str Then
+            LBox.SELECTED(i) = True
+            Exit Sub
+        End If
+    Next i
+End Sub

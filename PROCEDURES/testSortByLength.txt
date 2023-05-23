@@ -1,0 +1,11 @@
+
+Public Sub testSortByLength()
+    '@INCLUDE ArraySortByLength
+    Dim Sample As Variant
+    Sample = Split("this,is,a,random,phrase", ",")
+    ArraySortByLength Sample, LBound(Sample), UBound(Sample)
+    Dim i As Integer
+    For i = LBound(Sample) To UBound(Sample)
+        Debug.Print Sample(i)
+    Next i
+End Sub

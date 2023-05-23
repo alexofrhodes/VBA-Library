@@ -1,0 +1,49 @@
+
+'https://sites.google.com/site/e90e50/vbscript/regexp/splittare
+
+Function RegexArray(ByVal TEXT As String, _
+                    Optional pattern As String = "\s+", _
+                    Optional IgnoreCase As Boolean = False, _
+                    Optional CleanHeadTail As Boolean = True)
+
+'______________________________________________
+'¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+'Di Roberto Mensa nick r
+'______________________________________________
+'¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+Dim s As String
+Dim RE As Object
+Set RE = CreateObject("vbscript.regexp")
+
+RE.Global = True
+RE.IgnoreCase = IgnoreCase
+RE.pattern = pattern
+
+On Error Resume Next
+If RE.test(TEXT) Then
+    If Err Then
+        'il pattern non è valido
+        Err.clear
+    Else
+        'utilizzo un carattere non stampabile
+        'come delimitatore
+        s = RE.Replace(TEXT, Chr(7))
+        'pulisco i risultati vuoti in
+        'testa e coda alla stringa
+        If CleanHeadTail Then
+            If Left(s, 1) = Chr(7) Then
+                s = Right(s, Len(s) - 1)
+            End If
+
+            If Right(s, 1) = Chr(7) Then
+                s = Left(s, Len(s) - 1)
+            End If
+        End If
+        RegexArray = Split(s, Chr(7))
+        Exit Function
+    End If
+End If
+On Error GoTo 0
+RegexArray = Array(TEXT)
+End Function

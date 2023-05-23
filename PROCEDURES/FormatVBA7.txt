@@ -35,3 +35,120 @@ Function FormatVBA7(str As String) As String
     FormatVBA7 = out
 
 End Function
+Function FormatVBA7(str As String) As String
+'@BlogPosted
+'@AssignedModule F_Vbe_Codepane
+'@INCLUDE PROCEDURE collectionToString
+'@INCLUDE PROCEDURE CollectionSort
+    Dim selectedText
+        selectedText = str
+        selectedText = Replace(selectedText, " _" & vbNewLine, "")
+        selectedText = Split(selectedText, vbNewLine)
+    Dim IsVba7 As String
+    Dim NotVba7 As String
+    Dim colIsVBA7 As New Collection
+    Dim colNotVBA7 As New Collection
+    Dim i As Long
+    For i = LBound(selectedText) To UBound(selectedText)
+        If InStr(1, selectedText(i), "PtrSafe", vbTextCompare) Then
+            IsVba7 = selectedText(i)
+            NotVba7 = Replace(selectedText(i), "Declare ptrsafe ", "Declare ", , , vbTextCompare)
+        Else
+            IsVba7 = Replace(selectedText(i), "Declare ", "Declare PtrSafe ")
+            NotVba7 = selectedText(i)
+        End If
+        colIsVBA7.Add IsVba7
+        colNotVBA7.Add NotVba7
+    Next
+    
+    Dim s1 As String, s2 As String
+        s1 = Space(4) & aCollection.Init(colIsVBA7).Sort.ToString(vbNewLine & Space(4))
+        s2 = Space(4) & aCollection.Init(colNotVBA7).Sort.ToString(vbNewLine & Space(4))
+    
+    Dim out As String
+        out = "#If VBA7 then" & vbNewLine & _
+                    s1 & vbNewLine & _
+                "#Else" & vbNewLine & _
+                    s2 & vbNewLine & _
+                "#End If"
+    FormatVBA7 = out
+
+End Function
+Function FormatVBA7(str As String) As String
+'@BlogPosted
+'@AssignedModule F_Vbe_Codepane
+'@INCLUDE PROCEDURE collectionToString
+'@INCLUDE PROCEDURE CollectionSort
+    Dim selectedText
+        selectedText = str
+        selectedText = Replace(selectedText, " _" & vbNewLine, "")
+        selectedText = Split(selectedText, vbNewLine)
+    Dim IsVba7 As String
+    Dim NotVba7 As String
+    Dim colIsVBA7 As New Collection
+    Dim colNotVBA7 As New Collection
+    Dim i As Long
+    For i = LBound(selectedText) To UBound(selectedText)
+        If InStr(1, selectedText(i), "PtrSafe", vbTextCompare) Then
+            IsVba7 = selectedText(i)
+            NotVba7 = Replace(selectedText(i), "Declare ptrsafe ", "Declare ", , , vbTextCompare)
+        Else
+            IsVba7 = Replace(selectedText(i), "Declare ", "Declare PtrSafe ")
+            NotVba7 = selectedText(i)
+        End If
+        colIsVBA7.Add IsVba7
+        colNotVBA7.Add NotVba7
+    Next
+    
+    Dim s1 As String, s2 As String
+        s1 = Space(4) & aCollection.Init(colIsVBA7).Sort.ToString(vbNewLine & Space(4))
+        s2 = Space(4) & aCollection.Init(colNotVBA7).Sort.ToString(vbNewLine & Space(4))
+    
+    Dim out As String
+        out = "#If VBA7 then" & vbNewLine & _
+                    s1 & vbNewLine & _
+                "#Else" & vbNewLine & _
+                    s2 & vbNewLine & _
+                "#End If"
+    FormatVBA7 = out
+
+End Function
+Function FormatVBA7(str As String) As String
+'@BlogPosted
+'@AssignedModule F_Vbe_Codepane
+'@INCLUDE PROCEDURE collectionToString
+'@INCLUDE PROCEDURE CollectionSort
+    Dim selectedText
+        selectedText = str
+        selectedText = Replace(selectedText, " _" & vbNewLine, "")
+        selectedText = Split(selectedText, vbNewLine)
+    Dim IsVba7 As String
+    Dim NotVba7 As String
+    Dim colIsVBA7 As New Collection
+    Dim colNotVBA7 As New Collection
+    Dim i As Long
+    For i = LBound(selectedText) To UBound(selectedText)
+        If InStr(1, selectedText(i), "PtrSafe", vbTextCompare) Then
+            IsVba7 = selectedText(i)
+            NotVba7 = Replace(selectedText(i), "Declare ptrsafe ", "Declare ", , , vbTextCompare)
+        Else
+            IsVba7 = Replace(selectedText(i), "Declare ", "Declare PtrSafe ")
+            NotVba7 = selectedText(i)
+        End If
+        colIsVBA7.Add IsVba7
+        colNotVBA7.Add NotVba7
+    Next
+    
+    Dim s1 As String, s2 As String
+        s1 = Space(4) & aCollection.Init(colIsVBA7).Sort.ToString(vbNewLine & Space(4))
+        s2 = Space(4) & aCollection.Init(colNotVBA7).Sort.ToString(vbNewLine & Space(4))
+    
+    Dim out As String
+        out = "#If VBA7 then" & vbNewLine & _
+                    s1 & vbNewLine & _
+                "#Else" & vbNewLine & _
+                    s2 & vbNewLine & _
+                "#End If"
+    FormatVBA7 = out
+
+End Function

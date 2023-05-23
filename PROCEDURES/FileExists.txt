@@ -6,3 +6,33 @@ Public Function FileExists(ByVal filename As String) As Boolean
     If Right(filename, 1) = "\" Then filename = left(filename, Len(filename) - 1)
     FileExists = (Dir(filename, vbArchive + vbHidden + vbReadOnly + vbSystem) <> "")
 End Function
+
+Public Function FileExists(ByVal Filename As String) As Boolean
+'@BlogPosted
+'@AssignedModule F_FileFolder
+    If InStr(1, Filename, "\") = 0 Then Exit Function
+    If Right(Filename, 1) = "\" Then Filename = Left(Filename, Len(Filename) - 1)
+    FileExists = (Dir(Filename, vbArchive + vbHidden + vbReadOnly + vbSystem) <> "")
+End Function
+'Function FileExists(ByVal strFile As String, Optional bFindFolders As Boolean) As Boolean
+'    'Purpose:   Return True if the file exists, even if it is hidden.
+'    'Arguments: strFile: File name to look for. Current directory searched if no path included.
+'    '           bFindFolders. If strFile is a folder, FileExists() returns False unless this argument is True.
+'    'Note:      Does not look inside subdirectories for the file.
+'    'Author:    Allen Browne. http://allenbrowne.com June, 2006.
+'    Dim lngAttributes As Long
+'
+'    'Include read-only files, hidden files, system files.
+'    lngAttributes = (vbReadOnly Or vbHidden Or vbSystem)
+'    If bFindFolders Then
+'        lngAttributes = (lngAttributes Or vbDirectory) 'Include folders as well.
+'    Else
+'        'Strip any trailing slash, so Dir does not look inside the folder.
+'        Do While Right$(strFile, 1) = "\"
+'            strFile = left$(strFile, Len(strFile) - 1)
+'        Loop
+'    End If
+'    'If Dir() returns something, the file exists.
+'    On Error Resume Next
+'    FileExists = (Len(Dir(strFile, lngAttributes)) > 0)
+'End Function

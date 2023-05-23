@@ -1,6 +1,5 @@
 Attribute VB_Name = "Dependencies"
 
-
 Rem do not alter this module programmatically
 
 Rem AUTHOR         Anastasiou Alex
@@ -20,19 +19,61 @@ Rem YouTube        https://bit.ly/3aLZU9M
 #End If
 
 Rem ___CHANGE THESE TO MATCH YOUR FOLDER AND REPO____
-Public Const GITHUB_LIBRARY = "https://raw.githubusercontent.com/alexofrhodes/vba-library/"    '<---
+
+'------------------------------------------------------------------------------
+Public Const GITHUB_LIBRARY = "https://raw.githubusercontent.com/alexofrhodes/VBA-Library/"
+'------------------------------------------------------------------------------
     Public Const GITHUB_LIBRARY_DECLARATIONS = GITHUB_LIBRARY & "Declarations/"
     Public Const GITHUB_LIBRARY_PROCEDURES = GITHUB_LIBRARY & "Procedures/"
     Public Const GITHUB_LIBRARY_USERFORMS = GITHUB_LIBRARY & "Userforms/"
     Public Const GITHUB_LIBRARY_CLASSES = GITHUB_LIBRARY & "Classes/"
 
-Public Const GITHUB_LOCAL_LIBRARY = "C:\Users\acer\Documents\GitHub\VBA-Library\"   '<---
-    Public Const GITHUB_LOCAL_LIBRARY_DECLARATIONS = GITHUB_LOCAL_LIBRARY & "Declarations\"
-    Public Const GITHUB_LOCAL_LIBRARY_PROCEDURES = GITHUB_LOCAL_LIBRARY & "Procedures\"
-    Public Const GITHUB_LOCAL_LIBRARY_USERFORMS = GITHUB_LOCAL_LIBRARY & "Userforms\"
-    Public Const GITHUB_LOCAL_LIBRARY_CLASSES = GITHUB_LOCAL_LIBRARY & "Classes\"
+'------------------------------------------------------------------------------
+Public Const GITHUB_LOCAL_LIBRARY = "C:\Users\acer\Documents\GitHub\VBA-Library\"
+'------------------------------------------------------------------------------
+    Public Const LOCAL_LIBRARY_DECLARATIONS = GITHUB_LOCAL_LIBRARY & "Declarations\"
+    Public Const LOCAL_LIBRARY_PROCEDURES = GITHUB_LOCAL_LIBRARY & "Procedures\"
+    Public Const LOCAL_LIBRARY_USERFORMS = GITHUB_LOCAL_LIBRARY & "Userforms\"
+    Public Const LOCAL_LIBRARY_CLASSES = GITHUB_LOCAL_LIBRARY & "Classes\"
+'------------------------------------------------------------------------------
+
+Public Const GITHUB_BLOG = "https://alexofrhodes.github.io/"
+Public Const GITHUB_URL = "https://github.com/alexofrhodes/"
+
 Rem __________________________________________________
 
+Public Const AUTHOR_YOUTUBE = "https://www.youtube.com/channel/UC5QH3fn1zjx0aUjRER_rOjg"
+Public Const AUTHOR_VK = "https://vk.com/video/playlist/735281600_1"
+Public Const AUTHOR_NAME = "Anastasiou Alex"
+Public Const AUTHOR_EMAIL = "AnastasiouAlex@gmail.com"
+Public Const AUTHOR_COPYRIGHT = ""
+Public Const AUTHOR_OTHERTEXT = ""
+
+Public Const VBARC_MOTHERBOARD = "NBGD41100771701DDE7600"
+
+Public ShowInVBE As Boolean
+
+Public Function AUTHOR_MEDIA() As String
+    AUTHOR_MEDIA = "'* BLOG       : " & GITHUB_BLOG & vbNewLine & _
+                   "'* GITHUB     : " & GITHUB_URL & vbNewLine & _
+                   "'* YOUTUBE    : " & AUTHOR_YOUTUBE & vbNewLine & _
+                   "'* VK         : " & AUTHOR_VK & vbNewLine & "'*" & vbNewLine
+End Function
+
+Function DevInfo() As String
+    Dim i As Long: i = 14
+    Dim Character As String: Character = "_"
+    DevInfo = DpHeader(Array( _
+    "AUTHOR     " & AUTHOR_NAME, _
+    "EMAIL      " & AUTHOR_EMAIL, _
+    "BLOG       " & GITHUB_BLOG, _
+    "GITHUB     " & GITHUB_URL, _
+    "YOUTUBE    " & AUTHOR_YOUTUBE, _
+    "VK         " & AUTHOR_VK) _
+    , , "*", True, True)
+End Function
+
+'--------------------------------------------
 Sub AddLinkedListsToActiveProcedure()
     AddLinkedLists ThisWorkbook, ActiveModule, ActiveProcedure
 End Sub
@@ -50,38 +91,38 @@ Sub ImportActiveProcedureDependencies()
 End Sub
 
 Sub AddLinkedListsToAllProcedures(TargetWorkbook As Workbook)
-    Dim procedure
-    Dim module As VBComponent
-    For Each module In TargetWorkbook.VBProject.VBComponents
-        If module.Type = vbext_ct_StdModule And module.Name <> "Dependencies" Then
-            For Each procedure In ProceduresOfModule(module)
-                AddLinkedLists TargetWorkbook, module, CStr(procedure)
-            Next procedure
+    Dim Procedure
+    Dim Module As VBComponent
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        If Module.Type = vbext_ct_StdModule And Module.Name <> "Dependencies" Then
+            For Each Procedure In ProceduresOfModule(Module)
+                AddLinkedLists TargetWorkbook, Module, CStr(Procedure)
+            Next Procedure
         End If
-    Next module
+    Next Module
     MsgBox "Done"
 End Sub
 
 Sub ExportAllProcedures(TargetWorkbook As Workbook)
-    Dim procedure
-    Dim module As VBComponent
-    For Each module In TargetWorkbook.VBProject.VBComponents
-        If module.Type = vbext_ct_StdModule Then
-            For Each procedure In ProceduresOfModule(module)
-                ExportProcedure TargetWorkbook, module, CStr(procedure), False
-            Next procedure
+    Dim Procedure
+    Dim Module As VBComponent
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        If Module.Type = vbext_ct_StdModule Then
+            For Each Procedure In ProceduresOfModule(Module)
+                ExportProcedure TargetWorkbook, Module, CStr(Procedure), False
+            Next Procedure
         End If
-    Next module
+    Next Module
 End Sub
 
 Sub RemoveComments(TargetWorkbook As Workbook)
-    Dim module As VBComponent
+    Dim Module As VBComponent
     Dim s As String
     Dim i As Long
-    For Each module In TargetWorkbook.VBProject.VBComponents
-        For i = module.CodeModule.CountOfLines To 1 Step -1
-            s = Trim(module.CodeModule.Lines(i, 1))
-            If s Like "'*" Then module.CodeModule.DeleteLines i, 1
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        For i = Module.CodeModule.CountOfLines To 1 Step -1
+            s = Trim(Module.CodeModule.Lines(i, 1))
+            If s Like "'*" Then Module.CodeModule.DeleteLines i, 1
         Next i
     Next
 End Sub
@@ -222,7 +263,7 @@ Function ArrayDuplicatesRemove(myArray As Variant) As Variant
     For i = nFirst To nLast
         coll.Add arrTemp(i), arrTemp(i)
     Next i
-    Err.Clear
+    Err.clear
     On Error GoTo 0
 
     nLast = coll.Count + nFirst - 1
@@ -247,14 +288,14 @@ Public Function ArrayToCollection(Items As Variant) As Collection
 End Function
 
 Function CleanTrim(ByVal s As String, Optional ConvertNonBreakingSpace As Boolean = True) As String
-    Dim X As Long, CodesToClean As Variant
+    Dim x As Long, CodesToClean As Variant
     CodesToClean = Array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, _
                          21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 127, 129, 141, 143, 144, 157)
     If ConvertNonBreakingSpace Then s = Replace(s, Chr(160), " ")
     s = Replace(s, vbCr, "")
-    For X = LBound(CodesToClean) To UBound(CodesToClean)
-        If InStr(s, Chr(CodesToClean(X))) Then
-            s = Replace(s, Chr(CodesToClean(X)), vbNullString)
+    For x = LBound(CodesToClean) To UBound(CodesToClean)
+        If InStr(s, Chr(CodesToClean(x))) Then
+            s = Replace(s, Chr(CodesToClean(x)), vbNullString)
         End If
     Next
     CleanTrim = s
@@ -262,126 +303,126 @@ Function CleanTrim(ByVal s As String, Optional ConvertNonBreakingSpace As Boolea
 End Function
 
 Sub AddLinkedLists(Optional TargetWorkbook As Workbook, _
-                    Optional module As VBComponent, _
-                    Optional procedure As String)
-    If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Exit Sub
-    ProcedureLinesRemoveInclude TargetWorkbook, module, procedure
-    ProcedureAssignedModuleAdd TargetWorkbook, module, procedure
-    AddListOfLinkedProceduresToProcedure TargetWorkbook, module, procedure
-    AddListOfLinkedClassesToProcedure TargetWorkbook, module, procedure
-    AddListOfLinkedUserformsToProcedure TargetWorkbook, module, procedure
-    AddListOfLinkedDeclarationsToProcedure TargetWorkbook, module, procedure
+                    Optional Module As VBComponent, _
+                    Optional Procedure As String)
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Exit Sub
+    ProcedureLinesRemoveInclude TargetWorkbook, Module, Procedure
+    ProcedureAssignedModuleAdd TargetWorkbook, Module, Procedure
+    AddListOfLinkedProceduresToProcedure TargetWorkbook, Module, Procedure
+    AddListOfLinkedClassesToProcedure TargetWorkbook, Module, Procedure
+    AddListOfLinkedUserformsToProcedure TargetWorkbook, Module, Procedure
+    AddListOfLinkedDeclarationsToProcedure TargetWorkbook, Module, Procedure
     
 End Sub
 
 
 Sub AddListOfLinkedClassesToProcedure( _
                                      Optional TargetWorkbook As Workbook, _
-                                     Optional module As VBComponent, _
+                                     Optional Module As VBComponent, _
                                      Optional ProcedureName As String)
 
-    If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Stop
+    If Not AssignCPSvariables(TargetWorkbook, Module, ProcedureName) Then Stop
     Dim ListOfImports As String
     Dim Code As String
-        Code = ProcedureCode(TargetWorkbook, module, ProcedureName)
+        Code = ProcedureCode(TargetWorkbook, Module, ProcedureName)
     Dim myClasses As Collection
-    Set myClasses = LinkedClasses(TargetWorkbook, module, ProcedureName)
-    Dim Element As Variant
-    For Each Element In myClasses
-        If InStr(1, Code, "@INCLUDE CLASS " & Element) = 0 _
-        And InStr(1, ListOfImports, "@INCLUDE CLASS " & Element) = 0 Then
+    Set myClasses = LinkedClasses(TargetWorkbook, Module, ProcedureName)
+    Dim element As Variant
+    For Each element In myClasses
+        If InStr(1, Code, "@INCLUDE CLASS " & element) = 0 _
+        And InStr(1, ListOfImports, "@INCLUDE CLASS " & element) = 0 Then
             If ListOfImports = "" Then
-                ListOfImports = "'@INCLUDE CLASS " & Element
+                ListOfImports = "'@INCLUDE CLASS " & element
             Else
-                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE CLASS " & Element
+                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE CLASS " & element
             End If
         End If
     Next
     If ListOfImports <> "" Then
-        module.CodeModule.InsertLines _
-            ProcedureBodyLineFirstAfterComments(module, ProcedureName), ListOfImports
+        Module.CodeModule.InsertLines _
+            ProcedureBodyLineFirstAfterComments(Module, ProcedureName), ListOfImports
     End If
 End Sub
 
 Sub AddListOfLinkedDeclarationsToProcedure( _
                                           Optional TargetWorkbook As Workbook, _
-                                          Optional module As VBComponent, _
+                                          Optional Module As VBComponent, _
                                           Optional ProcedureName As String)
 
     If ProcedureName = "" Then ProcedureName = ActiveProcedure
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     Dim ListOfImports As String
-    If module Is Nothing Then Set module = ModuleOfProcedure(TargetWorkbook, ProcedureName)
+    If Module Is Nothing Then Set Module = ModuleOfProcedure(TargetWorkbook, ProcedureName)
     Dim ProcedureText As String
-    ProcedureText = ProcedureCode(TargetWorkbook, module, ProcedureName)
+    ProcedureText = ProcedureCode(TargetWorkbook, Module, ProcedureName)
     Dim myDeclarations As Collection
-    Set myDeclarations = LinkedDeclarations(TargetWorkbook, module, ProcedureName)
+    Set myDeclarations = LinkedDeclarations(TargetWorkbook, Module, ProcedureName)
     Dim coll As New Collection
-    Dim Element As Variant
-    For Each Element In myDeclarations
-        If InStr(1, ProcedureText, "'@INCLUDE DECLARATION " & Element) = 0 Then
+    Dim element As Variant
+    For Each element In myDeclarations
+        If InStr(1, ProcedureText, "'@INCLUDE DECLARATION " & element) = 0 Then
             If ListOfImports = "" Then
-                ListOfImports = "'@INCLUDE DECLARATION " & Element
+                ListOfImports = "'@INCLUDE DECLARATION " & element
             Else
-                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE DECLARATION " & Element
+                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE DECLARATION " & element
             End If
         End If
     Next
     If ListOfImports <> "" Then
-        module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(module, ProcedureName), ListOfImports
+        Module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(Module, ProcedureName), ListOfImports
     End If
 End Sub
 
 Sub AddListOfLinkedProceduresToProcedure( _
                                         Optional TargetWorkbook As Workbook, _
-                                        Optional module As VBComponent, _
+                                        Optional Module As VBComponent, _
                                         Optional ProcedureName As String)
 
-    If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Stop
+    If Not AssignCPSvariables(TargetWorkbook, Module, ProcedureName) Then Stop
     Dim Procedures As Collection
-    Set Procedures = LinkedProcedures(TargetWorkbook, module, ProcedureName)
+    Set Procedures = LinkedProcedures(TargetWorkbook, Module, ProcedureName)
     Dim ListOfImports As String
     Dim Code As String
-        Code = ProcedureCode(TargetWorkbook, module, ProcedureName)
-    Dim procedure As Variant
-    For Each procedure In Procedures
-        If InStr(1, Code, "@INCLUDE PROCEDURE " & procedure) = 0 And InStr(1, ListOfImports, "@INCLUDE PROCEDURE " & procedure) = 0 Then
+        Code = ProcedureCode(TargetWorkbook, Module, ProcedureName)
+    Dim Procedure As Variant
+    For Each Procedure In Procedures
+        If InStr(1, Code, "@INCLUDE PROCEDURE " & Procedure) = 0 And InStr(1, ListOfImports, "@INCLUDE PROCEDURE " & Procedure) = 0 Then
             If ListOfImports = "" Then
-                ListOfImports = "'@INCLUDE PROCEDURE " & procedure
+                ListOfImports = "'@INCLUDE PROCEDURE " & Procedure
             Else
-                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE PROCEDURE " & procedure
+                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE PROCEDURE " & Procedure
             End If
         End If
     Next
     If ListOfImports <> "" Then
-        module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(module, ProcedureName), ListOfImports
+        Module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(Module, ProcedureName), ListOfImports
     End If
 End Sub
 
 Sub AddListOfLinkedUserformsToProcedure( _
                                        Optional TargetWorkbook As Workbook, _
-                                       Optional module As VBComponent, _
+                                       Optional Module As VBComponent, _
                                        Optional ProcedureName As String)
     
-    If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Stop
+    If Not AssignCPSvariables(TargetWorkbook, Module, ProcedureName) Then Stop
 
     Dim ListOfImports As String
     Dim Code As String
-        Code = ProcedureCode(TargetWorkbook, module, ProcedureName)
+        Code = ProcedureCode(TargetWorkbook, Module, ProcedureName)
     Dim myClasses As Collection
-    Set myClasses = LinkedUserforms(TargetWorkbook, module, ProcedureName)
-    Dim Element As Variant
-    For Each Element In myClasses
-        If InStr(1, Code, "@INCLUDE USERFORM " & Element) = 0 And InStr(1, ListOfImports, "@INCLUDE USERFORM " & Element) = 0 Then
+    Set myClasses = LinkedUserforms(TargetWorkbook, Module, ProcedureName)
+    Dim element As Variant
+    For Each element In myClasses
+        If InStr(1, Code, "@INCLUDE USERFORM " & element) = 0 And InStr(1, ListOfImports, "@INCLUDE USERFORM " & element) = 0 Then
             If ListOfImports = "" Then
-                ListOfImports = "'@INCLUDE USERFORM " & Element
+                ListOfImports = "'@INCLUDE USERFORM " & element
             Else
-                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE USERFORM " & Element
+                ListOfImports = ListOfImports & vbNewLine & "'@INCLUDE USERFORM " & element
             End If
         End If
     Next
     If ListOfImports <> "" Then
-        module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(module, ProcedureName), ListOfImports
+        Module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(Module, ProcedureName), ListOfImports
     End If
 End Sub
 
@@ -397,7 +438,7 @@ End Function
 Public Function ActiveCodepaneWorkbook() As Workbook
     On Error GoTo ErrorHandler
     Dim WorkbookName As String
-    WorkbookName = Application.VBE.SelectedVBComponent.Collection.Parent.FileName
+    WorkbookName = Application.VBE.SelectedVBComponent.Collection.Parent.Filename
     WorkbookName = Right(WorkbookName, Len(WorkbookName) - InStrRev(WorkbookName, "\"))
     Set ActiveCodepaneWorkbook = Workbooks(WorkbookName)
     Exit Function
@@ -422,13 +463,13 @@ Catch:
     ArrayDimensionLength = i - 1
 End Function
 
-Public Sub ArrayToRange2D(arr2d As Variant, Cell As Range)
+Public Sub ArrayToRange2D(arr2d As Variant, cell As Range)
 
     If ArrayDimensionLength(arr2d) = 1 Then arr2d = WorksheetFunction.Transpose(arr2d)
     Dim dif As Long
         dif = IIf(LBound(arr2d, 1) = 0, 1, 0)
     Dim rng As Range
-    Set rng = Cell.Resize(UBound(arr2d, 1) + dif, UBound(arr2d, 2) + dif)
+    Set rng = cell.Resize(UBound(arr2d, 1) + dif, UBound(arr2d, 2) + dif)
 
     If Application.WorksheetFunction.CountA(rng) > 0 Then
         Exit Sub
@@ -439,45 +480,45 @@ End Sub
 
 Function AssignCPSvariables( _
                             ByRef TargetWorkbook As Workbook, _
-                            ByRef module As VBComponent, _
-                            ByRef procedure As String) As Boolean
+                            ByRef Module As VBComponent, _
+                            ByRef Procedure As String) As Boolean
 
     If Not AssignWorkbookVariable(TargetWorkbook) Then Exit Function
-    If Not AssignModuleVariable(TargetWorkbook, module, procedure) Then Exit Function
-    If Not AssignProcedureVariable(TargetWorkbook, procedure) Then Exit Function
+    If Not AssignModuleVariable(TargetWorkbook, Module, Procedure) Then Exit Function
+    If Not AssignProcedureVariable(TargetWorkbook, Procedure) Then Exit Function
     AssignCPSvariables = True
     
 End Function
 
 Function AssignModuleVariable( _
                              ByVal TargetWorkbook As Workbook, _
-                             ByRef module As VBComponent, _
-                             Optional ByVal procedure As String) As Boolean
-    If module Is Nothing Then
-        If procedure = "" Then
-            Set module = ActiveModule
+                             ByRef Module As VBComponent, _
+                             Optional ByVal Procedure As String) As Boolean
+    If Module Is Nothing Then
+        If Procedure = "" Then
+            Set Module = ActiveModule
         End If
         On Error Resume Next
-        Set module = ModuleOfProcedure(TargetWorkbook, procedure)
+        Set Module = ModuleOfProcedure(TargetWorkbook, Procedure)
         On Error GoTo 0
     End If
-    AssignModuleVariable = Not module Is Nothing
+    AssignModuleVariable = Not Module Is Nothing
 End Function
 
-Function AssignProcedureVariable(TargetWorkbook As Workbook, ByRef procedure As String) As Boolean
-    If procedure = "" Then
+Function AssignProcedureVariable(TargetWorkbook As Workbook, ByRef Procedure As String) As Boolean
+    If Procedure = "" Then
         Dim cps As String
         cps = CodepaneSelection
         If Len(cps) > 0 Then
-            procedure = cps
+            Procedure = cps
         Else
-            procedure = ActiveProcedure
+            Procedure = ActiveProcedure
         End If
-        If Not ProcedureExists(TargetWorkbook, procedure) Then
-            Debug.Print procedure & " not found in Workbook " & TargetWorkbook.Name
+        If Not ProcedureExists(TargetWorkbook, Procedure) Then
+            Debug.Print Procedure & " not found in Workbook " & TargetWorkbook.Name
         End If
     End If
-    AssignProcedureVariable = Not procedure = ""
+    AssignProcedureVariable = Not Procedure = ""
 End Function
 
 Function AssignWorkbookVariable(ByRef TargetWorkbook As Workbook) As Boolean
@@ -510,18 +551,18 @@ Public Function CodepaneSelection() As String
         CodepaneSelection = Mid(Application.VBE.ActiveCodePane.CodeModule.Lines(startLine, 1), StartColumn, EndColumn - StartColumn)
         Exit Function
     End If
-    Dim Str As String
+    Dim str As String
     Dim i As Long
     For i = startLine To endLine
-        If Str = "" Then
-            Str = Mid(Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1), StartColumn)
+        If str = "" Then
+            str = Mid(Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1), StartColumn)
         ElseIf i < endLine Then
-            Str = Str & vbNewLine & Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1)
+            str = str & vbNewLine & Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1)
         Else
-            Str = Str & vbNewLine & Left(Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1), EndColumn - 1)
+            str = str & vbNewLine & Left(Application.VBE.ActiveCodePane.CodeModule.Lines(i, 1), EndColumn - 1)
         End If
     Next
-    CodepaneSelection = Str
+    CodepaneSelection = str
 End Function
 
 Public Function CollectionContains( _
@@ -583,13 +624,13 @@ Function CollectionsToArray2D(collections As Collection) As Variant
     If collections.Count = 0 Then Exit Function
     Dim columnCount As Long
     columnCount = collections.Count
-    Dim rowCount As Long
-    rowCount = collections.Item(1).Count
+    Dim RowCount As Long
+    RowCount = collections.Item(1).Count
     Dim var As Variant
-    ReDim var(1 To rowCount, 1 To columnCount)
+    ReDim var(1 To RowCount, 1 To columnCount)
     Dim cols As Long
     Dim rows As Long
-    For rows = 1 To rowCount
+    For rows = 1 To RowCount
         For cols = 1 To collections.Count
             var(rows, cols) = collections(cols).Item(rows)
         Next cols
@@ -605,16 +646,16 @@ Function ComponentNames( _
                        Optional TargetWorkbook As Workbook)
     Dim coll As New Collection
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
-    Dim module As VBComponent
-    For Each module In TargetWorkbook.VBProject.VBComponents
-        If module.Type = ModuleType Then
-            coll.Add module.Name
+    Dim Module As VBComponent
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        If Module.Type = ModuleType Then
+            coll.Add Module.Name
         End If
     Next
     Set ComponentNames = coll
 End Function
 
-Function DeclarationsKeywordSubstring(Str As Variant, Optional delim As String _
+Function DeclarationsKeywordSubstring(str As Variant, Optional delim As String _
                 , Optional afterWord As String _
                 , Optional beforeWord As String _
                 , Optional counter As Integer _
@@ -625,35 +666,35 @@ Function DeclarationsKeywordSubstring(Str As Variant, Optional delim As String _
         MsgBox ("Pass at least 1 parameter betweenn -AfterWord- , -BeforeWord- , -counter-")
         Exit Function
     End If
-    If TypeName(Str) = "String" Then
+    If TypeName(str) = "String" Then
         If delim <> "" Then
-            Str = Split(Str, delim)
-            If UBound(Str) <> 0 Then
+            str = Split(str, delim)
+            If UBound(str) <> 0 Then
                 If afterWord = "" And beforeWord = "" And counter <> 0 Then
-                    If counter - 1 <= UBound(Str) Then
-                        DeclarationsKeywordSubstring = Str(counter - 1)
+                    If counter - 1 <= UBound(str) Then
+                        DeclarationsKeywordSubstring = str(counter - 1)
                         Exit Function
                     End If
                 End If
-                For i = LBound(Str) To UBound(Str)
+                For i = LBound(str) To UBound(str)
                     If afterWord <> "" And beforeWord = "" Then
                         If i <> 0 Then
-                            If Str(i - 1) = afterWord Or Str(i - 1) = "#" & afterWord Then
-                                DeclarationsKeywordSubstring = Str(i)
+                            If str(i - 1) = afterWord Or str(i - 1) = "#" & afterWord Then
+                                DeclarationsKeywordSubstring = str(i)
                                 Exit Function
                             End If
                         End If
                     ElseIf afterWord = "" And beforeWord <> "" Then
-                        If i <> UBound(Str) Then
-                            If Str(i + 1) = beforeWord Or Str(i + 1) = "#" & beforeWord Then
-                                DeclarationsKeywordSubstring = Str(i)
+                        If i <> UBound(str) Then
+                            If str(i + 1) = beforeWord Or str(i + 1) = "#" & beforeWord Then
+                                DeclarationsKeywordSubstring = str(i)
                                 Exit Function
                             End If
                         End If
                     ElseIf afterWord <> "" And beforeWord <> "" Then
-                        If i <> 0 And i <> UBound(Str) Then
-                            If (Str(i - 1) = afterWord Or Str(i - 1) = "#" & afterWord) And (Str(i + 1) = beforeWord Or Str(i + 1) = "#" & beforeWord) Then
-                                DeclarationsKeywordSubstring = Str(i)
+                        If i <> 0 And i <> UBound(str) Then
+                            If (str(i - 1) = afterWord Or str(i - 1) = "#" & afterWord) And (str(i + 1) = beforeWord Or str(i + 1) = "#" & beforeWord) Then
+                                DeclarationsKeywordSubstring = str(i)
                                 Exit Function
                             End If
                         End If
@@ -661,11 +702,11 @@ Function DeclarationsKeywordSubstring(Str As Variant, Optional delim As String _
                 Next i
             End If
         Else
-            If InStr(1, Str, afterWord) > 0 And InStr(1, Str, beforeWord) > 0 Then
+            If InStr(1, str, afterWord) > 0 And InStr(1, str, beforeWord) > 0 Then
                 If includeWords = False Then
-                    DeclarationsKeywordSubstring = Mid(Str, InStr(1, Str, afterWord) + Len(afterWord))
+                    DeclarationsKeywordSubstring = Mid(str, InStr(1, str, afterWord) + Len(afterWord))
                 Else
-                    DeclarationsKeywordSubstring = Mid(Str, InStr(1, Str, afterWord))
+                    DeclarationsKeywordSubstring = Mid(str, InStr(1, str, afterWord))
                 End If
                 If outer = True Then
                     If includeWords = False Then
@@ -693,10 +734,10 @@ Sub DeclarationsTableCreate(TargetWorkbook As Workbook)
     DeclarationsWorksheetCreate
     
     Dim TargetWorksheet As Worksheet
-    Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
+    Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
     If Format(Now, "YYMMDDHHNN") - TargetWorksheet.Range("Z1").Value < 60 Then Exit Sub
     
-    TargetWorksheet.Range("A2").CurrentRegion.Offset(1).Clear
+    TargetWorksheet.Range("A2").CurrentRegion.OFFSET(1).clear
     ArrayToRange2D CollectionsToArray2D( _
                         getDeclarations( _
                             wb:=TargetWorkbook, _
@@ -716,13 +757,13 @@ End Sub
 
 Function DeclarationsTableKeywords() As Collection
     Dim TargetWorksheet As Worksheet
-    Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
-    Dim lr As Long: lr = getLastRow(TargetWorksheet)
+    Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
+    Dim Lr As Long: Lr = getLastRow(TargetWorksheet)
     Dim coll As New Collection
-    Dim Cell As Range
-    For Each Cell In TargetWorksheet.Range("C2:C" & lr)
+    Dim cell As Range
+    For Each cell In TargetWorksheet.Range("C2:C" & Lr)
         On Error Resume Next
-        coll.Add Cell.Text, Cell.Text
+        coll.Add cell.TEXT, cell.TEXT
         On Error GoTo 0
     Next
     Set DeclarationsTableKeywords = coll
@@ -739,7 +780,7 @@ Sub DeclarationsTableSort()
     Dim sort3 As String ': sort3 = "D1"
 
     With TargetWorksheet.Sort
-        .SortFields.Clear
+        .SortFields.clear
         .SortFields.Add key:=TargetWorksheet.Range(sort1), Order:=xlAscending
         
         If Not sort2 = "" Then
@@ -761,7 +802,7 @@ End Sub
 Function DeclarationsWorksheetCreate() As Boolean
     If WorksheetExists("Declarations_Table", ThisWorkbook) Then Exit Function
     Dim TargetWorksheet As Worksheet
-    Set TargetWorksheet = ThisWorkbook.Sheets.Add
+    Set TargetWorksheet = ThisWorkbook.SHEETS.Add
     With TargetWorksheet
         .Name = "Declarations_Table"
         .Cells.VerticalAlignment = xlVAlignTop
@@ -774,18 +815,18 @@ End Function
 Sub ExportLinkedDeclaration(TargetWorkbook As Workbook, DeclarationName As String)
     DeclarationsTableCreate TargetWorkbook
     Dim TargetWorksheet As Worksheet
-    Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
+    Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
 
     Dim codeName As String
     Dim codeText As String
-    Dim Cell As Range
+    Dim cell As Range
     On Error Resume Next
-    Set Cell = TargetWorksheet.Columns(3).Find(DeclarationName, LookAt:=xlWhole)
+    Set cell = TargetWorksheet.Columns(3).Find(DeclarationName, LookAt:=xlWhole)
     On Error GoTo 0
-    If Cell Is Nothing Then Exit Sub
+    If cell Is Nothing Then Exit Sub
 
     codeName = DeclarationName
-    codeText = Cell.Offset(0, 1).Text
+    codeText = cell.OFFSET(0, 1).TEXT
     TxtOverwrite GITHUB_LOCAL_LIBRARY_DECLARATIONS & DeclarationName & ".txt", codeText
 
 End Sub
@@ -794,11 +835,11 @@ End Sub
 
 Sub ExportProcedure( _
                     Optional TargetWorkbook As Workbook, _
-                    Optional module As VBComponent, _
+                    Optional Module As VBComponent, _
                     Optional ProcedureName As String, _
                     Optional ExportMergedTxt As Boolean)
 
-    If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Exit Sub
+    If Not AssignCPSvariables(TargetWorkbook, Module, ProcedureName) Then Exit Sub
 
     ProjetFoldersCreate
 
@@ -807,30 +848,30 @@ Sub ExportProcedure( _
 
     ExportedProcedures.Add CStr(ProcedureName), CStr(ProcedureName)
 
-    Dim procedure
-    For Each procedure In LinkedProceduresDeep(ProcedureName, TargetWorkbook)
-        ExportedProcedures.Add CStr(procedure), CStr(procedure)
+    Dim Procedure
+    For Each Procedure In LinkedProceduresDeep(ProcedureName, TargetWorkbook)
+        ExportedProcedures.Add CStr(Procedure), CStr(Procedure)
     Next
 
     If ExportedProcedures.Count > 1 Then
-        For Each procedure In ExportedProcedures
-            ExportTargetProcedure TargetWorkbook, , CStr(procedure)
+        For Each Procedure In ExportedProcedures
+            ExportTargetProcedure TargetWorkbook, , CStr(Procedure)
         Next
         If ExportMergedTxt Then
             Dim MergedName As String:   MergedName = "Merged_" & ProcedureName
-            Dim FileName As String:     FileName = GITHUB_LOCAL_LIBRARY_PROCEDURES & MergedName & ".txt"
+            Dim Filename As String:     Filename = LOCAL_LIBRARY_PROCEDURES & MergedName & ".txt"
             Dim MergedString As String
     
-            For Each procedure In ExportedProcedures
-                MergedString = MergedString & vbNewLine & ProcedureCode(TargetWorkbook, , procedure)
+            For Each Procedure In ExportedProcedures
+                MergedString = MergedString & vbNewLine & ProcedureCode(TargetWorkbook, , Procedure)
             Next
             Debug.Print "OVERWROTE " & MergedName
-            TxtOverwrite FileName, MergedString
-            TxtPrependContainedProcedures FileName
+            TxtOverwrite Filename, MergedString
+            TxtPrependContainedProcedures Filename
         End If
     End If
     
-    FollowLink GITHUB_LOCAL_LIBRARY_PROCEDURES
+    FollowLink LOCAL_LIBRARY_PROCEDURES
     
     Exit Sub
 ErrorHandler:
@@ -839,50 +880,50 @@ End Sub
 
 Sub ExportTargetProcedure( _
         Optional TargetWorkbook As Workbook, _
-        Optional module As VBComponent, _
-        Optional procedure As String)
+        Optional Module As VBComponent, _
+        Optional Procedure As String)
 
-    If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Exit Sub
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Exit Sub
 
     Dim proclastmod
-        proclastmod = ProcedureLastModified(TargetWorkbook, module, procedure)
+        proclastmod = ProcedureLastModified(TargetWorkbook, Module, Procedure)
     If proclastmod = 0 Then
-        AddLinkedLists TargetWorkbook, module, procedure
-        proclastmod = ProcedureLastModAdd(TargetWorkbook, module, procedure)
+        AddLinkedLists TargetWorkbook, Module, Procedure
+        proclastmod = ProcedureLastModAdd(TargetWorkbook, Module, Procedure)
     End If
 
     Dim Code As String
-        Code = ProcedureCode(TargetWorkbook, module, CStr(procedure))
+        Code = ProcedureCode(TargetWorkbook, Module, CStr(Procedure))
     Dim FileFullName As String
-        FileFullName = GITHUB_LOCAL_LIBRARY_PROCEDURES & procedure & ".txt"
+        FileFullName = GITHUB_LOCAL_LIBRARY_PROCEDURES & Procedure & ".txt"
     If FileExists(FileFullName) Then
         Dim filelastmod
             filelastmod = StringLastModified(TxtRead(FileFullName))
         If proclastmod > filelastmod Then
-            Debug.Print "OVERWROTE " & procedure
+            Debug.Print "OVERWROTE " & Procedure
             TxtOverwrite FileFullName, Code
         End If
     Else
-        Debug.Print "NEW " & procedure
+        Debug.Print "NEW " & Procedure
         TxtOverwrite FileFullName, Code
     End If
 
-    Dim Element
-    For Each Element In LinkedUserforms(TargetWorkbook, module, CStr(procedure))
-        TargetWorkbook.VBProject.VBComponents(Element).Export GITHUB_LOCAL_LIBRARY_USERFORMS & Element & ".frm"
+    Dim element
+    For Each element In LinkedUserforms(TargetWorkbook, Module, CStr(Procedure))
+        TargetWorkbook.VBProject.VBComponents(element).Export GITHUB_LOCAL_LIBRARY_USERFORMS & element & ".frm"
     Next
-    For Each Element In LinkedClasses(TargetWorkbook, module, CStr(procedure))
-        TargetWorkbook.VBProject.VBComponents(Element).Export GITHUB_LOCAL_LIBRARY_CLASSES & Element & ".cls"
+    For Each element In LinkedClasses(TargetWorkbook, Module, CStr(Procedure))
+        TargetWorkbook.VBProject.VBComponents(element).Export GITHUB_LOCAL_LIBRARY_CLASSES & element & ".cls"
     Next
-    For Each Element In LinkedDeclarations(TargetWorkbook, module, CStr(procedure))
-        ExportLinkedDeclaration TargetWorkbook, CStr(Element)
+    For Each element In LinkedDeclarations(TargetWorkbook, Module, CStr(Procedure))
+        ExportLinkedDeclaration TargetWorkbook, CStr(element)
     Next
 End Sub
 
-Public Function FileExists(ByVal FileName As String) As Boolean
-    If InStr(1, FileName, "\") = 0 Then Exit Function
-    If Right(FileName, 1) = "\" Then FileName = Left(FileName, Len(FileName) - 1)
-    FileExists = (Dir(FileName, vbArchive + vbHidden + vbReadOnly + vbSystem) <> "")
+Public Function FileExists(ByVal Filename As String) As Boolean
+    If InStr(1, Filename, "\") = 0 Then Exit Function
+    If Right(Filename, 1) = "\" Then Filename = Left(Filename, Len(Filename) - 1)
+    FileExists = (Dir(Filename, vbArchive + vbHidden + vbReadOnly + vbSystem) <> "")
 End Function
 
 Function FolderExists(ByVal strPath As String) As Boolean
@@ -920,9 +961,9 @@ End Sub
 
 
 
-Function FormatVBA7(Str As String) As String
+Function FormatVBA7(str As String) As String
     Dim selectedText
-        selectedText = Str
+        selectedText = str
         selectedText = Replace(selectedText, " _" & vbNewLine, "")
         selectedText = Split(selectedText, vbNewLine)
     Dim IsVba7 As String
@@ -984,15 +1025,15 @@ Sub ImportClass( _
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     If ClassName = "" Then ClassName = CodepaneSelection
     If ClassName = "" Or InStr(1, ClassName, " ") > 0 Then Exit Sub
-    Dim filePath As String
-    filePath = GITHUB_LOCAL_LIBRARY_CLASSES & ClassName & ".cls"
-    If CheckPath(filePath) = "I" Then
+    Dim FilePath As String
+    FilePath = GITHUB_LOCAL_LIBRARY_CLASSES & ClassName & ".cls"
+    If CheckPath(FilePath) = "I" Then
         On Error Resume Next
         Dim Code As String
         Code = TXTReadFromUrl(GITHUB_LIBRARY_CLASSES & ClassName & ".cls")
         On Error GoTo 0
         If Len(Code) > 0 And Not UCase(Code) Like ("*NOT FOUND*") Then
-            TxtOverwrite filePath, Code
+            TxtOverwrite FilePath, Code
         Else
             MsgBox "File " & ClassName & ".cls not found neither localy nor online"
             Exit Sub
@@ -1006,23 +1047,23 @@ Sub ImportClass( _
             Exit Sub
         End If
     End If
-    TargetWorkbook.VBProject.VBComponents.Import filePath
+    TargetWorkbook.VBProject.VBComponents.Import FilePath
 End Sub
 
 
 Sub ImportDeclaration( _
                         Optional DeclarationName As String, _
-                        Optional module As VBComponent, _
+                        Optional Module As VBComponent, _
                         Optional TargetWorkbook As Workbook)
 
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
     If DeclarationName = "" Then DeclarationName = CodepaneSelection
     If DeclarationName = "" Or InStr(1, DeclarationName, " ") > 0 Then Exit Sub
-    Dim filePath As String
-    filePath = GITHUB_LOCAL_LIBRARY_DECLARATIONS & DeclarationName & ".txt"
+    Dim FilePath As String
+    FilePath = GITHUB_LOCAL_LIBRARY_DECLARATIONS & DeclarationName & ".txt"
     Dim Code As String
     On Error Resume Next
-    Code = TxtRead(filePath)
+    Code = TxtRead(FilePath)
     On Error GoTo 0
 
     If Len(Code) = 0 Then 'CheckPath(filePath) = "I" Then
@@ -1031,7 +1072,7 @@ Sub ImportDeclaration( _
         On Error GoTo 0
         If Len(Code) > 0 And Not UCase(Code) Like ("*NOT FOUND*") Then
             Code = FormatVBA7(Code)
-            TxtOverwrite filePath, Code
+            TxtOverwrite FilePath, Code
         Else
             Debug.Print "File " & DeclarationName & ".txt not found localy or online"
             Exit Sub
@@ -1040,8 +1081,8 @@ Sub ImportDeclaration( _
 
     End If
     If InStr(1, WorkbookCode(TargetWorkbook), Code, vbTextCompare) > 0 Then Exit Sub
-    If module Is Nothing Then Set module = ModuleAddOrSet(TargetWorkbook, "vbArcImports", vbext_ct_StdModule)
-    module.CodeModule.AddFromString Code
+    If Module Is Nothing Then Set Module = ModuleAddOrSet(TargetWorkbook, "vbArcImports", vbext_ct_StdModule)
+    Module.CodeModule.AddFromString Code
 
 End Sub
 
@@ -1052,16 +1093,16 @@ End Sub
 
 
 Sub ImportProcedure( _
-                    Optional procedure As String, _
+                    Optional Procedure As String, _
                     Optional TargetWorkbook As Workbook, _
-                    Optional module As VBComponent, _
+                    Optional Module As VBComponent, _
                     Optional Overwrite As Boolean)
 
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
-    If procedure = "" Then procedure = CodepaneSelection
-    If procedure = "" Or InStr(1, procedure, " ") > 0 Then Exit Sub
+    If Procedure = "" Then Procedure = CodepaneSelection
+    If Procedure = "" Or InStr(1, Procedure, " ") > 0 Then Exit Sub
     Dim ProcedurePath As String
-        ProcedurePath = GITHUB_LOCAL_LIBRARY_PROCEDURES & procedure & ".txt"
+        ProcedurePath = GITHUB_LOCAL_LIBRARY_PROCEDURES & Procedure & ".txt"
 
     Dim Code As String
     On Error Resume Next
@@ -1070,12 +1111,12 @@ Sub ImportProcedure( _
 
     If Len(Code) = 0 Then
         On Error Resume Next
-        Code = TXTReadFromUrl(GITHUB_LIBRARY_PROCEDURES & procedure & ".txt")
+        Code = TXTReadFromUrl(GITHUB_LIBRARY_PROCEDURES & Procedure & ".txt")
         On Error GoTo 0
         If Len(Code) > 0 And Not UCase(Code) Like ("*NOT FOUND*") Then
             TxtOverwrite ProcedurePath, Code
         Else
-            MsgBox "File " & procedure & ".txt not found neither localy nor online"
+            MsgBox "File " & Procedure & ".txt not found neither localy nor online"
             Exit Sub
         End If
     End If
@@ -1084,52 +1125,52 @@ Sub ImportProcedure( _
         filelastmod = StringLastModified(Code)
     Dim proclastmod
 
-    If ProcedureExists(TargetWorkbook, procedure) = True Then
-        Set module = ModuleOfProcedure(TargetWorkbook, procedure)
-        proclastmod = ProcedureLastModified(TargetWorkbook, module, procedure)
+    If ProcedureExists(TargetWorkbook, Procedure) = True Then
+        Set Module = ModuleOfProcedure(TargetWorkbook, Procedure)
+        proclastmod = ProcedureLastModified(TargetWorkbook, Module, Procedure)
         If Overwrite = True Then
             If proclastmod = 0 Or proclastmod < filelastmod Then
-                ProcedureReplace module, procedure, TxtRead(ProcedurePath)
+                ProcedureReplace Module, Procedure, TxtRead(ProcedurePath)
             End If
         End If
     Else
-        If module Is Nothing Then
+        If Module Is Nothing Then
             Dim ModuleName As String
                 ModuleName = StringProcedureAssignedModule(Code)
             If ModuleName = "" Then ModuleName = "vbArcImports"
-            Set module = ModuleAddOrSet(TargetWorkbook, ModuleName, vbext_ct_StdModule)
+            Set Module = ModuleAddOrSet(TargetWorkbook, ModuleName, vbext_ct_StdModule)
         End If
-        module.CodeModule.AddFromFile ProcedurePath
+        Module.CodeModule.AddFromFile ProcedurePath
     End If
 
-    ImportProcedureDependencies procedure, TargetWorkbook, module, Overwrite
-    ProcedureMoveToAssignedModule TargetWorkbook, module, procedure
+    ImportProcedureDependencies Procedure, TargetWorkbook, Module, Overwrite
+    ProcedureMoveToAssignedModule TargetWorkbook, Module, Procedure
 End Sub
 
 Sub ImportProcedureDependencies( _
-                 Optional procedure As String, _
+                 Optional Procedure As String, _
                  Optional TargetWorkbook As Workbook, _
-                 Optional module As VBComponent, _
+                 Optional Module As VBComponent, _
                  Optional Overwrite As Boolean)
 
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
-    If procedure = "" Then
+    If Procedure = "" Then
         Dim cps As String
         cps = CodepaneSelection
         If Len(cps) > 0 Then
-            procedure = cps
+            Procedure = cps
         Else
-            procedure = ActiveProcedure
+            Procedure = ActiveProcedure
         End If
-        If Not ProcedureExists(TargetWorkbook, procedure) Then Exit Sub
+        If Not ProcedureExists(TargetWorkbook, Procedure) Then Exit Sub
     End If
     On Error Resume Next
-    If module Is Nothing Then Set module = ModuleOfProcedure(TargetWorkbook, procedure)
-    If module Is Nothing Then Exit Sub
+    If Module Is Nothing Then Set Module = ModuleOfProcedure(TargetWorkbook, Procedure)
+    If Module Is Nothing Then Exit Sub
     On Error GoTo 0
     Dim var
     Dim importfile As String
-    var = Split(ProcedureCode(TargetWorkbook, module, procedure), vbNewLine)
+    var = Split(ProcedureCode(TargetWorkbook, Module, Procedure), vbNewLine)
     var = Filter(var, "'@INCLUDE ")
     Dim TextLine As Variant
     For Each TextLine In var
@@ -1138,13 +1179,13 @@ Sub ImportProcedureDependencies( _
             importfile = Split(TextLine, " ")(2)
             importfile = Replace(importfile, vbNewLine, "")
             If TextLine Like "'@INCLUDE PROCEDURE *" Then
-                ImportProcedure importfile, TargetWorkbook, module, Overwrite
+                ImportProcedure importfile, TargetWorkbook, Module, Overwrite
             ElseIf TextLine Like "'@INCLUDE CLASS *" Then
                 ImportClass importfile, TargetWorkbook, Overwrite
             ElseIf TextLine Like "'@INCLUDE USERFORM *" Then
                 ImportUserform importfile, TargetWorkbook, Overwrite
             ElseIf TextLine Like "'@INCLUDE DECLARATION *" Then
-                ImportDeclaration importfile, module, TargetWorkbook
+                ImportDeclaration importfile, Module, TargetWorkbook
             End If
         End If
     Next
@@ -1197,18 +1238,18 @@ Function LIBRARY_FOLDER() As String
 End Function
 
 Function LastCell(rng As Range, Optional booCol As Boolean) As Range
-    Dim WS As Worksheet
-    Set WS = rng.Parent
-    Dim Cell As Range
+    Dim ws As Worksheet
+    Set ws = rng.Parent
+    Dim cell As Range
     If booCol = False Then
-        Set Cell = WS.Cells(rows.Count, rng.Column).End(xlUp)
-        If Cell.MergeCells Then Set Cell = Cells(Cell.Row + Cell.rows.Count - 1, Cell.Column)
+        Set cell = ws.Cells(rows.Count, rng.Column).End(xlUp)
+        If cell.MergeCells Then Set cell = Cells(cell.Row + cell.rows.Count - 1, cell.Column)
     Else
-        Set Cell = WS.Cells(rng.Row, Columns.Count).End(xlToLeft)
-        If Cell.MergeCells Then Set Cell = Cells(Cell.Row, Cell.Column + Cell.Columns.Count - 1)
+        Set cell = ws.Cells(rng.Row, Columns.Count).End(xlToLeft)
+        If cell.MergeCells Then Set cell = Cells(cell.Row, cell.Column + cell.Columns.Count - 1)
     End If
 
-    Set LastCell = Cell
+    Set LastCell = cell
 End Function
 
 Public Function Len2( _
@@ -1230,17 +1271,17 @@ End Function
 
 Function LinkedClasses( _
                       TargetWorkbook As Workbook, _
-                      module As VBComponent, _
-                      procedure As String) As Collection
+                      Module As VBComponent, _
+                      Procedure As String) As Collection
 
     Dim coll As New Collection
     Dim var As Variant
-        var = classCallsOfModule(module)
+        var = classCallsOfModule(Module)
     Dim Code As String
-        Code = ProcedureCode(TargetWorkbook, module, procedure)
-    Dim keyword As String
+        Code = ProcedureCode(TargetWorkbook, Module, Procedure)
+    Dim Keyword As String
     Dim ClassName As String
-    Dim Element As Variant
+    Dim element As Variant
     Dim i As Long
     On Error Resume Next
     For i = LBound(var, 1) To UBound(var, 1)
@@ -1248,9 +1289,9 @@ Function LinkedClasses( _
             coll.Add var(i, 1), var(i, 1)
         End If
     Next
-    For Each Element In ClassNames
-        If InStr(1, Code, Element) > 0 Then
-            coll.Add Element, CStr(Element)
+    For Each element In ClassNames
+        If InStr(1, Code, element) > 0 Then
+            coll.Add element, CStr(element)
         End If
     Next
     On Error GoTo 0
@@ -1259,21 +1300,21 @@ End Function
 
 Function LinkedDeclarations( _
                            Optional TargetWorkbook As Workbook, _
-                           Optional module As VBComponent, _
-                           Optional procedure As String) As Collection
+                           Optional Module As VBComponent, _
+                           Optional Procedure As String) As Collection
 
-    If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Stop
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
     
     DeclarationsTableCreate TargetWorkbook
     
-    Dim TargetWorksheet As Worksheet: Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
+    Dim TargetWorksheet As Worksheet: Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
     Dim coll As New Collection
-    Dim Code As String: Code = ProcedureCode(TargetWorkbook, module, procedure)
-    Dim Element
-    For Each Element In DeclarationsTableKeywords
-        If RegexTest(Code, "\b ?" & CStr(Element) & "\b") Then
+    Dim Code As String: Code = ProcedureCode(TargetWorkbook, Module, Procedure)
+    Dim element
+    For Each element In DeclarationsTableKeywords
+        If RegexTest(Code, "\b ?" & CStr(element) & "\b") Then
             On Error Resume Next
-            coll.Add CStr(Element), CStr(Element)
+            coll.Add CStr(element), CStr(element)
             On Error GoTo 0
         End If
     Next
@@ -1282,19 +1323,19 @@ End Function
 
 Function LinkedProcedures( _
                          Optional TargetWorkbook As Workbook, _
-                         Optional module As VBComponent, _
+                         Optional Module As VBComponent, _
                          Optional ProcedureName As String) As Collection
-    If Not AssignCPSvariables(TargetWorkbook, module, ProcedureName) Then Stop
+    If Not AssignCPSvariables(TargetWorkbook, Module, ProcedureName) Then Stop
     Dim Procedures As Collection
     Set Procedures = ProceduresOfWorkbook(TargetWorkbook)
     Dim Code As String
-        Code = ProcedureCode(TargetWorkbook, module, ProcedureName)
+        Code = ProcedureCode(TargetWorkbook, Module, ProcedureName)
     Dim coll As New Collection
-    Dim procedure As Variant
-    For Each procedure In Procedures
-        If UCase(CStr(procedure)) <> UCase(CStr(ProcedureName)) Then
-            If RegexTest(Code, "\W" & CStr(procedure) & "[.(\W]") = True Then
-                coll.Add procedure, CStr(procedure)
+    Dim Procedure As Variant
+    For Each Procedure In Procedures
+        If UCase(CStr(Procedure)) <> UCase(CStr(ProcedureName)) Then
+            If RegexTest(Code, "\W" & CStr(Procedure) & "[.(\W]") = True Then
+                coll.Add Procedure, CStr(Procedure)
             End If
         End If
     Next
@@ -1309,28 +1350,28 @@ Function LinkedProceduresDeep( _
     Dim Processed As Collection:           Set Processed = New Collection
     Dim CalledProcedures As Collection:    Set CalledProcedures = New Collection
 
-    Dim procedure As Variant
-    Dim module As VBComponent
+    Dim Procedure As Variant
+    Dim Module As VBComponent
 
     Processed.Add CStr(ProcedureName), CStr(ProcedureName)
     On Error Resume Next
-    For Each procedure In LinkedProcedures(TargetWorkbook, , CStr(ProcedureName))
-    CalledProcedures.Add CStr(procedure), CStr(procedure)
+    For Each Procedure In LinkedProcedures(TargetWorkbook, , CStr(ProcedureName))
+    CalledProcedures.Add CStr(Procedure), CStr(Procedure)
     Next
     On Error GoTo 0
 
     Dim CalledProceduresCount As Long
         CalledProceduresCount = CalledProcedures.Count
-    Dim Element
+    Dim element
 repeat:
-    For Each Element In CalledProcedures
-        If Not CollectionContains(Processed, , CStr(Element)) Then
+    For Each element In CalledProcedures
+        If Not CollectionContains(Processed, , CStr(element)) Then
             On Error Resume Next
-            For Each procedure In LinkedProcedures(TargetWorkbook, , CStr(Element))
-            CalledProcedures.Add CStr(procedure), CStr(procedure)
+            For Each Procedure In LinkedProcedures(TargetWorkbook, , CStr(element))
+            CalledProcedures.Add CStr(Procedure), CStr(Procedure)
             Next
             On Error GoTo 0
-            Processed.Add CStr(Element), CStr(Element)
+            Processed.Add CStr(element), CStr(element)
         End If
     Next
     If CalledProcedures.Count > CalledProceduresCount Then
@@ -1342,12 +1383,12 @@ repeat:
 End Function
 
 
-Sub LinkedProceduresMoveHere(Optional procedure As String)
+Sub LinkedProceduresMoveHere(Optional Procedure As String)
     Dim TargetWorkbook As Workbook
     Set TargetWorkbook = ActiveCodepaneWorkbook
-    If Not AssignProcedureVariable(TargetWorkbook, procedure) Then Exit Sub
+    If Not AssignProcedureVariable(TargetWorkbook, Procedure) Then Exit Sub
     Dim el
-    For Each el In LinkedProceduresDeep(procedure, TargetWorkbook)
+    For Each el In LinkedProceduresDeep(Procedure, TargetWorkbook)
         ProcedureMoveHere CStr(el)
     Next
 End Sub
@@ -1357,11 +1398,11 @@ End Sub
 
 Function LinkedUserforms( _
                         TargetWorkbook As Workbook, _
-                        module As VBComponent, _
-                        procedure As String) As Collection
+                        Module As VBComponent, _
+                        Procedure As String) As Collection
     Dim coll As New Collection
     Dim Code As String
-        Code = ProcedureCode(TargetWorkbook, module, procedure)
+        Code = ProcedureCode(TargetWorkbook, Module, Procedure)
     Dim formName
     For Each formName In UserformNames(TargetWorkbook)
         If RegexTest(Code, "\W" & formName & "[.(\W]") = True Then coll.Add formName '& " " & "(Userform)"
@@ -1376,22 +1417,22 @@ Function ModuleAddOrSet( _
 
 
     If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
-    Dim module As VBComponent
+    Dim Module As VBComponent
     On Error Resume Next
-    Set module = TargetWorkbook.VBProject.VBComponents(TargetName)
+    Set Module = TargetWorkbook.VBProject.VBComponents(TargetName)
     On Error GoTo 0
-    If module Is Nothing Then
-        Set module = TargetWorkbook.VBProject.VBComponents.Add(ModuleType)
-        module.Name = TargetName
+    If Module Is Nothing Then
+        Set Module = TargetWorkbook.VBProject.VBComponents.Add(ModuleType)
+        Module.Name = TargetName
     End If
-    Set ModuleAddOrSet = module
+    Set ModuleAddOrSet = Module
 End Function
 
 
 
 
-Function ModuleCode(module As VBComponent) As String
-    With module.CodeModule
+Function ModuleCode(Module As VBComponent) As String
+    With Module.CodeModule
         If .CountOfLines = 0 Then ModuleCode = "": Exit Function
         ModuleCode = .Lines(1, .CountOfLines)
     End With
@@ -1400,11 +1441,11 @@ End Function
 Public Function ModuleExists( _
                             TargetName As String, _
                             TargetWorkbook As Workbook) As Boolean
-    Dim module As VBComponent
+    Dim Module As VBComponent
     On Error Resume Next
-    Set module = TargetWorkbook.VBProject.VBComponents(TargetName)
+    Set Module = TargetWorkbook.VBProject.VBComponents(TargetName)
     On Error GoTo 0
-    ModuleExists = Not module Is Nothing
+    ModuleExists = Not Module Is Nothing
 End Function
 
 Public Function ModuleOfProcedure( _
@@ -1412,32 +1453,32 @@ Public Function ModuleOfProcedure( _
                                  ProcedureName As Variant) As VBComponent
     Dim ProcKind As VBIDE.vbext_ProcKind
     Dim lineNum As Long, NumProc As Long
-    Dim procedure As String
-    Dim module As VBComponent
-    For Each module In TargetWorkbook.VBProject.VBComponents
-        With module.CodeModule
+    Dim Procedure As String
+    Dim Module As VBComponent
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        With Module.CodeModule
             lineNum = .CountOfDeclarationLines + 1
             Do Until lineNum >= .CountOfLines
-                procedure = .ProcOfLine(lineNum, ProcKind)
-                If UCase(procedure) = UCase(ProcedureName) Then
-                    Set ModuleOfProcedure = module
+                Procedure = .ProcOfLine(lineNum, ProcKind)
+                If UCase(Procedure) = UCase(ProcedureName) Then
+                    Set ModuleOfProcedure = Module
                     Exit Function
                 End If
-                lineNum = .ProcStartLine(procedure, ProcKind) + .ProcCountLines(procedure, ProcKind) + 1
+                lineNum = .procStartLine(Procedure, ProcKind) + .ProcCountLines(Procedure, ProcKind) + 1
             Loop
         End With
-    Next module
+    Next Module
 End Function
 
-Function ModuleOrSheetName(module As VBComponent) As String
-    If module.Type = vbext_ct_Document Then
-        If module.Name = "ThisWorkbook" Then
-            ModuleOrSheetName = module.Name
+Function ModuleOrSheetName(Module As VBComponent) As String
+    If Module.Type = vbext_ct_Document Then
+        If Module.Name = "ThisWorkbook" Then
+            ModuleOrSheetName = Module.Name
         Else
-            ModuleOrSheetName = GetSheetByCodeName(WorkbookOfModule(module), module.Name).Name
+            ModuleOrSheetName = GetSheetByCodeName(WorkbookOfModule(Module), Module.Name).Name
         End If
     Else
-        ModuleName = module.Name
+        ModuleName = Module.Name
     End If
 End Function
 
@@ -1460,10 +1501,10 @@ End Function
 
 Function ProcedureAssignedModule( _
                                 TargetWorkbook As Workbook, _
-                                module As VBComponent, _
-                                procedure As String) As VBComponent
+                                Module As VBComponent, _
+                                Procedure As String) As VBComponent
         Dim ComponentName As Variant
-        ComponentName = Split(ProcedureCode(TargetWorkbook, module, procedure), vbNewLine)
+        ComponentName = Split(ProcedureCode(TargetWorkbook, Module, Procedure), vbNewLine)
         ComponentName = Filter(ComponentName, "'@AssignedModule")
         If Len2(ComponentName) <> 1 Then Exit Function
         Dim UB As Long
@@ -1474,61 +1515,61 @@ End Function
 
 Sub ProcedureAssignedModuleAdd( _
                                 Optional TargetWorkbook As Workbook, _
-                                Optional module As VBComponent, _
-                                Optional procedure As String)
-    If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Stop
-    ProcedureLinesRemove "'@AssignedModule *", TargetWorkbook, module, procedure
-    module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(module, procedure), _
-                                  "'@AssignedModule " & module.Name
+                                Optional Module As VBComponent, _
+                                Optional Procedure As String)
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
+    ProcedureLinesRemove "'@AssignedModule *", TargetWorkbook, Module, Procedure
+    Module.CodeModule.InsertLines ProcedureBodyLineFirstAfterComments(Module, Procedure), _
+                                  "'@AssignedModule " & Module.Name
 End Sub
 
 Function ProcedureBodyLineFirst( _
-                               module As VBComponent, _
-                               procedure As String) As Long
-    ProcedureBodyLineFirst = ProcedureTitleLineFirst(module, procedure) + ProcedureTitleLineCount(module, procedure)
+                               Module As VBComponent, _
+                               Procedure As String) As Long
+    ProcedureBodyLineFirst = ProcedureTitleLineFirst(Module, Procedure) + ProcedureTitleLineCount(Module, Procedure)
 End Function
 
 Function ProcedureBodyLineFirstAfterComments( _
-                                            module As VBComponent, _
-                                            procedure As String) As Long
-    Dim N As Long
+                                            Module As VBComponent, _
+                                            Procedure As String) As Long
+    Dim n As Long
     Dim s As String
-    For N = ProcedureBodyLineFirst(module, procedure) To module.CodeModule.CountOfLines
-        s = Trim(module.CodeModule.Lines(N, 1))
+    For n = ProcedureBodyLineFirst(Module, Procedure) To Module.CodeModule.CountOfLines
+        s = Trim(Module.CodeModule.Lines(n, 1))
         If s = vbNullString Then
             Exit For
         ElseIf Left(s, 1) = "'" Then
         ElseIf Left(s, 3) = "Rem" Then
-        ElseIf Right(Trim(module.CodeModule.Lines(N - 1, 1)), 1) = "_" Then
+        ElseIf Right(Trim(Module.CodeModule.Lines(n - 1, 1)), 1) = "_" Then
         ElseIf Right(s, 1) = "_" Then
         Else
             Exit For
         End If
-    Next N
-    ProcedureBodyLineFirstAfterComments = N
+    Next n
+    ProcedureBodyLineFirstAfterComments = n
 End Function
 
 
 
 Public Function ProcedureCode( _
                              Optional TargetWorkbook As Workbook, _
-                             Optional module As VBComponent, _
-                             Optional procedure As Variant, _
+                             Optional Module As VBComponent, _
+                             Optional Procedure As Variant, _
                              Optional IncludeHeader As Boolean = True) As String
-    If Not AssignCPSvariables(TargetWorkbook, module, CStr(procedure)) Then Exit Function
+    If Not AssignCPSvariables(TargetWorkbook, Module, CStr(Procedure)) Then Exit Function
     Dim lProcStart            As Long
     Dim lProcBodyStart        As Long
     Dim lProcNoLines          As Long
     Const vbext_pk_Proc = 0
     On Error GoTo Error_Handler
-    lProcStart = module.CodeModule.ProcStartLine(procedure, vbext_pk_Proc)
-    lProcBodyStart = module.CodeModule.ProcBodyLine(procedure, vbext_pk_Proc)
-    lProcNoLines = module.CodeModule.ProcCountLines(procedure, vbext_pk_Proc)
+    lProcStart = Module.CodeModule.procStartLine(Procedure, vbext_pk_Proc)
+    lProcBodyStart = Module.CodeModule.ProcBodyLine(Procedure, vbext_pk_Proc)
+    lProcNoLines = Module.CodeModule.ProcCountLines(Procedure, vbext_pk_Proc)
     If IncludeHeader = True Then
-        ProcedureCode = module.CodeModule.Lines(lProcStart, lProcNoLines)
+        ProcedureCode = Module.CodeModule.Lines(lProcStart, lProcNoLines)
     Else
         lProcNoLines = lProcNoLines - (lProcBodyStart - lProcStart)
-        ProcedureCode = module.CodeModule.Lines(lProcBodyStart, lProcNoLines)
+        ProcedureCode = Module.CodeModule.Lines(lProcBodyStart, lProcNoLines)
     End If
 Error_Handler_Exit:
     On Error Resume Next
@@ -1545,9 +1586,9 @@ Function ProcedureExists( _
                         ProcedureName As Variant) As Boolean
     Dim Procedures As Collection
     Set Procedures = ProceduresOfWorkbook(TargetWorkbook)
-    Dim procedure As Variant
-    For Each procedure In Procedures
-        If UCase(CStr(procedure)) = UCase(ProcedureName) Then
+    Dim Procedure As Variant
+    For Each Procedure In Procedures
+        If UCase(CStr(Procedure)) = UCase(ProcedureName) Then
             ProcedureExists = True
             Exit Function
         End If
@@ -1556,22 +1597,22 @@ End Function
 
 Function ProcedureLastModAdd( _
                             Optional TargetWorkbook As Workbook, _
-                            Optional module As VBComponent, _
-                            Optional procedure As String, _
+                            Optional Module As VBComponent, _
+                            Optional Procedure As String, _
                             Optional ModificationDate As Double)
                        
 
 
-If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Exit Function
+If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Exit Function
     If ModificationDate = 0 Then ModificationDate = Format(Now, "yymmddhhnn")
     Dim LastModLine As Long
-        LastModLine = ProcedureLineContaining(module, procedure, "'@LastModified *")
+        LastModLine = ProcedureLineContaining(Module, Procedure, "'@LastModified *")
     If LastModLine = 0 Then GoTo PASS
     Dim LDate As Double
-        LDate = Split(module.CodeModule.Lines(LastModLine, 1), " ")(1)
-    ProcedureLinesRemove "'@LastModified *", TargetWorkbook, module, procedure
+        LDate = Split(Module.CodeModule.Lines(LastModLine, 1), " ")(1)
+    ProcedureLinesRemove "'@LastModified *", TargetWorkbook, Module, Procedure
 PASS:
-    module.CodeModule.InsertLines ProcedureBodyLineFirst(module, procedure), _
+    Module.CodeModule.InsertLines ProcedureBodyLineFirst(Module, Procedure), _
                                   "'@LastModified " & ModificationDate
     
     ProcedureLastModAdd = ModificationDate
@@ -1579,41 +1620,41 @@ End Function
 
 Function ProcedureLastModified( _
                             Optional TargetWorkbook As Workbook, _
-                            Optional module As VBComponent, _
-                            Optional procedure As String)
-    If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Stop
-    ProcedureLastModified = StringLastModified(ProcedureCode(TargetWorkbook, module, procedure))
+                            Optional Module As VBComponent, _
+                            Optional Procedure As String)
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
+    ProcedureLastModified = StringLastModified(ProcedureCode(TargetWorkbook, Module, Procedure))
 End Function
 
 Function ProcedureLinesCount( _
-                            module As VBComponent, _
-                            procedure As String) As Long
-    ProcedureLinesCount = module.CodeModule.ProcCountLines(procedure, vbext_pk_Proc)
+                            Module As VBComponent, _
+                            Procedure As String) As Long
+    ProcedureLinesCount = Module.CodeModule.ProcCountLines(Procedure, vbext_pk_Proc)
 End Function
 
 Public Function ProcedureLinesFirst( _
-                                   module As VBComponent, _
-                                   procedure As String) As Long
+                                   Module As VBComponent, _
+                                   Procedure As String) As Long
     Dim ProcKind As VBIDE.vbext_ProcKind
         ProcKind = vbext_pk_Proc
-    ProcedureLinesFirst = module.CodeModule.ProcStartLine(procedure, ProcKind)
+    ProcedureLinesFirst = Module.CodeModule.procStartLine(Procedure, ProcKind)
 End Function
 
 
 Public Function ProcedureLinesLast( _
-                                  module As VBComponent, _
-                                  procedure As String, _
+                                  Module As VBComponent, _
+                                  Procedure As String, _
                                   Optional IncludeTail As Boolean) As Long
     Dim ProcKind As VBIDE.vbext_ProcKind
         ProcKind = vbext_pk_Proc
     Dim startAt As Long
-        startAt = module.CodeModule.ProcStartLine(procedure, ProcKind)
+        startAt = Module.CodeModule.procStartLine(Procedure, ProcKind)
     Dim CountOf As Long
-        CountOf = module.CodeModule.ProcCountLines(procedure, ProcKind)
+        CountOf = Module.CodeModule.ProcCountLines(Procedure, ProcKind)
     Dim endAt As Long
         endAt = startAt + CountOf - 1
     If Not IncludeTail Then
-        Do While Not Trim(module.CodeModule.Lines(endAt, 1)) Like "End *"
+        Do While Not Trim(Module.CodeModule.Lines(endAt, 1)) Like "End *"
             endAt = endAt - 1
         Loop
     End If
@@ -1623,143 +1664,143 @@ End Function
 Sub ProcedureLinesRemove( _
                         myCriteria As String, _
                         Optional TargetWorkbook As Workbook, _
-                        Optional module As VBComponent, _
-                        Optional procedure As String)
-    If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Stop
+                        Optional Module As VBComponent, _
+                        Optional Procedure As String)
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
 
     Dim Code As String
     Dim i As Long
-    For i = ProcedureLinesLast(module, procedure) To ProcedureLinesFirst(module, procedure) Step -1
-        Code = Trim(module.CodeModule.Lines(i, 1))
-        If Code Like myCriteria Then module.CodeModule.DeleteLines i
+    For i = ProcedureLinesLast(Module, Procedure) To ProcedureLinesFirst(Module, Procedure) Step -1
+        Code = Trim(Module.CodeModule.Lines(i, 1))
+        If Code Like myCriteria Then Module.CodeModule.DeleteLines i
     Next
 End Sub
 
 Sub ProcedureLinesRemoveInclude( _
                                 Optional TargetWorkbook As Workbook, _
-                                Optional module As VBComponent, _
-                                Optional procedure As String)
-    If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Stop
-    ProcedureLinesRemove "'@INCLUDE", TargetWorkbook, module, procedure
+                                Optional Module As VBComponent, _
+                                Optional Procedure As String)
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Stop
+    ProcedureLinesRemove "'@INCLUDE", TargetWorkbook, Module, Procedure
 End Sub
 
 
 Sub ProcedureMoveHere( _
-                     Optional procedure As String)
+                     Optional Procedure As String)
 
     
     Dim TargetWorkbook As Workbook
     Set TargetWorkbook = ActiveCodepaneWorkbook
-    If Not AssignProcedureVariable(TargetWorkbook, procedure) Then Exit Sub
-    Dim module As VBComponent
-    Set module = ModuleOfProcedure(TargetWorkbook, procedure)
+    If Not AssignProcedureVariable(TargetWorkbook, Procedure) Then Exit Sub
+    Dim Module As VBComponent
+    Set Module = ModuleOfProcedure(TargetWorkbook, Procedure)
     Dim s As String
-        s = ProcedureCode(TargetWorkbook, module, procedure)
+        s = ProcedureCode(TargetWorkbook, Module, Procedure)
 
         If InStr(1, s, "'@AssignedModule") = 0 Then
-            ProcedureAssignedModuleAdd TargetWorkbook, module, procedure
-            s = ProcedureCode(TargetWorkbook, module, procedure)
+            ProcedureAssignedModuleAdd TargetWorkbook, Module, Procedure
+            s = ProcedureCode(TargetWorkbook, Module, Procedure)
         End If
 
     Dim sl As Long, cl As Long
-        sl = ProcedureLinesFirst(module, procedure)
-        cl = ProcedureLinesLast(module, procedure, False) - sl + 1
-    ActiveModule.CodeModule.InsertLines ProcedureLinesLast(module, ActiveProcedure, True) + 1, s
-    module.CodeModule.DeleteLines sl, cl
+        sl = ProcedureLinesFirst(Module, Procedure)
+        cl = ProcedureLinesLast(Module, Procedure, False) - sl + 1
+    ActiveModule.CodeModule.InsertLines ProcedureLinesLast(Module, ActiveProcedure, True) + 1, s
+    Module.CodeModule.DeleteLines sl, cl
 End Sub
 
 Sub ProcedureMoveToAssignedModule( _
                                  Optional TargetWorkbook As Workbook, _
-                                 Optional module As VBComponent, _
-                                 Optional procedure As String)
-    If Not AssignCPSvariables(TargetWorkbook, module, procedure) Then Exit Sub
+                                 Optional Module As VBComponent, _
+                                 Optional Procedure As String)
+    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then Exit Sub
     Dim MoveToModule As VBComponent
-    Set MoveToModule = ProcedureAssignedModule(TargetWorkbook, module, procedure)
+    Set MoveToModule = ProcedureAssignedModule(TargetWorkbook, Module, Procedure)
     If MoveToModule Is Nothing Then Exit Sub
-    ProcedureMoveToModule TargetWorkbook, module, procedure, MoveToModule
+    ProcedureMoveToModule TargetWorkbook, Module, Procedure, MoveToModule
 End Sub
 
 Sub ProcedureMoveToModule( _
                          TargetWorkbook As Workbook, _
-                         module As VBComponent, _
-                         procedure As String, _
+                         Module As VBComponent, _
+                         Procedure As String, _
                          MoveToModule As VBComponent)
     Dim Code As String
-        Code = ProcedureCode(TargetWorkbook, module, procedure)
+        Code = ProcedureCode(TargetWorkbook, Module, Procedure)
     Dim startLine As Long
-        startLine = ProcedureLinesFirst(module, procedure)
+        startLine = ProcedureLinesFirst(Module, Procedure)
     Dim CountLines As Long
-        CountLines = ProcedureLinesCount(module, procedure)
+        CountLines = ProcedureLinesCount(Module, Procedure)
     MoveToModule.CodeModule.InsertLines MoveToModule.CodeModule.CountOfLines + 1, vbNewLine & Code
-    module.CodeModule.DeleteLines startLine, CountLines
+    Module.CodeModule.DeleteLines startLine, CountLines
 
 End Sub
 
 Public Sub ProcedureReplace( _
-                            module As VBComponent, _
-                            procedure As String, _
+                            Module As VBComponent, _
+                            Procedure As String, _
                             Code As String)
 
     Dim startLine As Integer
     Dim NumLines As Integer
-    With module.CodeModule
-        startLine = .ProcStartLine(procedure, vbext_pk_Proc)
-        NumLines = .ProcCountLines(procedure, vbext_pk_Proc)
+    With Module.CodeModule
+        startLine = .procStartLine(Procedure, vbext_pk_Proc)
+        NumLines = .ProcCountLines(Procedure, vbext_pk_Proc)
         .DeleteLines startLine, NumLines
         .InsertLines startLine, Code
     End With
 End Sub
 
 Function ProcedureTitle( _
-                       module As VBComponent, _
-                       procedure As String) As String
+                       Module As VBComponent, _
+                       Procedure As String) As String
     Dim titleLine As Long
-        titleLine = ProcedureTitleLineFirst(module, procedure)
-    Dim title As String
-        title = module.CodeModule.Lines(titleLine, 1)
+        titleLine = ProcedureTitleLineFirst(Module, Procedure)
+    Dim Title As String
+        Title = Module.CodeModule.Lines(titleLine, 1)
     Dim counter As Long
         counter = 1
-    Do While Right(title, 1) = "_"
+    Do While Right(Title, 1) = "_"
         counter = counter + 1
-        title = module.CodeModule.Lines(titleLine, counter)
+        Title = Module.CodeModule.Lines(titleLine, counter)
     Loop
 
-    ProcedureTitle = title
+    ProcedureTitle = Title
 End Function
 
 Function ProcedureTitleLineCount( _
-                                module As VBComponent, _
-                                procedure As String) As Long
+                                Module As VBComponent, _
+                                Procedure As String) As Long
 
-    ProcedureTitleLineCount = ProcedureTitleLineLast(module, procedure) - ProcedureTitleLineFirst(module, procedure) + 1
+    ProcedureTitleLineCount = ProcedureTitleLineLast(Module, Procedure) - ProcedureTitleLineFirst(Module, Procedure) + 1
 End Function
 
 
 
 Public Function ProcedureTitleLineFirst( _
-                                       module As VBComponent, _
-                                       procedure As String) As Long
-    ProcedureTitleLineFirst = module.CodeModule.ProcBodyLine(procedure, vbext_pk_Proc)
+                                       Module As VBComponent, _
+                                       Procedure As String) As Long
+    ProcedureTitleLineFirst = Module.CodeModule.ProcBodyLine(Procedure, vbext_pk_Proc)
 End Function
 
 Function ProcedureTitleLineLast( _
-                               module As VBComponent, _
-                               procedure As String) As Long
-    ProcedureTitleLineLast = ProcedureTitleLineFirst(module, procedure) + UBound(Split(ProcedureTitle(module, procedure), vbNewLine))
+                               Module As VBComponent, _
+                               Procedure As String) As Long
+    ProcedureTitleLineLast = ProcedureTitleLineFirst(Module, Procedure) + UBound(Split(ProcedureTitle(Module, Procedure), vbNewLine))
 End Function
 
 Public Function ProceduresOfModule( _
-                                  module As VBComponent) As Collection
+                                  Module As VBComponent) As Collection
     Dim ProcKind As VBIDE.vbext_ProcKind
     Dim lineNum As Long
     Dim coll As New Collection
-    Dim procedure As String
-    With module.CodeModule
+    Dim Procedure As String
+    With Module.CodeModule
         lineNum = .CountOfDeclarationLines + 1
         Do Until lineNum >= .CountOfLines
             ProcedureAs = .ProcOfLine(lineNum, ProcKind)
             coll.Add ProcedureAs
-            lineNum = .ProcStartLine(ProcedureAs, ProcKind) + .ProcCountLines(ProcedureAs, ProcKind) + 1
+            lineNum = .procStartLine(ProcedureAs, ProcKind) + .ProcCountLines(ProcedureAs, ProcKind) + 1
         Loop
     End With
     Set ProceduresOfModule = coll
@@ -1806,34 +1847,34 @@ Function ProceduresOfWorkbook( _
                              Optional ExcludeDocument As Boolean = True, _
                              Optional ExcludeClass As Boolean = True, _
                              Optional ExcludeForm As Boolean = True) As Collection
-    Dim module As VBComponent
+    Dim Module As VBComponent
     Dim ProcKind As VBIDE.vbext_ProcKind
     Dim lineNum As Long
     Dim coll As New Collection
     Dim ProcedureName As String
-    For Each module In TargetWorkbook.VBProject.VBComponents
-        If ExcludeClass = True And module.Type = vbext_ct_ClassModule Then GoTo SKIP
-        If ExcludeDocument = True And module.Type = vbext_ct_Document Then GoTo SKIP
-        If ExcludeForm = True And module.Type = vbext_ct_MSForm Then GoTo SKIP
-        With module.CodeModule
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        If ExcludeClass = True And Module.Type = vbext_ct_ClassModule Then GoTo SKIP
+        If ExcludeDocument = True And Module.Type = vbext_ct_Document Then GoTo SKIP
+        If ExcludeForm = True And Module.Type = vbext_ct_MSForm Then GoTo SKIP
+        With Module.CodeModule
             lineNum = .CountOfDeclarationLines + 1
             Do Until lineNum >= .CountOfLines
                 ProcedureName = .ProcOfLine(lineNum, ProcKind)
                 If InStr(1, ProcedureName, "_") = 0 Then
                     coll.Add ProcedureName
                 End If
-                lineNum = .ProcStartLine(ProcedureName, ProcKind) + .ProcCountLines(ProcedureName, ProcKind) + 1
+                lineNum = .procStartLine(ProcedureName, ProcKind) + .ProcCountLines(ProcedureName, ProcKind) + 1
             Loop
         End With
 SKIP:
-    Next module
+    Next Module
     Set ProceduresOfWorkbook = coll
 End Function
 
 Sub ProjetFoldersCreate()
-    Dim Element
-    For Each Element In vbarcFolders
-        FoldersCreate CStr(Element)
+    Dim element
+    For Each element In vbarcFolders
+        FoldersCreate CStr(element)
     Next
 End Sub
 
@@ -1927,21 +1968,21 @@ ERR_HANDLER:
     GoTo Exit_Err_Handler
 End Sub
 
-Sub TxtPrepend(filePath As String, txt As String)
+Sub TxtPrepend(FilePath As String, txt As String)
     Dim s As String
-    s = TxtRead(filePath)
-    TxtOverwrite filePath, txt & vbNewLine & s
+    s = TxtRead(FilePath)
+    TxtOverwrite FilePath, txt & vbNewLine & s
 End Sub
 
 
 
-Sub TxtPrependContainedProcedures(FileName As String)
-    Dim s As String: s = TxtRead(FileName)
+Sub TxtPrependContainedProcedures(Filename As String)
+    Dim s As String: s = TxtRead(Filename)
     Dim v As New Collection
     Set v = ProceduresOfTXT(s)
     If v.Count = 0 Then Exit Sub
     Dim Line As String: Line = String(30, "'")
-    TxtPrepend FileName, _
+    TxtPrepend Filename, _
     "'Contains the following " & "#" & v.Count & " procedures " & vbNewLine & Line & vbNewLine & _
     "'" & collectionToString(v, vbNewLine & "'") & vbNewLine & Line & vbNewLine & vbNewLine
 End Sub
@@ -1998,15 +2039,15 @@ End Function
 
 Function WorkbookCode(TargetWorkbook) As String
     If TypeName(TargetWorkbook) <> "Workbook" Then Stop
-    Dim module As VBComponent
+    Dim Module As VBComponent
     Dim txt
-    For Each module In TargetWorkbook.VBProject.VBComponents
-        If module.CodeModule.CountOfLines > 0 Then
+    For Each Module In TargetWorkbook.VBProject.VBComponents
+        If Module.CodeModule.CountOfLines > 0 Then
             txt = txt & _
                   vbNewLine & _
-                  "'" & String(10, "=") & ModuleOrSheetName(module) & " (" & module.Type & ") " & String(10, "=") & _
+                  "'" & String(10, "=") & ModuleOrSheetName(Module) & " (" & Module.Type & ") " & String(10, "=") & _
                   vbNewLine & _
-                  ModuleCode(module)
+                  ModuleCode(Module)
         End If
     Next
     WorkbookCode = txt
@@ -2018,7 +2059,7 @@ Function WorkbookOfModule(vbComp As VBComponent) As Workbook
 End Function
 
 Function WorkbookOfProject(vbProj As VBProject) As Workbook
-    tmpStr = vbProj.FileName
+    tmpStr = vbProj.Filename
     tmpStr = Right(tmpStr, Len(tmpStr) - InStrRev(tmpStr, "\"))
     Set WorkbookOfProject = Workbooks(tmpStr)
 End Function
@@ -2028,40 +2069,40 @@ End Function
 Function WorksheetExists(SheetName As String, TargetWorkbook As Workbook) As Boolean
     Dim TargetWorksheet  As Worksheet
     On Error Resume Next
-    Set TargetWorksheet = TargetWorkbook.Sheets(SheetName)
+    Set TargetWorksheet = TargetWorkbook.SHEETS(SheetName)
     On Error GoTo 0
     WorksheetExists = Not TargetWorksheet Is Nothing
 End Function
 
-Function classCallsOfModule(module As VBComponent) As Variant
+Function classCallsOfModule(Module As VBComponent) As Variant
 
 
     Dim Code As Variant
-    Dim Element As Variant
-    Dim keyword As Variant
+    Dim element As Variant
+    Dim Keyword As Variant
     Dim var As Variant
     ReDim var(1 To 2, 1 To 1)
     Dim counter As Long
     counter = 0
-    If module.CodeModule.CountOfDeclarationLines > 0 Then
-        Code = module.CodeModule.Lines(1, module.CodeModule.CountOfDeclarationLines)
+    If Module.CodeModule.CountOfDeclarationLines > 0 Then
+        Code = Module.CodeModule.Lines(1, Module.CodeModule.CountOfDeclarationLines)
         Code = Replace(Code, "_" & vbNewLine, "")
         Code = Split(Code, vbNewLine)
         Code = Filter(Code, " As ", , vbTextCompare)
-        For Each Element In Code
-            Element = Trim(Element)
-            If Element Like "* As *" Then
-                keyword = Split(Element, " As ")(0)
-                keyword = Split(keyword, " ")(UBound(Split(keyword, " ")))
-                Element = Split(Element, " As ")(1)
-                Element = Replace(Element, "New ", "")
+        For Each element In Code
+            element = Trim(element)
+            If element Like "* As *" Then
+                Keyword = Split(element, " As ")(0)
+                Keyword = Split(Keyword, " ")(UBound(Split(Keyword, " ")))
+                element = Split(element, " As ")(1)
+                element = Replace(element, "New ", "")
                 
                 For Each ClassName In ClassNames
-                    If Element = ClassName Then
+                    If element = ClassName Then
                         
                         ReDim Preserve var(1 To 2, 1 To counter + 1)
-                        var(1, UBound(var, 2)) = Element
-                        var(2, UBound(var, 2)) = keyword
+                        var(1, UBound(var, 2)) = element
+                        var(2, UBound(var, 2)) = Keyword
                         counter = counter + 1
                     End If
                 Next
@@ -2083,10 +2124,10 @@ Function classCallsOfModule(module As VBComponent) As Variant
 End Function
 
 Function collectionToString(coll As Collection, delim As String) As String
-    Dim Element
+    Dim element
     Dim out As String
-    For Each Element In coll
-        out = IIf(out = "", Element, out & delim & Element)
+    For Each element In coll
+        out = IIf(out = "", element, out & delim & element)
     Next
     collectionToString = out
 End Function
@@ -2108,97 +2149,97 @@ Function getDeclarations( _
     Dim ScopeCollection         As New Collection
     Dim TypeCollection          As New Collection
 
-    Dim Element                 As Variant
+    Dim element                 As Variant
     Dim OriginalDeclarations    As Variant
-    Dim Str                     As Variant
+    Dim str                     As Variant
     
-    Dim Tmp                     As String
+    Dim tmp                     As String
     Dim Helper                  As String
     Dim i                       As Long
     
-    Dim module                  As VBComponent
-    For Each module In wb.VBProject.VBComponents
-        If module.Type = vbext_ct_StdModule Or module.Type = vbext_ct_MSForm Then
-            If module.CodeModule.CountOfDeclarationLines > 0 Then
-                Str = module.CodeModule.Lines(1, module.CodeModule.CountOfDeclarationLines)
-                Str = Replace(Str, "_" & vbNewLine, "")
-                OriginalDeclarations = Str
-                Tmp = Str
-                Do While InStr(1, Str, "End Type") > 0
-                    Tmp = Mid(Str, InStr(1, Str, "Type "), InStr(1, Str, "End Type") - InStr(1, Str, "Type ") + 8)
-                    Str = Replace(Str, Tmp, Split(Tmp, vbNewLine)(0))
+    Dim Module                  As VBComponent
+    For Each Module In wb.VBProject.VBComponents
+        If Module.Type = vbext_ct_StdModule Or Module.Type = vbext_ct_MSForm Then
+            If Module.CodeModule.CountOfDeclarationLines > 0 Then
+                str = Module.CodeModule.Lines(1, Module.CodeModule.CountOfDeclarationLines)
+                str = Replace(str, "_" & vbNewLine, "")
+                OriginalDeclarations = str
+                tmp = str
+                Do While InStr(1, str, "End Type") > 0
+                    tmp = Mid(str, InStr(1, str, "Type "), InStr(1, str, "End Type") - InStr(1, str, "Type ") + 8)
+                    str = Replace(str, tmp, Split(tmp, vbNewLine)(0))
                 Loop
-                Do While InStr(1, Str, "End Enum") > 0
-                    Tmp = Mid(Str, InStr(1, Str, "Enum "), InStr(1, Str, "End Enum") - InStr(1, Str, "Enum ") + 8)
-                    Str = Replace(Str, Tmp, Split(Tmp, vbNewLine)(0))
+                Do While InStr(1, str, "End Enum") > 0
+                    tmp = Mid(str, InStr(1, str, "Enum "), InStr(1, str, "End Enum") - InStr(1, str, "Enum ") + 8)
+                    str = Replace(str, tmp, Split(tmp, vbNewLine)(0))
                 Loop
-                Do While InStr(1, Str, "  ") > 0
-                    Str = Replace(Str, "  ", " ")
+                Do While InStr(1, str, "  ") > 0
+                    str = Replace(str, "  ", " ")
                 Loop
                 
-                Str = Split(Str, vbNewLine)
-                Tmp = OriginalDeclarations
+                str = Split(str, vbNewLine)
+                tmp = OriginalDeclarations
                 
-                For Each Element In Str
-                    If Len(CStr(Element)) > 0 And Not Trim(CStr(Element)) Like "'*" And Not Trim(CStr(Element)) Like "Rem*" Then
-                        If RegexTest(CStr(Element), "\b ?Enum \b") Then
-                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(Element), " ", "Enum")
-                            DeclarationsCollection.Add DeclarationsKeywordSubstring(Tmp, , "Enum " & KeywordsCollection.Item(KeywordsCollection.Count), "End Enum", , , True)
+                For Each element In str
+                    If Len(CStr(element)) > 0 And Not Trim(CStr(element)) Like "'*" And Not Trim(CStr(element)) Like "Rem*" Then
+                        If RegexTest(CStr(element), "\b ?Enum \b") Then
+                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", "Enum")
+                            DeclarationsCollection.Add DeclarationsKeywordSubstring(tmp, , "Enum " & KeywordsCollection.Item(KeywordsCollection.Count), "End Enum", , , True)
                             TypeCollection.Add "Enum"
-                            ComponentCollection.Add module.Name
-                            ComponentTypecollection.Add ModuleTypeToString(module.Type)
+                            ComponentCollection.Add Module.Name
+                            ComponentTypecollection.Add ModuleTypeToString(Module.Type)
                             ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.Item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
-                        ElseIf RegexTest(CStr(Element), "\b ?Type \b") Then
-                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(Element), " ", "Type")
-                            DeclarationsCollection.Add DeclarationsKeywordSubstring(Tmp, , "Type " & KeywordsCollection.Item(KeywordsCollection.Count), "End Type", , , True)
+                        ElseIf RegexTest(CStr(element), "\b ?Type \b") Then
+                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", "Type")
+                            DeclarationsCollection.Add DeclarationsKeywordSubstring(tmp, , "Type " & KeywordsCollection.Item(KeywordsCollection.Count), "End Type", , , True)
                             TypeCollection.Add "Type"
-                            ComponentCollection.Add module.Name
-                            ComponentTypecollection.Add ModuleTypeToString(module.Type)
+                            ComponentCollection.Add Module.Name
+                            ComponentTypecollection.Add ModuleTypeToString(Module.Type)
                             ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.Item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
-                        ElseIf InStr(1, CStr(Element), "Const ", vbTextCompare) > 0 Then
-                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(Element), " ", "Const")
-                            DeclarationsCollection.Add CStr(Element)
+                        ElseIf InStr(1, CStr(element), "Const ", vbTextCompare) > 0 Then
+                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", "Const")
+                            DeclarationsCollection.Add CStr(element)
                             TypeCollection.Add "Const"
-                            ComponentCollection.Add module.Name
-                            ComponentTypecollection.Add ModuleTypeToString(module.Type)
+                            ComponentCollection.Add Module.Name
+                            ComponentTypecollection.Add ModuleTypeToString(Module.Type)
                             ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.Item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
-                        ElseIf RegexTest(CStr(Element), "\b ?Sub \b") Then
-                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(Element), " ", "Sub")
-                            DeclarationsCollection.Add CStr(Element)
+                        ElseIf RegexTest(CStr(element), "\b ?Sub \b") Then
+                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", "Sub")
+                            DeclarationsCollection.Add CStr(element)
                             TypeCollection.Add "Sub"
-                            ComponentCollection.Add module.Name
-                            ComponentTypecollection.Add ModuleTypeToString(module.Type)
+                            ComponentCollection.Add Module.Name
+                            ComponentTypecollection.Add ModuleTypeToString(Module.Type)
                             ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.Item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
-                        ElseIf RegexTest(CStr(Element), "\b ?Function \b") Then
-                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(Element), " ", "Function")
-                            DeclarationsCollection.Add CStr(Element)
+                        ElseIf RegexTest(CStr(element), "\b ?Function \b") Then
+                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", "Function")
+                            DeclarationsCollection.Add CStr(element)
                             TypeCollection.Add "Function"
-                            ComponentCollection.Add module.Name
-                            ComponentTypecollection.Add ModuleTypeToString(module.Type)
+                            ComponentCollection.Add Module.Name
+                            ComponentTypecollection.Add ModuleTypeToString(Module.Type)
                             ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.Item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
-                        ElseIf Element Like "*(*) As *" Then
-                            Helper = Left(Element, InStr(1, CStr(Element), "(") - 1)
+                        ElseIf element Like "*(*) As *" Then
+                            Helper = Left(element, InStr(1, CStr(element), "(") - 1)
                             Helper = Mid(Helper, InStrRev(Helper, " ") + 1)
                             KeywordsCollection.Add Helper
-                            DeclarationsCollection.Add CStr(Element)
+                            DeclarationsCollection.Add CStr(element)
                             TypeCollection.Add "Other"
-                            ComponentCollection.Add module.Name
-                            ComponentTypecollection.Add ModuleTypeToString(module.Type)
+                            ComponentCollection.Add Module.Name
+                            ComponentTypecollection.Add ModuleTypeToString(Module.Type)
                             ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.Item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
-                        ElseIf Element Like "* As *" Then
-                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(Element), " ", , "As")
-                            DeclarationsCollection.Add CStr(Element)
+                        ElseIf element Like "* As *" Then
+                            KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", , "As")
+                            DeclarationsCollection.Add CStr(element)
                             TypeCollection.Add "Other"
-                            ComponentCollection.Add module.Name
-                            ComponentTypecollection.Add ModuleTypeToString(module.Type)
+                            ComponentCollection.Add Module.Name
+                            ComponentTypecollection.Add ModuleTypeToString(Module.Type)
                             ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.Item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
                         Else
                         End If
                     End If
-                Next Element
+                Next element
             End If
         End If
-    Next module
+    Next Module
     
     If includeScope = True Then Output.Add ScopeCollection
     If includeType = True Then Output.Add TypeCollection
@@ -2233,10 +2274,10 @@ Function vbarcFolders() As Collection
     Set vbarcFolders = coll
 End Function
 
-Function ProcedureLineContaining(module As VBComponent, procedure As String, This As String) As Long
+Function ProcedureLineContaining(Module As VBComponent, Procedure As String, this As String) As Long
     Dim i As Long
-    For i = ProcedureLinesFirst(module, procedure) To ProcedureLinesLast(module, procedure)
-        If module.CodeModule.Lines(i, 1) Like This Then
+    For i = ProcedureLinesFirst(Module, Procedure) To ProcedureLinesLast(Module, Procedure)
+        If Module.CodeModule.Lines(i, 1) Like this Then
             ProcedureLineContaining = i
             Exit Function
         End If
@@ -2250,18 +2291,19 @@ Public Function ClearClipboard()
 End Function
 
 Public Function CLIP(Optional StoreText As String) As String
-    Dim X As Variant
-    X = StoreText
+    Dim x As Variant
+    x = StoreText
     With CreateObject("htmlfile")
         With .parentWindow.clipboardData
             Select Case True
             Case Len(StoreText)
-                .SetData "text", X
+                .SetData "text", x
             Case Else
                 CLIP = .GetData("text")
             End Select
         End With
     End With
 End Function
+
 
 

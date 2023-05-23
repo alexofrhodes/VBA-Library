@@ -37,3 +37,165 @@ Function StringFormatAlignRowsElements(txt As String, AlignString As String, Opt
 End Function
 '--------------------
 '@EndFolder Align
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 17-03-2023 11:05    Alex                fixed case AlignAtString=":" (StringFormatAlignRowsElements)
+
+Function StringFormatAlignRowsElements(txt As String, AlignAtString As String, SearchFromLeft As Boolean, Optional AlignAtColumn As Long)
+'@LastModified 2303171105
+'@AssignedModule F_Vbe_Comments
+    Dim TextLines: TextLines = Split(txt, vbNewLine)
+    Dim elementOriginalColumn  As Long
+    Dim rightMostColumn        As Long
+    Dim lineText               As String
+    Dim numberOfSpacesToInsert As Long
+    Dim i                      As Long
+    
+    If AlignAtColumn = 0 Then
+        For i = LBound(TextLines) To UBound(TextLines)
+            lineText = TextLines(i)
+            If SearchFromLeft Then
+                elementOriginalColumn = InStr(lineText, AlignAtString)
+            Else
+                elementOriginalColumn = InStrRev(lineText, AlignAtString)
+            End If
+            If elementOriginalColumn > rightMostColumn Then rightMostColumn = elementOriginalColumn
+        Next
+        AlignAtColumn = rightMostColumn
+    End If
+    
+    For i = LBound(TextLines) To UBound(TextLines)
+        lineText = TextLines(i)
+        If SearchFromLeft Then
+            elementOriginalColumn = InStr(lineText, AlignAtString)
+        Else
+            elementOriginalColumn = InStrRev(lineText, AlignAtString)
+        End If
+        
+        If elementOriginalColumn > 0 Then
+            numberOfSpacesToInsert = AlignAtColumn - elementOriginalColumn + IIf(AlignAtString = ":", 1, 0)
+            If numberOfSpacesToInsert > 0 Then
+                If AlignAtString = ":" Then
+                    TextLines(i) = Left(TextLines(i), elementOriginalColumn) & _
+                                    Space(numberOfSpacesToInsert) & _
+                                    Trim(Mid(TextLines(i), elementOriginalColumn + 1))
+                Else
+                    TextLines(i) = Left(TextLines(i), elementOriginalColumn - 1) & _
+                                    Space(numberOfSpacesToInsert) & _
+                                    Mid(TextLines(i), elementOriginalColumn)
+                End If
+            End If
+        End If
+    Next
+
+    StringFormatAlignRowsElements = Join(TextLines, vbNewLine)
+
+End Function
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 17-03-2023 11:05    Alex                fixed case AlignAtString=":" (StringFormatAlignRowsElements)
+
+Function StringFormatAlignRowsElements(txt As String, AlignAtString As String, SearchFromLeft As Boolean, Optional AlignAtColumn As Long)
+'@LastModified 2303171105
+'@AssignedModule F_Vbe_Comments
+    Dim TextLines: TextLines = Split(txt, vbNewLine)
+    Dim elementOriginalColumn  As Long
+    Dim rightMostColumn        As Long
+    Dim lineText               As String
+    Dim numberOfSpacesToInsert As Long
+    Dim i                      As Long
+    
+    If AlignAtColumn = 0 Then
+        For i = LBound(TextLines) To UBound(TextLines)
+            lineText = TextLines(i)
+            If SearchFromLeft Then
+                elementOriginalColumn = InStr(lineText, AlignAtString)
+            Else
+                elementOriginalColumn = InStrRev(lineText, AlignAtString)
+            End If
+            If elementOriginalColumn > rightMostColumn Then rightMostColumn = elementOriginalColumn
+        Next
+        AlignAtColumn = rightMostColumn
+    End If
+    
+    For i = LBound(TextLines) To UBound(TextLines)
+        lineText = TextLines(i)
+        If SearchFromLeft Then
+            elementOriginalColumn = InStr(lineText, AlignAtString)
+        Else
+            elementOriginalColumn = InStrRev(lineText, AlignAtString)
+        End If
+        
+        If elementOriginalColumn > 0 Then
+            numberOfSpacesToInsert = AlignAtColumn - elementOriginalColumn + IIf(AlignAtString = ":", 1, 0)
+            If numberOfSpacesToInsert > 0 Then
+                If AlignAtString = ":" Then
+                    TextLines(i) = Left(TextLines(i), elementOriginalColumn) & _
+                                    Space(numberOfSpacesToInsert) & _
+                                    Trim(Mid(TextLines(i), elementOriginalColumn + 1))
+                Else
+                    TextLines(i) = Left(TextLines(i), elementOriginalColumn - 1) & _
+                                    Space(numberOfSpacesToInsert) & _
+                                    Mid(TextLines(i), elementOriginalColumn)
+                End If
+            End If
+        End If
+    Next
+
+    StringFormatAlignRowsElements = Join(TextLines, vbNewLine)
+
+End Function
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 17-03-2023 11:05    Alex                fixed case AlignAtString=":" (StringFormatAlignRowsElements)
+
+Function StringFormatAlignRowsElements(txt As String, AlignAtString As String, SearchFromLeft As Boolean, Optional AlignAtColumn As Long)
+'@LastModified 2303171105
+'@AssignedModule F_Vbe_Comments
+    Dim TextLines: TextLines = Split(txt, vbNewLine)
+    Dim elementOriginalColumn  As Long
+    Dim rightMostColumn        As Long
+    Dim lineText               As String
+    Dim numberOfSpacesToInsert As Long
+    Dim i                      As Long
+    
+    If AlignAtColumn = 0 Then
+        For i = LBound(TextLines) To UBound(TextLines)
+            lineText = TextLines(i)
+            If SearchFromLeft Then
+                elementOriginalColumn = InStr(lineText, AlignAtString)
+            Else
+                elementOriginalColumn = InStrRev(lineText, AlignAtString)
+            End If
+            If elementOriginalColumn > rightMostColumn Then rightMostColumn = elementOriginalColumn
+        Next
+        AlignAtColumn = rightMostColumn
+    End If
+    
+    For i = LBound(TextLines) To UBound(TextLines)
+        lineText = TextLines(i)
+        If SearchFromLeft Then
+            elementOriginalColumn = InStr(lineText, AlignAtString)
+        Else
+            elementOriginalColumn = InStrRev(lineText, AlignAtString)
+        End If
+        
+        If elementOriginalColumn > 0 Then
+            numberOfSpacesToInsert = AlignAtColumn - elementOriginalColumn + IIf(AlignAtString = ":", 1, 0)
+            If numberOfSpacesToInsert > 0 Then
+                If AlignAtString = ":" Then
+                    TextLines(i) = Left(TextLines(i), elementOriginalColumn) & _
+                                    Space(numberOfSpacesToInsert) & _
+                                    Trim(Mid(TextLines(i), elementOriginalColumn + 1))
+                Else
+                    TextLines(i) = Left(TextLines(i), elementOriginalColumn - 1) & _
+                                    Space(numberOfSpacesToInsert) & _
+                                    Mid(TextLines(i), elementOriginalColumn)
+                End If
+            End If
+        End If
+    Next
+
+    StringFormatAlignRowsElements = Join(TextLines, vbNewLine)
+
+End Function

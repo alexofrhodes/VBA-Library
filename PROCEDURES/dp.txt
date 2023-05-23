@@ -1,12 +1,15 @@
 
 Public Sub dp(var As Variant)
+'@LastModified 2305220815
 '@BlogPosted
 '@AssignedModule F_Vbe_DebugPrintStop
+'@INCLUDE DECLARATION i
+'@INCLUDE PROCEDURE PrintXML
 '@INCLUDE PROCEDURE printRange
 '@INCLUDE PROCEDURE printArray
 '@INCLUDE PROCEDURE printCollection
 '@INCLUDE PROCEDURE printDictionary
-    Dim Element     As Variant
+    Dim element     As Variant
     Dim i As Long
 '    Debug.Print TypeName(var)
     Select Case TypeName(var)

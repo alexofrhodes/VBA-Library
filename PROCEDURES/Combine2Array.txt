@@ -1,0 +1,66 @@
+
+Public Function Combine2Array(ByVal arr1 As Variant, ByVal arr2 As Variant) As Variant
+    '@INCLUDE NumberOfArrayDimensions
+    Dim LowRowArr1 As Long
+    Dim HighRowArr1 As Long
+    Dim LowColumnArr1 As Long
+    Dim HighColumnArr1 As Long
+    Dim NumOfRowsArr1 As Long
+    Dim NumOfColumnsArr1 As Long
+    Dim LowRowArr2 As Long
+    Dim HighRowArr2 As Long
+    Dim LowColumnArr2 As Long
+    Dim HighColumnArr2 As Long
+    Dim NumOfRowsArr2 As Long
+    Dim NumOfColumnsArr2 As Long
+    Dim Output As Variant
+    Dim OutputRow As Long
+    Dim OutputColumn As Long
+    Dim RowIdx As Long
+    Dim ColIdx As Long
+    If (IsArray(arr1) = False) Or (IsArray(arr2) = False) Then
+        Combine2Array = Null
+        MsgBox "Both need to be array"
+        Exit Function
+    End If
+    If (NumberOfArrayDimensions(arr1) <> 2) Or (NumberOfArrayDimensions(arr2) <> 2) Then
+        Combine2Array = Null
+        MsgBox "Both need to be 2D array"
+        Exit Function
+    End If
+    LowRowArr1 = LBound(arr1, 1)
+    HighRowArr1 = UBound(arr1, 1)
+    LowColumnArr1 = LBound(arr1, 2)
+    HighColumnArr1 = UBound(arr1, 2)
+    NumOfRowsArr1 = HighRowArr1 - LowRowArr1 + 1
+    NumOfColumnsArr1 = HighColumnArr1 - LowColumnArr1 + 1
+    LowRowArr2 = LBound(arr2, 1)
+    HighRowArr2 = UBound(arr2, 1)
+    LowColumnArr2 = LBound(arr2, 2)
+    HighColumnArr2 = UBound(arr2, 2)
+    NumOfRowsArr2 = HighRowArr2 - LowRowArr2 + 1
+    NumOfColumnsArr2 = HighColumnArr2 - LowColumnArr2 + 1
+    If NumOfColumnsArr1 <> NumOfColumnsArr2 Then
+        Combine2Array = Null
+        MsgBox "Both array must have same number of column"
+        Exit Function
+    End If
+    ReDim Output(0 To NumOfRowsArr1 + NumOfRowsArr2 - 1, 0 To NumOfColumnsArr1 - 1)
+    For RowIdx = LowRowArr1 To HighRowArr1
+        OutputColumn = 0
+        For ColIdx = LowColumnArr1 To HighColumnArr1
+            Output(OutputRow, OutputColumn) = arr1(RowIdx, ColIdx)
+            OutputColumn = OutputColumn + 1
+        Next ColIdx
+        OutputRow = OutputRow + 1
+    Next RowIdx
+    For RowIdx = LowRowArr2 To HighRowArr2
+        OutputColumn = 0
+        For ColIdx = LowColumnArr2 To HighColumnArr2
+            Output(OutputRow, OutputColumn) = arr2(RowIdx, ColIdx)
+            OutputColumn = OutputColumn + 1
+        Next ColIdx
+        OutputRow = OutputRow + 1
+    Next RowIdx
+    Combine2Array = Output
+End Function

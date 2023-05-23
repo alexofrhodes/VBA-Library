@@ -1,0 +1,33 @@
+
+Public Function Recycle(filespec As String, Optional ErrText As String) As Boolean
+    Dim SHFileOp As SHFILEOPSTRUCT
+    Dim Res As Long
+    Dim sFileSpec As String
+    ErrText = vbNullString
+    sFileSpec = filespec
+    If InStr(1, filespec, ":", vbBinaryCompare) = 0 Then
+        ErrText = "'" & filespec & "' is not a fully qualified name on the local machine"
+        Recycle = False
+        Exit Function
+    End If
+    If Dir(filespec, vbDirectory) = vbNullString Then
+        ErrText = "'" & filespec & "' does not exist"
+        Recycle = False
+        Exit Function
+    End If
+    If Right(sFileSpec, 1) = "\" Then
+        sFileSpec = Left(sFileSpec, Len(sFileSpec) - 1)
+    End If
+    With SHFileOp
+        .wFunc = FO_DELETE
+        .pFrom = sFileSpec
+        .fFlags = FOF_ALLOWUNDO
+        .fFlags = FOF_ALLOWUNDO + FOF_NOCONFIRMATION
+    End With
+    Res = SHFileOperation(SHFileOp)
+    If Res = 0 Then
+        Recycle = True
+    Else
+        Recycle = False
+    End If
+End Function

@@ -1,0 +1,12 @@
+
+Public Function IndentationCount(str) As Long
+    IndentationCount = Len(str) - Len(LTrim(str))
+End Function
+
+Public Function IndentationCount(str) As Long
+    IndentationCount = Len(str) - Len(LTrim(str))
+End Function
+
+Public Function IndentationCount(str) As Long
+    IndentationCount = Len(str) - Len(LTrim(str))
+End Function

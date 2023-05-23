@@ -1,0 +1,12 @@
+
+Public Function ArrayHeaderIndex(arr As Variant, HeadingValue As String) As Integer
+    'RETURN NEGATIVE IF NOT FOUND
+    ArrayHeaderIndex = -1
+    Dim ColumnIndex As Integer
+    For ColumnIndex = LBound(arr, 2) To UBound(arr, 2)
+        If arr(LBound(arr, 1), ColumnIndex) = HeadingValue Then
+            ArrayHeaderIndex = ColumnIndex
+            Exit Function
+        End If
+    Next ColumnIndex
+End Function

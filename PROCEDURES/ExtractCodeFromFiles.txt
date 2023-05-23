@@ -1,0 +1,11 @@
+
+Sub ExtractCodeFromFiles()
+    Dim v
+    v = DataFilePicker(Array("xl*"), True)
+    Dim el
+    Dim coll As New Collection
+    For Each el In v
+        coll.Add el
+    Next
+    OleVbaRun coll
+End Sub

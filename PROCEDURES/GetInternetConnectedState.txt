@@ -1,0 +1,6 @@
+
+Public Function GetInternetConnectedState() As Boolean
+'@LastModified 2305220934
+'@INCLUDE DECLARATION InternetGetConnectedState
+    GetInternetConnectedState = InternetGetConnectedState(0&, 0&)
+End Function

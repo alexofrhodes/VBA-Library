@@ -1,0 +1,30 @@
+
+Function GreekToLatin(keimeno As String) As String
+    'https://varlamis.wordpress.com/2011/05/31/word_GreekToLatin/
+    '    Application.Volatile True
+    Dim varr As Variant
+    Dim inchar As Variant
+    Dim exchar As Variant
+    Dim pl As Integer, gr As Integer, lu As Integer
+    Dim gramma As String
+    pl = Len(keimeno)
+
+    inchar = Array("Á", "Â", "Ã", "Ä", "Å", "Æ", "Ç", "È", "É", "Ê", "Ë", _
+    "Ì", "Í", "Î", "Ï", "Ð", "Ñ", "Ó", "Ô", "Õ", "Ö", "×", "Ø", "Ù", _
+    "¢", "¸", "¹", "º", "¼", "¾", "¿", "Ú", "Û", "À", "à", "ò")
+
+    exchar = Array("A", "B", "G", "D", "E", "Z", "H", "8", "I", "K", "L", _
+    "M", "N", "KS", "O", "P", "R", "S", "T", "Y", "F", "X", "PS", "W", _
+    "A", "E", "H", "I", "O", "Y", "W", "I", "Y", "I", "Y", "S")
+
+    ReDim varr(pl - 1)
+    For gr = 1 To pl
+        gramma = Mid(keimeno, gr, 1)
+        For lu = LBound(inchar) To UBound(inchar)
+            If UCase(gramma) = inchar(lu) Then gramma = exchar(lu): Exit For
+        Next
+        varr(gr - 1) = gramma
+    Next
+    GreekToLatin = Join(varr, "")
+
+End Function

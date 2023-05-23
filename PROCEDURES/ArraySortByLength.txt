@@ -1,0 +1,28 @@
+
+Public Sub ArraySortByLength(list As Variant, first As Long, last As Long)
+    '@INCLUDE ArraySortByLengthHelper
+    Dim Pivot As String
+    Dim Low As Long
+    Dim High As Long
+    Low = first
+    High = last
+    Pivot = list((first + last) \ 2)
+    Do While Low <= High
+        Do While Low < last And ArraySortByLengthHelper(list(Low), Pivot)
+            Low = Low + 1
+        Loop
+        Do While High > first And ArraySortByLengthHelper(Pivot, list(High))
+            High = High - 1
+        Loop
+        If Low <= High Then
+            Dim Swap As String
+            Swap = list(Low)
+            list(Low) = list(High)
+            list(High) = Swap
+            Low = Low + 1
+            High = High - 1
+        End If
+    Loop
+    If (first < High) Then ArraySortByLength list, first, High
+    If (Low < last) Then ArraySortByLength list, Low, last
+End Sub

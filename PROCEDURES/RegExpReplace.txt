@@ -1,0 +1,51 @@
+
+ Public Function RegExpReplace( _
+                              TEXT As String, _
+                              pattern As String, _
+                              text_replace As String, _
+                              Optional instance_num As Integer = 0, _
+                              Optional match_case As Boolean = True) As String
+    Dim text_result, text_find As String
+    Dim matches_index, pos_start As Integer
+    
+    On Error GoTo ErrHandle
+    text_result = TEXT
+    Dim REGEX As RegExp
+    Set REGEX = CreateObject("VBScript.RegExp")
+      
+    REGEX.pattern = pattern
+    REGEX.Global = True
+    REGEX.MultiLine = True
+    
+    If True = match_case Then
+      REGEX.IgnoreCase = False
+    Else
+      REGEX.IgnoreCase = True
+    End If
+    Dim matches As Object
+    Set matches = REGEX.Execute(TEXT)
+    
+    If 0 < matches.Count Then
+      If (0 = instance_num) Then
+        text_result = REGEX.Replace(TEXT, text_replace)
+      Else
+        If instance_num <= matches.Count Then
+          pos_start = 1
+          For matches_index = 0 To instance_num - 2
+            pos_start = InStr(pos_start, TEXT, matches.item(matches_index), vbBinaryCompare) + Len(matches.item(matches_index))
+          Next matches_index
+    
+          text_find = matches.item(instance_num - 1)
+          text_result = Left(TEXT, pos_start - 1) & Replace(TEXT, text_find, text_replace, pos_start, 1, vbBinaryCompare)
+    
+        End If
+      End If
+    End If
+    
+    RegExpReplace = text_result
+    Exit Function
+    
+ErrHandle:
+    RegExpReplace = CVErr(xlErrValue)
+End Function
+

@@ -1,0 +1,28 @@
+
+Sub addCircle(cell As Range)
+    Dim t As Long, L As Long, h As Long, W As Long
+    On Error GoTo cellisarea
+    t = cell.MergeArea.Top
+    L = cell.MergeArea.Left
+    h = cell.MergeArea.Height
+    W = cell.MergeArea.Width
+    GoTo pass
+cellisarea:
+    t = cell.Top
+    L = cell.Left
+    h = cell.Height
+    W = cell.Width
+pass:
+    On Error GoTo 0
+    Dim MyOval As Shape
+    Set MyOval = ActiveSheet.Shapes.AddShape(msoShapeOval, L + 2, t + 2, W - 4, h - 4)
+    With MyOval
+        .Name = "myCircle"
+        .Fill.Visible = msoFalse
+        .Line.Visible = msoTrue
+        .Line.ForeColor.RGB = RGB(255, 0, 0)
+        .Line.Transparency = 0
+        .Line.Visible = msoTrue
+        .Line.Weight = 0.5
+    End With
+End Sub

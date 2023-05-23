@@ -30,3 +30,87 @@ Function StringFormatIndent(txt As String) As String
     Next
     StringFormatIndent = Join(str, vbNewLine)
 End Function
+Function StringFormatIndent(txt As String) As String
+'@BlogPosted
+'@AssignedModule F_Vbe_Indent
+'@INCLUDE PROCEDURE IsBlockEnd
+'@INCLUDE PROCEDURE IsBlockStart
+    Dim str As Variant
+    str = Split(txt, vbNewLine)
+    Dim strNewLine As String
+    Dim nIndent As Integer
+    Dim i As Long
+    For i = LBound(str) To UBound(str)
+        strNewLine = str(i)
+        strNewLine = LTrim$(strNewLine)
+        If IsBlockEnd(strNewLine) Then
+            nIndent = nIndent - 1
+        End If
+        If nIndent < 0 Then
+            nIndent = 0
+        End If
+        If strNewLine <> "" Then
+            str(i) = Space$(nIndent * 4) & strNewLine
+        End If
+        If IsBlockStart(LTrim$(strNewLine)) Then
+            nIndent = nIndent + 1
+        End If
+    Next
+    StringFormatIndent = Join(str, vbNewLine)
+End Function
+Function StringFormatIndent(txt As String) As String
+'@BlogPosted
+'@AssignedModule F_Vbe_Indent
+'@INCLUDE PROCEDURE IsBlockEnd
+'@INCLUDE PROCEDURE IsBlockStart
+    Dim str As Variant
+    str = Split(txt, vbNewLine)
+    Dim strNewLine As String
+    Dim nIndent As Integer
+    Dim i As Long
+    For i = LBound(str) To UBound(str)
+        strNewLine = str(i)
+        strNewLine = LTrim$(strNewLine)
+        If IsBlockEnd(strNewLine) Then
+            nIndent = nIndent - 1
+        End If
+        If nIndent < 0 Then
+            nIndent = 0
+        End If
+        If strNewLine <> "" Then
+            str(i) = Space$(nIndent * 4) & strNewLine
+        End If
+        If IsBlockStart(LTrim$(strNewLine)) Then
+            nIndent = nIndent + 1
+        End If
+    Next
+    StringFormatIndent = Join(str, vbNewLine)
+End Function
+Function StringFormatIndent(txt As String) As String
+'@BlogPosted
+'@AssignedModule F_Vbe_Indent
+'@INCLUDE PROCEDURE IsBlockEnd
+'@INCLUDE PROCEDURE IsBlockStart
+    Dim str As Variant
+    str = Split(txt, vbNewLine)
+    Dim strNewLine As String
+    Dim nIndent As Integer
+    Dim i As Long
+    For i = LBound(str) To UBound(str)
+        strNewLine = str(i)
+        strNewLine = LTrim$(strNewLine)
+        If IsBlockEnd(strNewLine) Then
+            nIndent = nIndent - 1
+        End If
+        If nIndent < 0 Then
+            nIndent = 0
+        End If
+        If strNewLine <> "" Then
+            str(i) = Space$(nIndent * 4) & strNewLine
+        End If
+        If IsBlockStart(LTrim$(strNewLine)) Then
+            nIndent = nIndent + 1
+        End If
+    Next
+    StringFormatIndent = Join(str, vbNewLine)
+End Function

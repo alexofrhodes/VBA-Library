@@ -1,0 +1,13 @@
+
+Public Function getFolder() As String
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .AllowMultiSelect = False
+        .Title = "Select a folder"
+        .Show
+        If .SelectedItems.Count > 0 Then
+            getFolder = .SelectedItems.item(1)
+        Else
+            'MsgBox "Folder is not selected."
+        End If
+    End With
+End Function

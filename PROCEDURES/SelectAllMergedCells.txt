@@ -1,0 +1,31 @@
+
+Sub SelectAllMergedCells()
+    Dim c As Range
+    Dim mergedCells As Range
+    Dim fullRange As Range
+    Dim rangeDescription As String
+    Dim rng As Range
+
+    If Selection.Cells.Count > 1 Then
+        Set fullRange = Selection
+        rangeDescription = "selected cells"
+    Else
+        Set fullRange = ActiveSheet.UsedRange
+        rangeDescription = "active range"
+    End If
+    For Each c In fullRange
+        If c.MergeCells = True Then
+            If mergedCells Is Nothing Then
+                Set mergedCells = c
+            Else
+                Set mergedCells = Union(mergedCells, c)
+            End If
+        End If
+    Next
+    If Not mergedCells Is Nothing Then
+        mergedCells.Select
+    Else
+        MsgBox "There are no merged cells in the " _
+        & rangeDescription & ": " & fullRange.Address
+    End If
+End Sub

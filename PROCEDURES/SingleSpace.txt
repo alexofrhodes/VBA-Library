@@ -1,0 +1,30 @@
+
+Public Function SingleSpace(ByVal TEXT As String) As String
+    Dim pos As String
+    pos = InStr(1, TEXT, Space(2), vbBinaryCompare)
+    Do Until pos = 0
+        TEXT = Replace(TEXT, Space(2), Space(1))
+        pos = InStr(1, TEXT, Space(2), vbBinaryCompare)
+    Loop
+    SingleSpace = TEXT
+End Function
+
+Public Function SingleSpace(ByVal TEXT As String) As String
+    Dim pos As String
+    pos = InStr(1, TEXT, Space(2), vbBinaryCompare)
+    Do Until pos = 0
+        TEXT = Replace(TEXT, Space(2), Space(1))
+        pos = InStr(1, TEXT, Space(2), vbBinaryCompare)
+    Loop
+    SingleSpace = TEXT
+End Function
+
+Public Function SingleSpace(ByVal TEXT As String) As String
+    Dim pos As String
+    pos = InStr(1, TEXT, Space(2), vbBinaryCompare)
+    Do Until pos = 0
+        TEXT = Replace(TEXT, Space(2), Space(1))
+        pos = InStr(1, TEXT, Space(2), vbBinaryCompare)
+    Loop
+    SingleSpace = TEXT
+End Function

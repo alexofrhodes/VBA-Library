@@ -1,0 +1,42 @@
+
+Function sInsert(s, this As String, interval As Long)
+    If interval < 1 Then Exit Function
+
+    Dim i As Long, Result As String
+
+    For i = 1 To Len(s) Step interval
+        On Error Resume Next
+        Result = Result & Left(s, interval) & this
+        s = Mid(s, interval + 1, Len(s) - interval)
+    Next i
+
+    sInsert = Left(Result, Len(Result) - Len(this))
+End Function
+
+Function sInsert(s, this As String, interval As Long)
+    If interval < 1 Then Exit Function
+
+    Dim i As Long, Result As String
+
+    For i = 1 To Len(s) Step interval
+        On Error Resume Next
+        Result = Result & Left(s, interval) & this
+        s = Mid(s, interval + 1, Len(s) - interval)
+    Next i
+
+    sInsert = Left(Result, Len(Result) - Len(this))
+End Function
+
+Function sInsert(s, this As String, interval As Long)
+    If interval < 1 Then Exit Function
+
+    Dim i As Long, Result As String
+
+    For i = 1 To Len(s) Step interval
+        On Error Resume Next
+        Result = Result & Left(s, interval) & this
+        s = Mid(s, interval + 1, Len(s) - interval)
+    Next i
+
+    sInsert = Left(Result, Len(Result) - Len(this))
+End Function

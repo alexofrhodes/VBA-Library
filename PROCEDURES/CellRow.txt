@@ -1,0 +1,8 @@
+
+Function CellRow(cell As Range) As Range
+    Dim ws As Worksheet
+    Set ws = cell.Parent
+    Dim r: r = cell.Row
+    Dim c As Long: c = cell.CurrentRegion.Column
+    Set CellRow = ws.Range(ws.Cells(r, c), ws.Cells(r, c + cell.CurrentRegion.Columns.Count - 1))
+End Function

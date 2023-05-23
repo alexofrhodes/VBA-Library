@@ -1,0 +1,7 @@
+
+Function DataFilePropertyCreated(FilePath) As Date
+    Dim fs, F
+    Set fs = CreateObject("Scripting.FileSystemObject")
+    Set F = fs.GetFile(FilePath)
+    DataFilePropertyCreated = F.datecreated
+End Function

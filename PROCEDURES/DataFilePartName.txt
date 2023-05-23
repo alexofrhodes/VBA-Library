@@ -10,3 +10,14 @@ Function DataFilePartName(fileNameWithExtension As String, Optional IncludeExten
     If IncludeExtension = False Then DataFilePartName = left(DataFilePartName, InStr(1, DataFilePartName, ".") - 1)
 End Function
 
+
+Function DataFilePartName(fileNameWithExtension As String, Optional IncludeExtension As Boolean) As String
+    If InStr(1, fileNameWithExtension, "\") > 0 Then
+        DataFilePartName = Right(fileNameWithExtension, Len(fileNameWithExtension) - InStrRev(fileNameWithExtension, "\"))
+    ElseIf InStr(1, fileNameWithExtension, "/") > 0 Then
+        DataFilePartName = Right(fileNameWithExtension, Len(fileNameWithExtension) - InStrRev(fileNameWithExtension, "/"))
+    Else
+        DataFilePartName = fileNameWithExtension
+    End If
+    If IncludeExtension = False Then DataFilePartName = Left(DataFilePartName, InStr(1, DataFilePartName, ".") - 1)
+End Function

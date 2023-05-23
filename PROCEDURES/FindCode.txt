@@ -1,0 +1,15 @@
+
+Sub FindCode(s As String)
+'@LastModified 2305231016
+'@INCLUDE CLASS aTreeView
+'@INCLUDE USERFORM uCodeFinder
+    Load uCodeFinder
+    uCodeFinder.Show
+    With aTreeView.Init(uCodeFinder.TreeView1)
+        .FindCodeEverywhere s
+        .TreeviewAssignProjectImages
+        .ExpandAll
+    End With
+    uCodeFinder.TextBox1.TEXT = s
+'    uCodeFinder.Show
+End Sub

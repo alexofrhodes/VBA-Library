@@ -1,0 +1,10 @@
+
+Function WorksheetAvailableColumn(TargetWorksheet As Worksheet)
+    Dim lc As Long
+    lc = getLastColumn(TargetWorksheet)
+    If WorksheetFunction.CountA(TargetWorksheet.Columns(lc)) = 0 Then
+        WorksheetAvailableColumn = lc
+    Else
+        WorksheetAvailableColumn = lc + 1
+    End If
+End Function

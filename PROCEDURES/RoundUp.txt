@@ -1,0 +1,13 @@
+
+Public Function RoundUp(dblNumToRound As Long, lMultiple As Long) As Double
+    Dim asDec   As Variant
+    Dim Rounded As Variant
+
+    asDec = CDec(dblNumToRound) / lMultiple
+    Rounded = Int(asDec)
+
+    If Rounded <> asDec Then
+       Rounded = Rounded + 1
+    End If
+    RoundUp = Rounded * lMultiple
+End Function

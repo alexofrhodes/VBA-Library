@@ -8,3 +8,13 @@ Sub TxtPrepend(filePath As String, txt As String)
     s = TxtRead(filePath)
     TxtOverwrite filePath, txt & vbNewLine & s
 End Sub
+
+Sub TxtPrepend(FilePath As String, txt As String)
+'@BlogPosted
+'@AssignedModule F_FileFolder
+'@INCLUDE PROCEDURE TxtOverwrite
+'@INCLUDE PROCEDURE TxtRead
+    Dim s As String
+    s = TxtRead(FilePath)
+    TxtOverwrite FilePath, txt & vbNewLine & s
+End Sub

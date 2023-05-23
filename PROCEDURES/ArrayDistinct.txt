@@ -1,0 +1,29 @@
+
+Function ArrayDistinct(ByVal inputArr As Variant) As Variant
+'
+'concept of distinct (may exist multiple times, return once) <> unique (which exists only once)
+'
+    Dim coll As New Collection, a As Variant        'Collection declaration.
+    Dim arrOut() As Variant                                   'For taking value from Collection to array.
+    Dim idx As Long                                              'For running loop to take output to array.
+
+    If IsArray(inputArr) = False Then       'Check if it's array or not.
+        MsgBox "Need array to get Distinct"
+        ArrayDistinct = Null
+        Exit Function
+    End If
+
+    On Error Resume Next    'This line is more crucial then the other part..Because of this line it will create unique list.
+        'Because when you are trying to add same key it will return an error..And due to Resume next it will neglect that.
+    For Each a In inputArr
+    ' This part is actually creating the unique set..Because when you will add same item then
+    'it will return an error and due to On Error Resume Next it will neglect that.
+        coll.Add a, CStr(a)           'For converting value to text because Collection can't take Integer(Number) as Key.
+    Next
+    ReDim arrOut(1 To coll.Count, 0)        'Redim output array to take from collection.
+    For Each a In coll                                'Run loop for converting collection to array.
+        idx = idx + 1                               'Increase the value of Idx by 1 for next array.
+        arrOut(idx, 0) = a                        'Take value to array.
+    Next a
+    ArrayDistinct = arrOut                      'Set the value of arr to function output.
+End Function

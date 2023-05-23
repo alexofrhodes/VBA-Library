@@ -1,0 +1,24 @@
+
+Sub Expand(ByVal ExpandRows As Double, ByVal ExpandColumns As Double)
+    Application.ScreenUpdating = False
+    Dim r As Range
+    Dim i As Long
+    Dim rowSize As Long
+    Dim ColSize As Long
+    For i = 1 To Selection.Areas.Count
+        ColSize = Selection.Areas(i).Columns.Count
+        rowSize = Selection.Areas(i).rows.Count
+        If ValidExpand(rowSize + ExpandRows, ColSize + ExpandColumns) Then
+            If r Is Nothing Then
+                Set r = Range(Selection.Areas(i).RESIZE(rowSize + ExpandRows, ColSize + ExpandColumns).Address)
+            Else
+                Set r = Application.Union(r, Range(Selection.Areas(i).RESIZE(rowSize + ExpandRows, ColSize + ExpandColumns).Address))
+            End If
+        End If
+    Next i
+    If Not r Is Nothing Then
+        ActiveWorkbook.ActiveSheet.Range("A1").Select
+        r.Select
+    End If
+    Application.ScreenUpdating = True
+End Sub

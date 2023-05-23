@@ -1,0 +1,8 @@
+
+Function ArrayColumnContains(inputArray As Variant, idx As Long, Contains As String)
+    'mind if inputarray is 0 or 1 base when passing idx
+    Dim r As Long, c As Long
+    For r = LBound(inputArray, 1) To UBound(inputArray, 1)
+        If inputArray(r, idx) Like Contains Then ArrayColumnContains = True: Exit Function
+    Next
+End Function

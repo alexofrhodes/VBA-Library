@@ -1,0 +1,17 @@
+
+Function ExcludeRange(ByVal rngMain As Range, rngExc As Range) As Range
+    Dim rngTemp     As Range
+    Dim rng         As Range
+    Set rngTemp = rngMain
+    Set rngMain = Nothing
+    For Each rng In rngTemp
+        If Intersect(rng, rngExc) Is Nothing Then
+            If rngMain Is Nothing Then
+                Set rngMain = rng
+            Else
+                Set rngMain = Union(rngMain, rng)
+            End If
+        End If
+    Next
+    Set ExcludeRange = rngMain
+End Function

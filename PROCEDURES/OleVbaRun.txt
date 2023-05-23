@@ -1,0 +1,17 @@
+
+Sub OleVbaRun(FilePathCollection As Collection)
+    Dim MainPath As String
+    MainPath = Environ$("USERPROFILE") & "\Documents\vbArc\oleVba\"
+    FoldersCreate MainPath
+    Dim OutPath As String
+    Dim Filename As String
+    Dim element As Variant
+    Dim Output As String
+    For Each element In FilePathCollection
+        Filename = DataFilePartName(CStr(element))
+        Output = oleVBA(element)
+        OutPath = MainPath & "\" & Filename & ".txt"
+        TxtOverwrite OutPath, Output
+    Next
+    If FilePathCollection.Count > 0 Then FollowLink MainPath
+End Sub

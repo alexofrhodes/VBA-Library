@@ -1,0 +1,6 @@
+
+Function oleVBA(Path As Variant) As String
+    Dim Q As String
+    Q = """"
+    oleVBA = ShellText("cmd.exe /c olevba " & Q & Path & Q)
+End Function

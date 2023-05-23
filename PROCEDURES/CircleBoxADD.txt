@@ -1,0 +1,19 @@
+
+Sub CircleBoxADD(Optional addToCells As Boolean)
+    If TypeName(Selection) <> "Range" Then
+        MsgBox "Please select 1 or more ranges before running the macro."
+        Exit Sub
+    End If
+    Dim MyOval As Shape
+    Dim cell As Range
+    Dim i As Long
+    If addToCells = True Then
+        For Each cell In Selection
+            addCircle cell
+        Next
+    Else
+        For i = 1 To Selection.Areas.Count
+            addCircle Selection.Areas(i).Cells
+        Next
+    End If
+End Sub

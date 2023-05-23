@@ -1,0 +1,15 @@
+
+
+Function CountOfCharacters(SearchHere As String, FindThis As String)
+    CountOfCharacters = (Len(SearchHere) - Len(Replace(SearchHere, FindThis, ""))) / Len(FindThis)
+End Function
+
+
+Function CountOfCharacters(SearchHere As String, FindThis As String)
+    CountOfCharacters = (Len(SearchHere) - Len(Replace(SearchHere, FindThis, ""))) / Len(FindThis)
+End Function
+
+
+Function CountOfCharacters(SearchHere As String, FindThis As String)
+    CountOfCharacters = (Len(SearchHere) - Len(Replace(SearchHere, FindThis, ""))) / Len(FindThis)
+End Function

@@ -1,0 +1,5 @@
+
+Function ActiveTable() As ListObject
+    On Error Resume Next
+    Set ActiveTable = ActiveCell.ListObject
+End Function

@@ -1,0 +1,21 @@
+
+Public Function SortSelectionArray(ByVal TempArray As Variant) As Variant
+    Dim MaxVal As Variant
+    Dim MaxIndex As Integer
+    Dim i As Integer, j As Integer
+    For i = UBound(TempArray) To 0 Step -1
+        MaxVal = TempArray(i)
+        MaxIndex = i
+        For j = 0 To i
+            If TempArray(j) > MaxVal Then
+                MaxVal = TempArray(j)
+                MaxIndex = j
+            End If
+        Next j
+        If MaxIndex < i Then
+            TempArray(MaxIndex) = TempArray(i)
+            TempArray(i) = MaxVal
+        End If
+    Next i
+    SortSelectionArray = TempArray
+End Function

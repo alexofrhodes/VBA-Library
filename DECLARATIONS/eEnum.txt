@@ -1,4 +1,0 @@
-Enum eEnum
-    firstChoice
-    secondChoice
-End Enum

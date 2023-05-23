@@ -1,0 +1,21 @@
+
+Sub TxtRemoveBlankLines(FileFullPath As Variant)
+    Const ForReading = 1
+    Const ForWriting = 2
+    Dim objFSO As Scripting.FileSystemObject
+    Dim objFile As Object
+    Dim strline As String
+    Dim strNewContents As String
+    Set objFSO = CreateObject("Scripting.FileSystemObject")
+    Set objFile = objFSO.OpenTextFile(FileFullPath, ForReading)
+    Do Until objFile.AtEndOfStream
+        strline = objFile.ReadLine
+        If Len(Trim(strline)) > 0 Then
+            strNewContents = strNewContents & strline & vbCrLf
+        End If
+    Loop
+    objFile.Close
+    Set objFile = objFSO.OpenTextFile(FileFullPath, ForWriting)
+    objFile.Write strNewContents
+    objFile.Close
+End Sub

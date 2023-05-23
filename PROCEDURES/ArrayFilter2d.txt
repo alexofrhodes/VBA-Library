@@ -1,0 +1,32 @@
+
+Function ArrayFilter2d(ByVal sArraY, ByVal ColIndex As Long, ByVal FindStr As String, ByVal HasTitle As Boolean)
+    Dim tmpArr, i As Long, j As Long, arr, dic, tmpStr, tmp, Chk As Boolean, TmpVal As Double
+    On Error Resume Next
+    Set dic = CreateObject("Scripting.Dictionary")
+    tmpArr = sArraY
+    ColIndex = ColIndex + LBound(tmpArr, 2) - 1
+    Chk = (InStr("><=", Left(FindStr, 1)) > 0)
+    For i = LBound(tmpArr, 1) - HasTitle To UBound(tmpArr, 1)
+        If Chk Then
+            TmpVal = CDbl(tmpArr(i, ColIndex))
+            If Evaluate(TmpVal & FindStr) Then dic.Add i, ""
+        Else
+            If UCase(tmpArr(i, ColIndex)) Like UCase(FindStr) Then dic.Add i, ""
+        End If
+    Next
+    If dic.Count > 0 Then
+        tmp = dic.Keys
+        ReDim arr(LBound(tmpArr, 1) To UBound(tmp) + LBound(tmpArr, 1) - HasTitle, LBound(tmpArr, 2) To UBound(tmpArr, 2))
+        For i = LBound(tmpArr, 1) - HasTitle To UBound(tmp) + LBound(tmpArr, 1) - HasTitle
+            For j = LBound(tmpArr, 2) To UBound(tmpArr, 2)
+                arr(i, j) = tmpArr(tmp(i - LBound(tmpArr, 1) + HasTitle), j)
+            Next
+        Next
+        If HasTitle Then
+            For j = LBound(tmpArr, 2) To UBound(tmpArr, 2)
+                arr(LBound(tmpArr, 1), j) = tmpArr(LBound(tmpArr, 1), j)
+            Next
+        End If
+    End If
+    ArrayFilter2d = arr
+End Function

@@ -1,0 +1,8 @@
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 22-10-2022 06:58    Alex                initial release (FixRowHeight)
+
+Sub FixRowHeight(cell As Range)
+'had problem with merged cells so i wrote this
+    cell.EntireRow.RowHeight = cell.Parent.StandardHeight * (1 + Len(cell.Cells(1, 1).TEXT) - Len(Replace(cell.Cells(1, 1).TEXT, vbLf, "")))
+End Sub

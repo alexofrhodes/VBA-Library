@@ -1,0 +1,23 @@
+
+Public Sub UnzipAllInFolder(source_folder As String)
+    Dim current_zip_file As String
+    current_zip_file = Dir(source_folder & "\*.zip")
+    If Len(current_zip_file) = 0 Then
+        MsgBox "No zip files found!", vbExclamation
+        Exit Sub
+    End If
+    Dim zip_folder As String
+    zip_folder = source_folder & "\unzipped"
+    Dim error_message As String
+    If Not create_temp_zip_folder(zip_folder, error_message) Then
+        MsgBox error_message, vbCritical, "Error"
+        Exit Sub
+    End If
+    Dim shell_app As Object
+    Set shell_app = CreateObject("Shell.Application")
+    Do While Len(current_zip_file) > 0
+        shell_app.Namespace(CVar(zip_folder)).CopyHere shell_app.Namespace(source_folder & "\" & current_zip_file).Items
+        current_zip_file = Dir
+    Loop
+    Set shell_app = Nothing
+End Sub

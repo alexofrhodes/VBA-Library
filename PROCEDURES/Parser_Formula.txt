@@ -1,0 +1,53 @@
+
+Function Parser_Formula( _
+                        ByVal s As String, _
+                        sListSeparator As String, _
+                        sRowSeparator As String) As String
+'@LastModified 2305220859
+'@AssignedModule F_String
+'https://sites.google.com/site/e90e50/random-topics/tool-for-parsing-formulas-in-excel
+    Const CW As String = "[^=\-+*/();:,.$<>^]"
+    Dim M As Object, RE As Object, SM As Object, SB As Object
+    Dim v As Variant, t As String
+
+    Set RE = CreateObject("vbscript.regexp")
+    RE.IgnoreCase = True
+    RE.Global = True
+
+    v = Array( _
+        "(""[^""]*""|'[^']*')", _
+        "(\{[^}]+})", _
+        "(\" & sListSeparator & ")", _
+        "(" & CW & "+(?:\." & CW & "+)*\()", _
+        "(\))", _
+        "(^=|\()", _
+        "(.)")
+
+    RE.pattern = Join(v, "|")
+    If RE.test(s) Then
+        Set M = RE.Execute(s)
+        s = ""
+        For Each SM In M
+            Set SB = SM.SubMatches
+            If Len(SB(0) & SB(6)) Then
+                t = SB(0) & SB(6)
+            ElseIf Len(SB(1)) Then
+                t = Array_Const_Wrap(SB(1), sRowSeparator) & vbCr
+            ElseIf Len(SB(2) & SB(5)) Then
+                t = SB(2) & SB(5) & vbCr
+            ElseIf Len(SB(3)) Then
+                t = vbCr & SB(3) & vbCr
+            ElseIf Len(SB(4)) Then
+                t = vbCr & SB(4)
+            End If
+            s = s & t
+        Next
+    End If
+
+    RE.pattern = "\r{2,}"
+    s = RE.Replace(s, vbCr)
+
+    If Left(s, 1) = vbCr Then s = Mid(s, 1 + Len(vbCr))
+    If Right(s, 1) = vbCr Then s = Left(s, Len(s) - Len(vbCr))
+    Parser_Formula = s
+End Function

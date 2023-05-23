@@ -1,0 +1,28 @@
+
+Sub UnmergeCustom(Optional seper As String)
+    If seper = "" Then seper = Chr(10)
+    Dim SRange As Range
+    Dim tmpStr As String
+    Dim cell As Range
+    Dim rmpStr As String
+    Dim counter As Long
+    Dim arr() As String
+    Set SRange = Selection
+    Dim element As Variant
+    For Each element In SRange.Areas
+        If element.MergeCells = False Then GoTo SKIP
+        tmpStr = CStr(element.Cells(1).Value)
+        arr = Split(tmpStr, seper)
+        element.ClearContents
+        element.MergeCells = False
+        counter = 0
+        On Error Resume Next
+        For Each cell In element.Cells
+            cell.Value = CStr(arr(counter))
+            counter = counter + 1
+        Next cell
+SKIP:
+        tmpStr = ""
+    Next
+    On Error GoTo 0
+End Sub

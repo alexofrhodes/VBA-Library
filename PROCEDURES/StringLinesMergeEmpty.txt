@@ -1,0 +1,78 @@
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 15-02-2023 11:42    Alex                (StringLinesMergeEmpty)
+
+Public Function StringLinesMergeEmpty(str As String)
+'@LastModified 2302151142
+
+    str = Replace(str, vbNewLine, vbLf)
+
+    Dim var
+    var = Split(str, vbLf)
+    str = ""
+    Dim i As Long
+    For i = LBound(var) To UBound(var)
+
+        If Trim(var(i)) <> "" Then
+            str = IIf(str <> "", str & vbNewLine, "") & var(i)
+        ElseIf Trim(var(i)) = "" And i > LBound(var) Then
+            If Trim(var(i - 1)) <> "" Then
+                str = str & vbNewLine
+
+            End If
+        End If
+    Next
+    StringLinesMergeEmpty = str
+End Function
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 15-02-2023 11:42    Alex                (StringLinesMergeEmpty)
+
+Public Function StringLinesMergeEmpty(str As String)
+'@LastModified 2302151142
+
+    str = Replace(str, vbNewLine, vbLf)
+
+    Dim var
+    var = Split(str, vbLf)
+    str = ""
+    Dim i As Long
+    For i = LBound(var) To UBound(var)
+
+        If Trim(var(i)) <> "" Then
+            str = IIf(str <> "", str & vbNewLine, "") & var(i)
+        ElseIf Trim(var(i)) = "" And i > LBound(var) Then
+            If Trim(var(i - 1)) <> "" Then
+                str = str & vbNewLine
+
+            End If
+        End If
+    Next
+    StringLinesMergeEmpty = str
+End Function
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 15-02-2023 11:42    Alex                (StringLinesMergeEmpty)
+
+Public Function StringLinesMergeEmpty(str As String)
+'@LastModified 2302151142
+
+    str = Replace(str, vbNewLine, vbLf)
+
+    Dim var
+    var = Split(str, vbLf)
+    str = ""
+    Dim i As Long
+    For i = LBound(var) To UBound(var)
+
+        If Trim(var(i)) <> "" Then
+            str = IIf(str <> "", str & vbNewLine, "") & var(i)
+        ElseIf Trim(var(i)) = "" And i > LBound(var) Then
+            If Trim(var(i - 1)) <> "" Then
+                str = str & vbNewLine
+
+            End If
+        End If
+    Next
+    StringLinesMergeEmpty = str
+End Function

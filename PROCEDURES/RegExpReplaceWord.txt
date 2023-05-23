@@ -1,0 +1,12 @@
+
+Public Function RegExpReplaceWord(ByVal strSource As String, ByVal strFind As String, ByVal strReplace As String) As String
+    Dim RE As Object
+    Set RE = CreateObject("VBScript.RegExp")
+
+    RE.Global = True
+    RE.IgnoreCase = True ' <-- case insensitve
+    RE.pattern = "\b" & strFind & "\b"
+    RegExpReplaceWord = RE.Replace(strSource, strReplace)
+    Set RE = Nothing
+
+End Function

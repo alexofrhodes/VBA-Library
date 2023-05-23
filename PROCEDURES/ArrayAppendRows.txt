@@ -1,0 +1,4 @@
+
+Function ArrayAppendRows(a As Variant, b As Variant) As Variant
+    ArrayAppendRows = ArrayCombine(a, b, True)
+End Function

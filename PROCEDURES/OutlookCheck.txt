@@ -1,0 +1,13 @@
+
+Function OutlookCheck() As Boolean
+'@LastModified 2305220937
+    Dim xOLApp As Object
+    Set xOLApp = CreateObject("Outlook.Application")
+    If Not xOLApp Is Nothing Then
+        OutlookCheck = True
+        Set xOLApp = Nothing
+        Exit Function
+    End If
+    OutlookCheck = False
+End Function
+

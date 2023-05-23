@@ -1,0 +1,3 @@
+Function ArrayAppendColumns(a As Variant, b As Variant) As Variant
+    ArrayAppendColumns = ArrayCombine(a, b, False)
+End Function

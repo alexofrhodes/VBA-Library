@@ -1,0 +1,9 @@
+
+Sub TxtMerge(FileCollection As Variant, TargetFile As String)
+    Dim s As String
+    Dim item
+    For Each item In FileCollection
+        s = s & vbNewLine & TxtRead(CStr(item))
+    Next
+    TxtOverwrite TargetFile, s
+End Sub

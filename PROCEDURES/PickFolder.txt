@@ -1,0 +1,12 @@
+
+
+Function PickFolder() As String
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .initialFileName = Environ("USERprofile") & "\Desktop\"
+        If .Show = -1 Then
+            PickFolder = .SelectedItems(1) & "\"
+        Else
+            Exit Function
+        End If
+    End With
+End Function

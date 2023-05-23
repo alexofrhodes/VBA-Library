@@ -1,0 +1,10 @@
+
+Function ArrayMultiFilter(SourceArray As Variant, matches As Variant, Optional Include As Boolean, Optional CompaRemode As VbCompareMethod = vbBinaryCompare) As Variant
+    Dim x&, arr, sJoined$
+    For x = LBound(matches) To UBound(matches)
+        arr = VBA.Filter(SourceArray, matches(x), Include, CompaRemode)
+        sJoined = sJoined & VBA.Join(arr, ",") & ","
+    Next x
+    sJoined = Left(sJoined, Len(sJoined) - 1)
+    ArrayMultiFilter = Split(sJoined, ",")
+End Function

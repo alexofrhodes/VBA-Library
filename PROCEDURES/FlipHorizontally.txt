@@ -1,0 +1,26 @@
+
+Sub FlipHorizontally()
+    Dim rng As Range
+    Dim WorkRng As Range
+    Dim arr As Variant
+    Dim i As Integer, j As Integer, k As Integer
+    On Error Resume Next
+    Dim xTitleId As String, xTemp As String
+    xTitleId = "Flip Data Horizontally"
+    Set WorkRng = Application.Selection
+    arr = WorkRng.Formula
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+    For i = 1 To UBound(arr, 1)
+        k = UBound(arr, 2)
+        For j = 1 To UBound(arr, 2) / 2
+            xTemp = arr(i, j)
+            arr(i, j) = arr(i, k)
+            arr(i, k) = xTemp
+            k = k - 1
+        Next
+    Next
+    WorkRng.Formula = arr
+    Application.ScreenUpdating = True
+    Application.Calculation = xlCalculationAutomatic
+End Sub

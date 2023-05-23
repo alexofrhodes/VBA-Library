@@ -1,0 +1,24 @@
+
+Rem @AUTHOR ROBERT TODAR
+Public Function ArrayToString(SourceArray As Variant, Optional Delimiter As String = ",") As String
+    '@INCLUDE ArrayDimensionLength
+    Dim Temp As String
+    Select Case ArrayDimensionLength(SourceArray)
+    Case 1
+        '* @TODO Created: 21-12-2022 19:34 Author: Anastasiou Alex
+        '* @TODO find where i put the flattenArray
+
+        Temp = Join(SourceArray, Delimiter)
+    Case 2
+        Dim RowIndex As Long
+        Dim ColIndex As Long
+        For RowIndex = LBound(SourceArray, 1) To UBound(SourceArray, 1)
+            For ColIndex = LBound(SourceArray, 2) To UBound(SourceArray, 2)
+                Temp = Temp & SourceArray(RowIndex, ColIndex)
+                If ColIndex <> UBound(SourceArray, 2) Then Temp = Temp & Delimiter
+            Next ColIndex
+            If RowIndex <> UBound(SourceArray, 1) Then Temp = Temp & vbNewLine
+        Next RowIndex
+    End Select
+    ArrayToString = Temp
+End Function

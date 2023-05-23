@@ -1,0 +1,19 @@
+
+Sub GoToBlankFirstInColumn()
+    If TypeName(Selection) <> "Range" Or _
+        Selection.Cells.Count > 1 Then
+        MsgBox "Choose 1 cell"
+        Exit Sub
+    End If
+    Dim sourceCol As Integer, RowCount As Integer, CurrentRow As Integer
+    Dim currentRowValue As String
+    sourceCol = ActiveCell.Column
+    RowCount = Cells(rows.Count, sourceCol).End(xlUp).Row
+    For CurrentRow = 1 To RowCount + 1
+        currentRowValue = Cells(CurrentRow, sourceCol).Value
+        If IsEmpty(currentRowValue) Or currentRowValue = "" Then
+            Cells(CurrentRow, sourceCol).Select
+            Exit Sub
+        End If
+    Next
+End Sub

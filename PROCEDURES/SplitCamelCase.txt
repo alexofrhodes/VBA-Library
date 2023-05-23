@@ -1,0 +1,52 @@
+
+'---------------------------------------------------------------------------------------
+' Procedure : SplitCamelCase
+' Author    : Daniel Pineault, CARDA Consultants Inc.
+' Website   : http://www.cardaconsultants.com
+' Purpose   : Split/Break a Camel Case string
+' Copyright : The following may be altered and reused as you wish so long as the
+'             copyright notice is left unchanged (including Author, Website and
+'             Copyright).  It may not be sold/resold or reposted on other sites (links
+'             back to this site are allowed).
+'
+' Input Variables:
+' ~~~~~~~~~~~~~~~~
+' sString   : Camel Case string to break/split
+' sDelim    : Character to use as a spcaer, if omitted will use a space
+'
+' Usage:
+' ~~~~~~
+' ?SplitCamelCase("SplitCamelCase")
+'       Returns Split Camel Case
+' ?SplitCamelCase("SplitCamelCase", "_")
+'       Returns Split_Camel_Case
+'
+' Revision History:
+' Rev       Date(yyyy/mm/dd)        Description
+' **************************************************************************************
+' 1         2008-May-03             Initial Release
+'---------------------------------------------------------------------------------------
+Function SplitCamelCase(sString As String, Optional sDelim As String = " ") As String
+On Error GoTo Error_Handler
+    Dim oRegEx          As Object
+
+    Set oRegEx = CreateObject("vbscript.regexp")
+    With oRegEx
+        .pattern = "([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))"
+        .Global = True
+        SplitCamelCase = .Replace(sString, "$1" & sDelim)
+    End With
+
+Error_Handler_Exit:
+    On Error Resume Next
+    Set oRegEx = Nothing
+    Exit Function
+
+Error_Handler:
+    MsgBox "The following error has occurred." & vbCrLf & vbCrLf & _
+            "Error Number: " & Err.Number & vbCrLf & _
+            "Error Source: SplitCamelCase" & vbCrLf & _
+            "Error Description: " & Err.Description, _
+            vbCritical, "An Error has Occurred!"
+    Resume Error_Handler_Exit
+End Function

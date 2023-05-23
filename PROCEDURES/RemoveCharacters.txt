@@ -1,0 +1,24 @@
+
+Function RemoveCharacters(TEXT As String, Remove As String) As String
+    Dim x As Long
+    RemoveCharacters = TEXT
+    For x = 1 To Len(Remove)
+        RemoveCharacters = Replace(RemoveCharacters, Mid(Remove, x, 1), "")
+    Next
+End Function
+
+Function RemoveCharacters(TEXT As String, Remove As String) As String
+    Dim x As Long
+    RemoveCharacters = TEXT
+    For x = 1 To Len(Remove)
+        RemoveCharacters = Replace(RemoveCharacters, Mid(Remove, x, 1), "")
+    Next
+End Function
+
+Function RemoveCharacters(TEXT As String, Remove As String) As String
+    Dim x As Long
+    RemoveCharacters = TEXT
+    For x = 1 To Len(Remove)
+        RemoveCharacters = Replace(RemoveCharacters, Mid(Remove, x, 1), "")
+    Next
+End Function

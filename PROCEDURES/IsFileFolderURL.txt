@@ -1,0 +1,10 @@
+
+Function IsFileFolderURL(Path) As String
+    Dim RetVal As String
+    RetVal = "I"
+    If (RetVal = "I") And FileExists(Path) Then RetVal = "F"
+    If (RetVal = "I") And FolderExists(Path) Then RetVal = "D"
+    If (RetVal = "I") And URLExists(Path) Then RetVal = "U"
+    ' I => Invalid | F => File | D => Directory | U => Valid Url
+    IsFileFolderURL = RetVal
+End Function

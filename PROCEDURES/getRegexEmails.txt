@@ -1,0 +1,4 @@
+
+Function getRegexEmails(inputString As String)
+    getRegexEmails = RegexAllMatches(inputString, REGEX_EMAILS)
+End Function

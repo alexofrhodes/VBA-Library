@@ -208,12 +208,13 @@ Public Sub CommentsToOwnLine()
 End Sub
 
 Public Function Property(PropertyType As Property_Type) As Variant
-    Select Case PropertyType
-    
-        Case Property_Type.Modified:           Property = PropertyGet(Modified)
-        Case Property_Type.Parent_Assigned:    Property = PropertyGet(Parent_Assigned)
-        
-    End Select
+'    Select Case PropertyType
+'
+'        Case Property_Type.Modified:           Property = PropertyGet(Modified)
+'        Case Property_Type.Parent_Assigned:    Property = PropertyGet(Parent_Assigned)
+'
+'    End Select
+    Property = PropertyGet(PropertyType)
 End Function
 
 Public Property Get ArgumentCount() As Long
@@ -470,9 +471,10 @@ Public Function LinkedProceduresDeep() As Collection
     Dim Module As VBComponent
 
     Processed.Add CStr(oProcedure), CStr(oProcedure)
+    CalledProcedures.Add CStr(oProcedure), CStr(oProcedure)
     On Error Resume Next
     For Each Procedure In LinkedProcedures
-    CalledProcedures.Add CStr(Procedure), CStr(Procedure)
+        CalledProcedures.Add CStr(Procedure), CStr(Procedure)
     Next
     On Error GoTo 0
     
@@ -537,11 +539,12 @@ End Sub
 
 Private Sub LinkedExport(Procedure As String)
     Dim Module As VBComponent
+    
     Set Module = ModuleOfProcedure(oWorkbook, Procedure)
     Dim c As New aProcedure
     c.Init oWorkbook, Module, Procedure
-    Dim proclastmod     As Long:        proclastmod = c.Property(Modified)
-    If proclastmod = 0 Then
+    Dim proclastmod     As String:        proclastmod = c.Property(Property_Type.Modified)
+    If proclastmod = vbNullString Then
         c.InjectLinkedLists
         c.PropertySet Modified, Format(Now, "yymmddhhnn")
         proclastmod = c.Property(Modified)
@@ -557,7 +560,7 @@ Private Sub LinkedExport(Procedure As String)
             TxtOverwrite FileFullName, s
         Else
             Debug.Print "Skipping " & Procedure & " because:"
-            Debug.Print vbTab & "StringLastModified(TxtRead(FileFullName)) > Property(Modified)"
+            Debug.Print vbTab & "StringLastModified(TxtRead(FileFullName)) >= Property(Modified)"
         End If
     Else
         Debug.Print "NEW " & Procedure
@@ -877,7 +880,7 @@ Function LinkedSheets() As Collection
     For Each element In SheetNames
         If InStr(1, CStr(element), " ") > 0 And InStr(1, s, CStr(element)) > 0 Then
             coll.Add CStr(element)
-        ElseIf RegexTest(Code, "\W" & CStr(element) & "[.(\W]") = True Then
+        ElseIf RegexTest(s, "\W" & CStr(element) & "[.(\W]") = True Then
             coll.Add CStr(element), CStr(element)
         End If
     Next
@@ -1396,7 +1399,7 @@ Public Function ArgumentStyleClean() As String
         Exit Function
     End If
     s = Join(var, vbNewLine)
-    s = VBA.Replace(Code, " _" & vbNewLine, "")
+    s = VBA.Replace(s, " _" & vbNewLine, "")
     ArgumentStyleClean = s
 End Function
 
