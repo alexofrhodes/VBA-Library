@@ -1,10 +1,11 @@
 
 Public Function ActiveCodepaneWorkbook() As Workbook
+'@LastModified 2305250729
 '@BlogPosted
 '@AssignedModule F_VBE
     On Error GoTo ErrorHandler
     Dim WorkbookName As String
-    WorkbookName = Application.VBE.SelectedVBComponent.Collection.parent.filename
+    WorkbookName = Application.VBE.SelectedVBComponent.Collection.Parent.Filename
     WorkbookName = Right(WorkbookName, Len(WorkbookName) - InStrRev(WorkbookName, "\"))
     Set ActiveCodepaneWorkbook = Workbooks(WorkbookName)
     Exit Function

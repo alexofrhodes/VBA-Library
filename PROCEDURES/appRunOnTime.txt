@@ -1,0 +1,18 @@
+
+Sub appRunOnTime(timeToRun, macroToRun As String, Optional arg1, Optional arg2, Optional arg3, Optional arg4, Optional arg5)
+'@LastModified 2305250729
+
+    If TypeName(arg5) <> "Error" Then
+        Application.OnTime timeToRun, "'" & macroToRun & """" & arg1 & """ ,""" & arg2 & """ ,""" & arg3 & """ ,""" & arg4 & """ ,""" & arg5 & " '"
+    ElseIf TypeName(arg4) <> "Error" Then
+        Application.OnTime timeToRun, "'" & macroToRun & """" & arg1 & """ ,""" & arg2 & """ ,""" & arg3 & """ ,""" & arg4 & " '"
+    ElseIf TypeName(arg3) <> "Error" Then
+        Application.OnTime timeToRun, "'" & macroToRun & """" & arg1 & """ ,""" & arg2 & """ ,""" & arg3 & " '"
+    ElseIf TypeName(arg2) <> "Error" Then
+        Application.OnTime timeToRun, "'" & macroToRun & """" & arg1 & """ ,""" & arg2 & " '"
+    ElseIf TypeName(arg1) <> "Error" Then
+        Application.OnTime timeToRun, "'" & macroToRun & """" & arg1 & """ '"
+    Else
+        Application.OnTime timeToRun, macroToRun
+    End If
+End Sub

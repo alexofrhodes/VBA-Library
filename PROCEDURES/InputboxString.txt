@@ -1,0 +1,11 @@
+
+Function InputboxString(Optional sTitle As String = "Select String", Optional sPrompt As String = "Select String", Optional DefaultValue = "") As String
+'@LastModified 2305250732
+    Dim stringVariable As String
+    stringVariable = Application.InputBox( _
+    Title:=sTitle, _
+    Prompt:=sPrompt, _
+    Type:=2, _
+    Default:=DefaultValue)
+    InputboxString = CStr(stringVariable)
+End Function
