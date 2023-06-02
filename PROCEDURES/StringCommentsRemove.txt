@@ -7,7 +7,7 @@ Function StringCommentsRemove(ByVal txt As String, RemoveRem As Boolean) As Stri
     ReDim var(0)
     Dim str
         str = Split(txt, vbNewLine)
-        str = ArrayRemoveEmptyElements(str)
+'        str = ArrayRemoveEmptyElements(str)
     Dim n               As Long
     Dim i               As Long
     Dim j               As Long
@@ -39,133 +39,19 @@ Retry:
         Else
             Select Case n
                 Case Is = 0
-                    If Len(lineText) > 0 Then
+'                    If Len(lineText) > 0 Then
                         var(UBound(var)) = str(j)
-                        ReDim Preserve var(UBound(var) + 1)
-                    End If
+                        If j < UBound(str) Then ReDim Preserve var(UBound(var) + 1)
+'                    End If
                 Case Is = 1
                     '
                 Case Is > 1
                     var(UBound(var)) = Left(str(j), n - 1)
-                    ReDim Preserve var(UBound(var) + 1)
+                    If j < UBound(str) Then ReDim Preserve var(UBound(var) + 1)
             End Select
         End If
 SKIP:
     Next j
-    var = ArrayRemoveEmptyElements(var)
-    StringCommentsRemove = Join(var, vbNewLine)
-End Function
-
-Function StringCommentsRemove(ByVal txt As String, RemoveRem As Boolean) As String
-'@BlogPosted
-'modified from Jacob Hilderbrand's code, found at
-'http://www.vbaexpress.com/kb/getarticle.php?kb_id=266
-    Dim var As Variant
-    ReDim var(0)
-    Dim str
-        str = Split(txt, vbNewLine)
-        str = ArrayRemoveEmptyElements(str)
-    Dim n               As Long
-    Dim i               As Long
-    Dim j               As Long
-    Dim k               As Long
-    Dim L               As Long
-    Dim lineText        As String
-    Dim QUOTES          As Long
-    Dim Q               As Long
-    Dim StartPos        As Long
-
-    For j = LBound(str) To UBound(str)
-        lineText = LTrim(str(j))
-        If RemoveRem Then If lineText Like "Rem *" Then GoTo SKIP
-        StartPos = 1
-Retry:
-        n = InStr(StartPos, lineText, "'")
-        Q = InStr(StartPos, lineText, """")
-        QUOTES = 0
-        If Q < n Then
-            For L = 1 To n
-                If Mid(lineText, L, 1) = """" Then
-                    QUOTES = QUOTES + 1
-                End If
-            Next L
-        End If
-        If QUOTES = Application.WorksheetFunction.Odd(QUOTES) Then
-            StartPos = n + 1
-            GoTo Retry:
-        Else
-            Select Case n
-                Case Is = 0
-                    If Len(lineText) > 0 Then
-                        var(UBound(var)) = str(j)
-                        ReDim Preserve var(UBound(var) + 1)
-                    End If
-                Case Is = 1
-                    '
-                Case Is > 1
-                    var(UBound(var)) = Left(str(j), n - 1)
-                    ReDim Preserve var(UBound(var) + 1)
-            End Select
-        End If
-SKIP:
-    Next j
-    var = ArrayRemoveEmptyElements(var)
-    StringCommentsRemove = Join(var, vbNewLine)
-End Function
-
-Function StringCommentsRemove(ByVal txt As String, RemoveRem As Boolean) As String
-'@BlogPosted
-'modified from Jacob Hilderbrand's code, found at
-'http://www.vbaexpress.com/kb/getarticle.php?kb_id=266
-    Dim var As Variant
-    ReDim var(0)
-    Dim str
-        str = Split(txt, vbNewLine)
-        str = ArrayRemoveEmptyElements(str)
-    Dim n               As Long
-    Dim i               As Long
-    Dim j               As Long
-    Dim k               As Long
-    Dim L               As Long
-    Dim lineText        As String
-    Dim QUOTES          As Long
-    Dim Q               As Long
-    Dim StartPos        As Long
-
-    For j = LBound(str) To UBound(str)
-        lineText = LTrim(str(j))
-        If RemoveRem Then If lineText Like "Rem *" Then GoTo SKIP
-        StartPos = 1
-Retry:
-        n = InStr(StartPos, lineText, "'")
-        Q = InStr(StartPos, lineText, """")
-        QUOTES = 0
-        If Q < n Then
-            For L = 1 To n
-                If Mid(lineText, L, 1) = """" Then
-                    QUOTES = QUOTES + 1
-                End If
-            Next L
-        End If
-        If QUOTES = Application.WorksheetFunction.Odd(QUOTES) Then
-            StartPos = n + 1
-            GoTo Retry:
-        Else
-            Select Case n
-                Case Is = 0
-                    If Len(lineText) > 0 Then
-                        var(UBound(var)) = str(j)
-                        ReDim Preserve var(UBound(var) + 1)
-                    End If
-                Case Is = 1
-                    '
-                Case Is > 1
-                    var(UBound(var)) = Left(str(j), n - 1)
-                    ReDim Preserve var(UBound(var) + 1)
-            End Select
-        End If
-SKIP:
-    Next j
-    var = ArrayRemoveEmptyElements(var)
+'    var = ArrayRemoveEmptyElements(var)
     StringCommentsRemove = Join(var, vbNewLine)
 End Function

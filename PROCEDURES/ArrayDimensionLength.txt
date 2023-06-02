@@ -2,24 +2,11 @@
 Public Function ArrayDimensionLength(SourceArray As Variant) As Integer
 '@BlogPosted
     Dim i As Integer
-    Dim test As Long
+    Dim Test As Long
     On Error GoTo Catch
     Do
         i = i + 1
-        test = UBound(SourceArray, i)
-    Loop
-Catch:
-    ArrayDimensionLength = i - 1
-End Function
-
-Public Function ArrayDimensionLength(SourceArray As Variant) As Integer
-'@BlogPosted
-    Dim i As Integer
-    Dim test As Long
-    On Error GoTo Catch
-    Do
-        i = i + 1
-        test = UBound(SourceArray, i)
+        Test = UBound(SourceArray, i)
     Loop
 Catch:
     ArrayDimensionLength = i - 1

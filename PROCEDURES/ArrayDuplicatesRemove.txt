@@ -4,48 +4,6 @@ Function ArrayDuplicatesRemove(myArray As Variant) As Variant
 '@AssignedModule F_Array
 '@INCLUDE PROCEDURE ArrayAllocated
     Dim nFirst As Long, nLast As Long, i As Long
-    Dim Item As String
-
-    Dim arrTemp() As String
-    Dim coll As New Collection
-    If Not ArrayAllocated(myArray) Then Exit Function
-    'Get First and Last Array Positions
-    nFirst = LBound(myArray)
-    nLast = UBound(myArray)
-    ReDim arrTemp(nFirst To nLast)
-
-    'Convert Array to String
-    For i = nFirst To nLast
-        arrTemp(i) = CStr(myArray(i))
-    Next i
-
-    'Populate Temporary Collection
-    On Error Resume Next
-    For i = nFirst To nLast
-        coll.Add arrTemp(i), arrTemp(i)
-    Next i
-    Err.clear
-    On Error GoTo 0
-
-    'Resize Array
-    nLast = coll.Count + nFirst - 1
-    ReDim arrTemp(nFirst To nLast)
-
-    'Populate Array
-    For i = nFirst To nLast
-        arrTemp(i) = coll(i - nFirst + 1)
-    Next i
-
-    'Output Array
-    ArrayDuplicatesRemove = arrTemp
-
-End Function
-
-Function ArrayDuplicatesRemove(myArray As Variant) As Variant
-'@BlogPosted
-'@AssignedModule F_Array
-'@INCLUDE PROCEDURE ArrayAllocated
-    Dim nFirst As Long, nLast As Long, i As Long
     Dim item As String
 
     Dim arrTemp() As String

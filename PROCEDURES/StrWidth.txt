@@ -1,41 +1,4 @@
 
-Public Function StrWidth(s As String, sFontName As String, fFontSize As Double) As Double
-'https://forum.ozgrid.com/forum/index.php?user-post-list/28803-shg/&pageNo=24
-    '@INCLUDE InitChrWidths
-    Dim i As Long
-    Dim j As Long
-
-    If sFontName <> msFontName Then
-        If Not InitChrWidths(sFontName) Then
-            Exit Function
-        End If
-    End If
-    For i = 1 To Len(s)
-        j = Asc(Mid(s, i, 1))
-        If j >= 32 Then
-            StrWidth = StrWidth + fFontSize * mafChrWid(j)
-        End If
-    Next i
-End Function
-
-Public Function StrWidth(s As String, sFontName As String, fFontSize As Double) As Double
-'https://forum.ozgrid.com/forum/index.php?user-post-list/28803-shg/&pageNo=24
-    '@INCLUDE InitChrWidths
-    Dim i As Long
-    Dim j As Long
-
-    If sFontName <> msFontName Then
-        If Not InitChrWidths(sFontName) Then
-            Exit Function
-        End If
-    End If
-    For i = 1 To Len(s)
-        j = Asc(Mid(s, i, 1))
-        If j >= 32 Then
-            StrWidth = StrWidth + fFontSize * mafChrWid(j)
-        End If
-    Next i
-End Function
 
 Public Function StrWidth(s As String, sFontName As String, fFontSize As Double) As Double
 'https://forum.ozgrid.com/forum/index.php?user-post-list/28803-shg/&pageNo=24

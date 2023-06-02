@@ -15,24 +15,5 @@ Public Function RegexTest( _
         .MultiLine = multilineFlag
         .pattern = stringPattern
     End With
-    RegexTest = REGEX.test(string1)
-End Function
-
-Public Function RegexTest( _
-                         ByVal string1 As String, _
-                         ByVal stringPattern As String, _
-                         Optional ByVal globalFlag As Boolean, _
-                         Optional ByVal ignoreCaseFlag As Boolean, _
-                         Optional ByVal multilineFlag As Boolean) As Boolean
-'@BlogPosted
-'@AssignedModule F_Regex
-    Dim REGEX As Object
-    Set REGEX = CreateObject("VBScript.RegExp")
-    With REGEX
-        .Global = globalFlag
-        .IgnoreCase = ignoreCaseFlag
-        .MultiLine = multilineFlag
-        .pattern = stringPattern
-    End With
-    RegexTest = REGEX.test(string1)
+    RegexTest = REGEX.Test(string1)
 End Function

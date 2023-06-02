@@ -10,27 +10,3 @@ Public Function asciien(s As String) As String
    Next i
     asciien = Replace(asciien, "(13)(10)", "(vbNewLine)")
 End Function
-
-Public Function asciien(s As String) As String
-' Returns the string to its respective ascii numbers
-'#IMPORTS DP
-   Dim i As Integer
-
-   For i = 1 To Len(s)
-      asciien = asciien & "(" & CStr(Asc(Mid(s, i, 1))) & ")"
-'      dp Mid(s, i, 1) & vbTab & CStr(Asc(Mid(s, i, 1)))
-   Next i
-    asciien = Replace(asciien, "(13)(10)", "(vbNewLine)")
-End Function
-
-Public Function asciien(s As String) As String
-' Returns the string to its respective ascii numbers
-'#IMPORTS DP
-   Dim i As Integer
-
-   For i = 1 To Len(s)
-      asciien = asciien & "(" & CStr(Asc(Mid(s, i, 1))) & ")"
-'      dp Mid(s, i, 1) & vbTab & CStr(Asc(Mid(s, i, 1)))
-   Next i
-    asciien = Replace(asciien, "(13)(10)", "(vbNewLine)")
-End Function

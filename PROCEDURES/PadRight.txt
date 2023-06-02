@@ -8,23 +8,3 @@ Public Function PadRight(ByVal str As String, ByVal Length As Long, Optional Cha
         PadRight = str
     End If
 End Function
-
-Public Function PadRight(ByVal str As String, ByVal Length As Long, Optional Character As String = " ", Optional RemoveExcess As Boolean)
-    If Len(str) < Length Then
-        PadRight = str & String$(Length - Len(str), Character)
-    ElseIf RemoveExcess = True Then
-        PadRight = Left$(str, Length)
-    Else
-        PadRight = str
-    End If
-End Function
-
-Public Function PadRight(ByVal str As String, ByVal Length As Long, Optional Character As String = " ", Optional RemoveExcess As Boolean)
-    If Len(str) < Length Then
-        PadRight = str & String$(Length - Len(str), Character)
-    ElseIf RemoveExcess = True Then
-        PadRight = Left$(str, Length)
-    Else
-        PadRight = str
-    End If
-End Function

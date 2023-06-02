@@ -1,64 +1,21 @@
 
-
 Public Function IsLineNumberAble( _
                                 ByVal str As String) As Boolean
 '@AssignedModule F_Vbe_Lines_Number
-    Dim test As String
-    test = Trim(str)
-    If Len(test) = 0 Then Exit Function
-    If Right(test, 1) = ":" Then Exit Function
-    If IsNumeric(Left(test, 1)) Then Exit Function
-    If test Like "'*" Then Exit Function
-    If test Like "Rem*" Then Exit Function
-    If test Like "Dim*" Then Exit Function
-    If test Like "Sub*" Then Exit Function
-    If test Like "Public*" Then Exit Function
-    If test Like "Private*" Then Exit Function
-    If test Like "Function*" Then Exit Function
-    If test Like "End Sub*" Then Exit Function
-    If test Like "End Function*" Then Exit Function
-    If test Like "Debug*" Then Exit Function
-    IsLineNumberAble = True
-End Function
-
-Public Function IsLineNumberAble( _
-                                ByVal str As String) As Boolean
-'@AssignedModule F_Vbe_Lines_Number
-    Dim test As String
-    test = Trim(str)
-    If Len(test) = 0 Then Exit Function
-    If Right(test, 1) = ":" Then Exit Function
-    If IsNumeric(Left(test, 1)) Then Exit Function
-    If test Like "'*" Then Exit Function
-    If test Like "Rem*" Then Exit Function
-    If test Like "Dim*" Then Exit Function
-    If test Like "Sub*" Then Exit Function
-    If test Like "Public*" Then Exit Function
-    If test Like "Private*" Then Exit Function
-    If test Like "Function*" Then Exit Function
-    If test Like "End Sub*" Then Exit Function
-    If test Like "End Function*" Then Exit Function
-    If test Like "Debug*" Then Exit Function
-    IsLineNumberAble = True
-End Function
-
-Public Function IsLineNumberAble( _
-                                ByVal str As String) As Boolean
-'@AssignedModule F_Vbe_Lines_Number
-    Dim test As String
-    test = Trim(str)
-    If Len(test) = 0 Then Exit Function
-    If Right(test, 1) = ":" Then Exit Function
-    If IsNumeric(Left(test, 1)) Then Exit Function
-    If test Like "'*" Then Exit Function
-    If test Like "Rem*" Then Exit Function
-    If test Like "Dim*" Then Exit Function
-    If test Like "Sub*" Then Exit Function
-    If test Like "Public*" Then Exit Function
-    If test Like "Private*" Then Exit Function
-    If test Like "Function*" Then Exit Function
-    If test Like "End Sub*" Then Exit Function
-    If test Like "End Function*" Then Exit Function
-    If test Like "Debug*" Then Exit Function
+    Dim Test As String
+    Test = Trim(str)
+    If Len(Test) = 0 Then Exit Function
+    If Right(Test, 1) = ":" Then Exit Function
+    If IsNumeric(Left(Test, 1)) Then Exit Function
+    If Test Like "'*" Then Exit Function
+    If Test Like "Rem*" Then Exit Function
+    If Test Like "Dim*" Then Exit Function
+    If Test Like "Sub*" Then Exit Function
+    If Test Like "Public*" Then Exit Function
+    If Test Like "Private*" Then Exit Function
+    If Test Like "Function*" Then Exit Function
+    If Test Like "End Sub*" Then Exit Function
+    If Test Like "End Function*" Then Exit Function
+    If Test Like "Debug*" Then Exit Function
     IsLineNumberAble = True
 End Function

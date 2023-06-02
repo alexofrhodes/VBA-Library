@@ -2,11 +2,3 @@
 Function IsOnlyLetters(s$) As Boolean
     IsOnlyLetters = Not s Like "*[!a-zA-Z]*"
 End Function
-
-Function IsOnlyLetters(s$) As Boolean
-    IsOnlyLetters = Not s Like "*[!a-zA-Z]*"
-End Function
-
-Function IsOnlyLetters(s$) As Boolean
-    IsOnlyLetters = Not s Like "*[!a-zA-Z]*"
-End Function

@@ -13,33 +13,3 @@ Public Function ModReplaceMulti( _
     Next
     ModReplaceMulti = str
 End Function
-
-Public Function ModReplaceMulti( _
-       ByVal Compare As VbCompareMethod, _
-       ByVal str As String, _
-       toStr As String, _
-       ParamArray Replacements() As Variant) _
-        As String
-    Rem ModReplaceMulti vbTextCompare, "a b c d", "X",array("a","c")
-    Rem returns: "X b X d"
-    Dim element As Variant
-    For Each element In Replacements
-        str = Replace(str, element, toStr, , , Compare)
-    Next
-    ModReplaceMulti = str
-End Function
-
-Public Function ModReplaceMulti( _
-       ByVal Compare As VbCompareMethod, _
-       ByVal str As String, _
-       toStr As String, _
-       ParamArray Replacements() As Variant) _
-        As String
-    Rem ModReplaceMulti vbTextCompare, "a b c d", "X",array("a","c")
-    Rem returns: "X b X d"
-    Dim element As Variant
-    For Each element In Replacements
-        str = Replace(str, element, toStr, , , Compare)
-    Next
-    ModReplaceMulti = str
-End Function

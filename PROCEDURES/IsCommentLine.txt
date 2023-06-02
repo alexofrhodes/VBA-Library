@@ -5,24 +5,3 @@ Function IsCommentLine(ByVal str As String) As Boolean
     If str Like "'*" Then IsCommentLine = True
     If str Like "Rem *" Then IsCommentLine = True
 End Function
-
-Function IsCommentLine(ByVal str As String) As Boolean
-'@LastModified 2305220757
-    str = Trim(str)
-    If str Like "'*" Then IsCommentLine = True
-    If str Like "Rem *" Then IsCommentLine = True
-End Function
-
-Function IsCommentLine(ByVal str As String) As Boolean
-'@LastModified 2305220757
-    str = Trim(str)
-    If str Like "'*" Then IsCommentLine = True
-    If str Like "Rem *" Then IsCommentLine = True
-End Function
-
-Function IsCommentLine(ByVal str As String) As Boolean
-'@LastModified 2305220757
-    str = Trim(str)
-    If str Like "'*" Then IsCommentLine = True
-    If str Like "Rem *" Then IsCommentLine = True
-End Function

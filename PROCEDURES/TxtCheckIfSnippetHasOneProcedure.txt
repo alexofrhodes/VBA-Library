@@ -1,0 +1,35 @@
+
+Sub TxtCheckIfSnippetHasOneProcedure(TargetFolder As String, ApplyFix As Boolean)
+'@LastModified 2306020847
+'@INCLUDE PROCEDURE TxtOverwrite
+'@INCLUDE PROCEDURE TxtRead
+'@INCLUDE PROCEDURE FilesAndOrFoldersInFolderOrZip
+'@INCLUDE PROCEDURE ProcedureCode
+'@INCLUDE PROCEDURE ProceduresOfTXT
+'@INCLUDE PROCEDURE dp
+    Dim TargetWorkbook As Workbook: Set TargetWorkbook = ThisWorkbook '<=====
+    TargetFolder = VBA.Replace(TargetFolder & "\", "\\", "\")
+    Dim FileCollection As New Collection
+    Call FilesAndOrFoldersInFolderOrZip(TargetFolder, False, True, True, FileCollection)
+    Dim FileName
+    Dim Procedure As String
+    Dim FileCode As String
+    Dim FixCode As String
+    Dim Procedures As Collection
+    For Each FileName In FileCollection
+        FileCode = TxtRead(FileName)
+        Set Procedures = ProceduresOfTXT(FileCode)
+        If Procedures.Count > 1 Then
+            dp Procedures.Count & vbTab & Mid(FileName, InStrRev(FileName, "\"))
+            If ApplyFix Then
+                Procedure = Procedures(1)
+                FixCode = ProcedureCode(TargetWorkbook, , Procedure)
+                If FixCode <> "" Then
+                    TxtOverwrite CStr(FileName), FixCode
+                Else
+                    Debug.Print "Procedure =" & Procedure & "= Not found in " & TargetWorkbook.Name
+                End If
+            End If
+        End If
+    Next
+End Sub

@@ -5,14 +5,5 @@ Function getLastRow(TargetSheet As Worksheet)
 '@INCLUDE PROCEDURE LastCell
     Dim LastCell As Range
     Set LastCell = TargetSheet.Cells.Find("*", SearchOrder:=xlByRows, SearchDirection:=xlPrevious)
-    getLastRow = LastCell.row
-End Function
-
-Function getLastRow(TargetSheet As Worksheet)
-'@BlogPosted
-'@AssignedModule F_Range
-'@INCLUDE PROCEDURE LastCell
-    Dim LastCell As Range
-    Set LastCell = TargetSheet.Cells.Find("*", SearchOrder:=xlByRows, SearchDirection:=xlPrevious)
     getLastRow = LastCell.Row
 End Function
