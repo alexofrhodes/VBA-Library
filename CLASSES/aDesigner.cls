@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-'* Module     : aDesigner
+'* Class      : aDesigner
 '* Author     : Anastasiou Alex
 '* Contacts   : AnastasiouAlex@gmail.com
 '*
@@ -42,9 +42,9 @@ Private Sub Class_Terminate()
 End Sub
 
 Function SelectedControl() As MSForms.control
-    If SelectedControls.Count = 1 Then
+    If SelectedControls.count = 1 Then
         Dim ctl    As control
-        For Each ctl In oModule.Designer.SELECTED
+        For Each ctl In oModule.Designer.Selected
             Set SelectedControl = ctl
             Exit Function
         Next ctl
@@ -54,28 +54,31 @@ End Function
 Function SelectedControls() As Collection
     Dim ctl    As control
     Dim out As New Collection
-    For Each ctl In oModule.Designer.SELECTED
+    For Each ctl In oModule.Designer.Selected
         out.Add ctl
     Next ctl
+    
+    Dim ac As New aCollection
+    Set out = ac.Init(out).Reverse.Items
     Set SelectedControls = out
 End Function
 
 Function SelectedFrameControl() As MSForms.control
     Dim ctl    As control, c As control
     Dim out As New Collection
-    For Each ctl In oModule.Designer.SELECTED
+    For Each ctl In oModule.Designer.Selected
         For Each c In ctl.Controls
             out.Add c
         Next
     Next ctl
-    If out.Count = 0 Then Exit Function
+    If out.count = 0 Then Exit Function
     Set SelectedFrameControl = out(1)
 End Function
 
 Function SelectedFrameControls() As Collection
     Dim ctl    As control, c As control
     Dim out As New Collection
-    For Each ctl In oModule.Designer.SELECTED
+    For Each ctl In oModule.Designer.Selected
         For Each c In ctl.Controls
             out.Add c
         Next
@@ -113,18 +116,18 @@ End Sub
 Private Sub AssignHandCursor(control As MSForms.control)
     On Error GoTo Catch
     With control
-        .MouseIcon = LoadPicture("C:\Users\acer\Dropbox\SOFTWARE\EXCEL\0 Alex\icons\Hand Cursor Pointer.ico")
+        .MouseIcon = LoadPicture(ThisWorkbook.Path & "\img\Hand Cursor Pointer.ico")
         .MousePointer = fmMousePointerCustom
     End With
 Catch:
 End Sub
 
 Sub SwitchNames()
-    If SelectedControls.Count <> 2 Then Exit Sub
+    If SelectedControls.count <> 2 Then Exit Sub
 
     Dim ctrls As Collection
     Set ctrls = SelectedControls
-    If ctrls.Count <> 2 Then Exit Sub
+    If ctrls.count <> 2 Then Exit Sub
     Dim tmp1 As String
     tmp1 = ctrls(1).Name
     Dim tmp2 As String
@@ -136,10 +139,10 @@ Sub SwitchNames()
 End Sub
 
 Sub SwitchPositions()
-    If SelectedControls.Count <> 2 Then Exit Sub
+    If SelectedControls.count <> 2 Then Exit Sub
     Dim ctrls As Collection
     Set ctrls = SelectedControls
-    If ctrls.Count <> 2 Then Exit Sub
+    If ctrls.count <> 2 Then Exit Sub
     Dim left1 As Long, left2 As Long
     Dim top1 As Long, top2 As Long
     left1 = ctrls(1).Left
@@ -159,7 +162,7 @@ End Sub
 Sub EditObjectProperties(ParamArray Args() As Variant)
     Rem EditObjectProperties "left",0,"top",0
     Dim obj As control: Set obj = SelectedControl
-    If obj Is Nothing Or SelectedControls.Count <> 1 Then Exit Sub
+    If obj Is Nothing Or SelectedControls.count <> 1 Then Exit Sub
     If Not WorksheetFunction.IsEven(UBound(Args)) Then Exit Sub
     Dim i As Long: i = 0
     Do While i < UBound(Args)
@@ -173,13 +176,13 @@ End Sub
 
 Sub EditObjectsProperty(objProperty As String, ParamArray Args() As Variant)
     Dim obj As New Collection: Set obj = SelectedControls
-    If obj.Count <> UBound(Args) + 1 Then
+    If obj.count <> UBound(Args) + 1 Then
         Toast "selected controls count <> arguements count"
         Exit Sub
     End If
     Dim ArgItem
     Dim i As Long
-    i = obj.Count
+    i = obj.count
     Dim element As Variant
     For Each element In obj
         CallByName element, objProperty, VbLet, _
@@ -245,7 +248,7 @@ Private Sub SortControls(Optional SortVertically As Boolean = True)
 End Sub
 
 Public Sub CopyControlProperties()
-    If SelectedControls.Count <> 1 Then Exit Sub
+    If SelectedControls.count <> 1 Then Exit Sub
     Dim ctr As control: Set ctr = SelectedControl
     Dim ws As Worksheet: Set ws = CreateOrSetSheet("CopyControlProperties", ThisWorkbook)
     Dim PropertiesArray As Variant
@@ -256,8 +259,8 @@ Public Sub CopyControlProperties()
     "Parent", "PasswordChar", "PathSeparator", "Picture", "PictureAlignment", "PictureSizeMode", "PictureTiling", "Previous", "RightToLeft", "Root", "RowSource", _
     "ScrollBars", "ScrollHeight", "ScrollLeft", "ScrollTop", "ScrollWidth", "Selected", "SelectedItem", "ShowModal", "SmallChange", "Sorted", "SpecialEffect", "StartUpPosition", _
     "Style", "Tag", "Text", "TextColumn", "TripleState", "WhatsThisHelp", "Width", "Zoom")
-    If ws.Range("A1") = "" Then ws.Range("A1").RESIZE(UBound(PropertiesArray) + 1) = WorksheetFunction.Transpose(PropertiesArray)
-    Dim PropertiesRange As Range: Set PropertiesRange = ws.Range("A1").CurrentRegion.RESIZE(, 1)
+    If ws.Range("A1") = "" Then ws.Range("A1").Resize(UBound(PropertiesArray) + 1) = WorksheetFunction.Transpose(PropertiesArray)
+    Dim PropertiesRange As Range: Set PropertiesRange = ws.Range("A1").CurrentRegion.Resize(, 1)
     Dim Property As Range
     On Error Resume Next
     For Each Property In PropertiesRange
@@ -268,13 +271,13 @@ End Sub
 Public Sub PasteControlProperties()
     Dim control As MSForms.control
     Dim Controls As Collection: Set Controls = SelectedControls
-    If Controls.Count = 0 Then Exit Sub
-    Dim ws As Worksheet: Set ws = ThisWorkbook.SHEETS("CopyControlProperties")
-    If ws.Columns(2).SpecialCells(xlCellTypeConstants).Count = 0 Then
+    If Controls.count = 0 Then Exit Sub
+    Dim ws As Worksheet: Set ws = ThisWorkbook.Sheets("CopyControlProperties")
+    If ws.Columns(2).SpecialCells(xlCellTypeConstants).count = 0 Then
         Toast "You haven't saved properties before"
         Exit Sub
     End If
-    Dim PropertiesRange As Range: Set PropertiesRange = ws.Range("A1").CurrentRegion.RESIZE(, 1)
+    Dim PropertiesRange As Range: Set PropertiesRange = ws.Range("A1").CurrentRegion.Resize(, 1)
     Dim Property As Range
     On Error Resume Next
     For Each control In Controls
@@ -332,7 +335,8 @@ Public Sub addFrameFormCode()
 End Sub
 
 Public Sub CreateFrameMenu()
-    Select Case SelectedControls.Count
+'TODO obsolete, replace with aMultiPage.Init(MultiPage1).BuildMenu
+    Select Case SelectedControls.count
     Case Is = 0
         ActiveModule.Designer.BackColor = MyColors.FormBackgroundDarkGray
         addFrameSidebar ActiveModule
@@ -462,7 +466,7 @@ Private Sub AddControlsToFrame(isSubFrame As Boolean)
     '@INCLUDE InputboxString
     If ActiveModule.Type <> vbext_ct_MSForm Then Exit Sub
     Dim ad As New aDesigner
-    If ad.SelectedControls.Count <> 1 Then Exit Sub
+    If ad.SelectedControls.count <> 1 Then Exit Sub
     If TypeName(ad.SelectedControl) <> "Frame" Then Exit Sub
     Dim Module As VBComponent
     Dim TargetFrame As MSForms.control
@@ -495,7 +499,7 @@ Private Sub AddControlsToFrame(isSubFrame As Boolean)
     Dim L As MSForms.control
     For Each element In coll
         Set L = Module.Designer.Controls(TargetFrame.Name).Controls.Add(ControlIDCommandButton, element)
-        L.Top = 7 + ((TargetFrame.Controls.Count - 1) * L.Height)
+        L.Top = 7 + ((TargetFrame.Controls.count - 1) * L.Height)
         L.BackColor = vbWhite
     Next
 End Sub

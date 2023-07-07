@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-'* Module     : aProcedure
+'* Class      : aProcedure
 '* Author     : Anastasiou Alex
 '* Contacts   : AnastasiouAlex@gmail.com
 '*
@@ -119,13 +119,13 @@ Public Sub Copy( _
 End Sub
 
 Public Function Contains( _
-                        this As String, _
+                        This As String, _
                         WholeWord As Boolean, _
                         MatchCase As Boolean, _
                         PatternSearch As Boolean) As String
 
     Contains = oModule.CodeModule.Find( _
-                                        this, _
+                                        This, _
                                         1, _
                                         LineIndex(Procedure_First), _
                                         LineIndex(Procedure_Last), _
@@ -136,13 +136,13 @@ Public Function Contains( _
 End Function
 
 Public Function Contains_InHeader( _
-                                this As String, _
+                                This As String, _
                                 WholeWord As Boolean, _
                                 MatchCase As Boolean, _
                                 PatternSearch As Boolean) As String
 
     Contains_InHeader = oModule.CodeModule.Find( _
-                                        this, _
+                                        This, _
                                         1, _
                                         LineIndex(Header_First), _
                                         LineIndex(Header_Last), _
@@ -153,13 +153,13 @@ Public Function Contains_InHeader( _
 End Function
 
 Public Function Contains_InBody( _
-                                this As String, _
+                                This As String, _
                                 WholeWord As Boolean, _
                                 MatchCase As Boolean, _
                                 PatternSearch As Boolean) As String
 
     Contains_InBody = oModule.CodeModule.Find( _
-                                        this, _
+                                        This, _
                                         1, _
                                         LineIndex(Body_First), _
                                         LineIndex(Body_Last), _
@@ -208,13 +208,12 @@ Public Sub CommentsToOwnLine()
 End Sub
 
 Public Function Property(PropertyType As Property_Type) As Variant
-'    Select Case PropertyType
-'
-'        Case Property_Type.Modified:           Property = PropertyGet(Modified)
-'        Case Property_Type.Parent_Assigned:    Property = PropertyGet(Parent_Assigned)
-'
-'    End Select
-    Property = PropertyGet(PropertyType)
+    Select Case PropertyType
+    
+        Case Property_Type.Modified:           Property = PropertyGet(Modified)
+        Case Property_Type.Parent_Assigned:    Property = PropertyGet(Parent_Assigned)
+        
+    End Select
 End Function
 
 Public Property Get ArgumentCount() As Long
@@ -308,14 +307,14 @@ Public Function LineIndex(idx As Line_Index) As Long
     End Select
 End Function
 
-Public Function LineLike(this As String, CodePart As Code_Part) As Long
+Public Function LineLike(This As String, CodePart As Code_Part) As Long
     Dim LineStart As Long, LineEnd As Long
     AssignLineStartEnd CodePart, LineStart, LineEnd
     Dim targetLine As String
     Dim i As Long
     For i = LineStart To LineEnd
         targetLine = Trim(oModule.CodeModule.Lines(i, 1))
-        If UCase(targetLine) Like UCase(this) Then
+        If UCase(targetLine) Like UCase(This) Then
             LineLike = i
             Exit Function
         End If
@@ -471,16 +470,15 @@ Public Function LinkedProceduresDeep() As Collection
     Dim Module As VBComponent
 
     Processed.Add CStr(oProcedure), CStr(oProcedure)
-    CalledProcedures.Add CStr(oProcedure), CStr(oProcedure)
     On Error Resume Next
     For Each Procedure In LinkedProcedures
-        CalledProcedures.Add CStr(Procedure), CStr(Procedure)
+    CalledProcedures.Add CStr(Procedure), CStr(Procedure)
     Next
     On Error GoTo 0
     
     Dim AP As aProcedure
     Dim CalledProceduresCount As Long
-        CalledProceduresCount = CalledProcedures.Count
+        CalledProceduresCount = CalledProcedures.count
     Dim element
 repeat:
     For Each element In CalledProcedures
@@ -494,8 +492,8 @@ repeat:
             Processed.Add CStr(element), CStr(element)
         End If
     Next
-    If CalledProcedures.Count > CalledProceduresCount Then
-        CalledProceduresCount = CalledProcedures.Count
+    If CalledProcedures.count > CalledProceduresCount Then
+        CalledProceduresCount = CalledProcedures.count
         GoTo repeat
     End If
 
@@ -539,12 +537,11 @@ End Sub
 
 Private Sub LinkedExport(Procedure As String)
     Dim Module As VBComponent
-    
     Set Module = ModuleOfProcedure(oWorkbook, Procedure)
     Dim c As New aProcedure
     c.Init oWorkbook, Module, Procedure
-    Dim proclastmod     As String:        proclastmod = c.Property(Property_Type.Modified)
-    If proclastmod = vbNullString Then
+    Dim proclastmod     As Long:        proclastmod = c.Property(Modified)
+    If proclastmod = 0 Then
         c.InjectLinkedLists
         c.PropertySet Modified, Format(Now, "yymmddhhnn")
         proclastmod = c.Property(Modified)
@@ -581,7 +578,7 @@ End Sub
 Sub ExportDeclaration(DeclarationName As String)
     aWorkbook.Init(oWorkbook).DeclarationsTableCreate
     Dim TargetWorksheet As Worksheet
-    Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
+    Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
 
     Dim codeName As String
     Dim codeText As String
@@ -646,8 +643,8 @@ Public Sub NumbersRemove()
         s = oModule.CodeModule.Lines(i, 1)
         If IsNumeric(Left(Trim(s), 1)) Then
             oModule.CodeModule.ReplaceLine i, _
-                Space(InStr(s, ":")) & _
                 Mid(s, InStr(s, ":") + 1)
+                'Space(InStr(s, ":"))
         End If
     Next i
 End Sub
@@ -711,12 +708,12 @@ Public Sub RemoveIncludeLines()
     RemoveLinesLike "'@INCLUDE *"
 End Sub
 
-Public Sub RemoveLinesLike(this As String)
+Public Sub RemoveLinesLike(This As String)
     Dim s As String
     Dim i As Long
     For i = LineIndex(Body_Last) To LineIndex(Body_First) Step -1
         s = Trim(oModule.CodeModule.Lines(i, 1))
-        If s Like this Then oModule.CodeModule.DeleteLines i
+        If s Like This Then oModule.CodeModule.DeleteLines i
     Next
 End Sub
 
@@ -799,7 +796,7 @@ End Sub
 
 Public Function LinkedDeclarations() As Collection
     aWorkbook.Init(oWorkbook).DeclarationsTableCreate
-    Dim TargetWorksheet As Worksheet: Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
+    Dim TargetWorksheet As Worksheet: Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
     Dim coll As New Collection
     Dim s As String: s = Code_All
     Dim element
@@ -815,7 +812,7 @@ End Function
 
 Function DeclarationsTableKeywords() As Collection
     Dim TargetWorksheet As Worksheet
-    Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
+    Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
     Dim Lr As Long: Lr = getLastRow(TargetWorksheet)
     Dim coll As New Collection
     Dim cell As Range
@@ -891,11 +888,11 @@ End Function
 Public Sub ExportLinkedCode()
     Dim Code       As String:   Code = LinkedCode
     Dim MergedName As String:   MergedName = "Merged_" & oProcedure
-    Dim Filename   As String:   Filename = LOCAL_LIBRARY_PROCEDURES & MergedName & ".txt"
+    Dim FileName   As String:   FileName = LOCAL_LIBRARY_PROCEDURES & MergedName & ".txt"
     Debug.Print "OVERWROTE " & MergedName
-    TxtOverwrite Filename, Code
-    TxtPrependContainedProcedures Filename
-    FollowLink Filename
+    TxtOverwrite FileName, Code
+    TxtPrependContainedProcedures FileName
+    FollowLink FileName
 End Sub
 
 Private Function LinkedCode() As String
@@ -981,10 +978,11 @@ Public Sub ImportProcedure( _
             End If
         End If
     Else
-        Dim ModuleName As String
-            ModuleName = StringProcedureAssignedModule(Result)
-        If ModuleName = "" Then ModuleName = "vbArcImports"
-        Set Module = ModuleAddOrSet(oWorkbook, ModuleName, vbext_ct_StdModule)
+'        Dim ModuleName As String
+'            ModuleName = StringProcedureAssignedModule(Result)
+'        If ModuleName = "" Then ModuleName = "vbArcImports"
+'        Set Module = ModuleAddOrSet(oWorkbook, ModuleName, vbext_ct_StdModule)
+    Set Module = ModuleAddOrSet(oWorkbook, "vbArcImports", vbext_ct_StdModule)
         Module.CodeModule.AddFromFile ProcedurePath
     End If
 
@@ -992,11 +990,11 @@ Public Sub ImportProcedure( _
 End Sub
 
 Sub ImportDeclaration(DeclarationName As String)
-    Dim FilePath As String
-    FilePath = LOCAL_LIBRARY_DECLARATIONS & DeclarationName & ".txt"
+    Dim filepath As String
+    filepath = LOCAL_LIBRARY_DECLARATIONS & DeclarationName & ".txt"
     Dim Result As String
     On Error Resume Next
-    Result = TxtRead(FilePath)
+    Result = TxtRead(filepath)
     On Error GoTo 0
 
     If Len(Result) = 0 Then 'CheckPath(filePath) = "I" Then
@@ -1004,7 +1002,7 @@ Sub ImportDeclaration(DeclarationName As String)
         Result = TXTReadFromUrl(GITHUB_LIBRARY_DECLARATIONS & DeclarationName & ".txt")
         On Error GoTo 0
         If Len(Result) > 0 And Not UCase(Result) Like ("*NOT FOUND*") Then
-            TxtOverwrite FilePath, Result
+            TxtOverwrite filepath, Result
         Else
             Debug.Print "File " & DeclarationName & ".txt not found localy or online"
             Exit Sub
@@ -1056,15 +1054,15 @@ End Sub
 Sub ImportClass(ClassName As String, _
                 Overwrite As Boolean)
 
-    Dim FilePath As String
-    FilePath = LOCAL_LIBRARY_CLASSES & ClassName & ".cls"
-    If CheckPath(FilePath) = "I" Then
+    Dim filepath As String
+    filepath = LOCAL_LIBRARY_CLASSES & ClassName & ".cls"
+    If CheckPath(filepath) = "I" Then
         On Error Resume Next
         Dim Code As String
         Code = TXTReadFromUrl(GITHUB_LIBRARY_CLASSES & ClassName & ".cls")
         On Error GoTo 0
         If Len(Code) > 0 And Not UCase(Code) Like ("*NOT FOUND*") Then
-            TxtOverwrite FilePath, Code
+            TxtOverwrite filepath, Code
         Else
             MsgBox "File " & ClassName & ".cls not found neither localy nor online"
             Exit Sub
@@ -1078,7 +1076,7 @@ Sub ImportClass(ClassName As String, _
             Exit Sub
         End If
     End If
-    oWorkbook.VBProject.VBComponents.Import FilePath
+    oWorkbook.VBProject.VBComponents.Import filepath
 End Sub
 
 Public Sub Replace(Result As String)
@@ -1110,24 +1108,23 @@ Private Function PropertyGet(PropertyType As Property_Type) As String
 End Function
 
 Public Function PropertySet(PropertyType As Property_Type, Value As String)
-    Dim i As Long
-    Dim Line As String: Line = PropertyLine(PropertyType)
+    Dim Line As Long: Line = PropertyLine(PropertyType)
     If Line = 0 Then
         oModule.CodeModule.InsertLines BodyLineFirst, "'@" & EnumOptionToString(PropertyType) & " " & Value
     Else
-        Dim targetLine As String: targetLine = Trim(oModule.CodeModule.Lines(i, 1))
+        Dim targetLine As String: targetLine = Trim(oModule.CodeModule.Lines(Line, 1))
         oModule.CodeModule.ReplaceLine Line, Split(targetLine)(0) & " " & Value
     End If
 
 End Function
 
 Private Function PropertyLine(PropertyType As Property_Type) As Long
-    Dim this As String: this = EnumOptionToString(PropertyType)
+    Dim This As String: This = EnumOptionToString(PropertyType)
     Dim targetLine  As String
     Dim i As Long
     For i = LineFirst To LineLast
         targetLine = Trim(oModule.CodeModule.Lines(i, 1))
-        If UCase(targetLine) Like UCase("'@" & this & " *") Then
+        If UCase(targetLine) Like UCase("'@" & This & " *") Then
             PropertyLine = i
             Exit Function
         End If
@@ -1138,17 +1135,17 @@ Public Sub InjectObjectsRelease()
     Dim LineStart As Long, LineEnd As Long
     AssignLineStartEnd Body_Code, LineStart, LineEnd
     Dim i As Long
-    Dim s As String, this As String, Keyword As String
+    Dim s As String, This As String, Keyword As String
     For i = LineStart To LineEnd
         s = Trim(oModule.CodeModule.Lines(i, 1))
         If (s Like "Set * = *" Or s Like "Dim*As New*") _
         And Not s Like "*= Nothing*" Then
             Keyword = Split(s, " ")(1)
-            this = IIf(this <> "", this & vbNewLine, "") & "Set " & Keyword & " = Nothing"
+            This = IIf(This <> "", This & vbNewLine, "") & "Set " & Keyword & " = Nothing"
         End If
     Next
-    If this = "" Then Exit Sub
-    Dim var: var = Split(this, vbNewLine)
+    If This = "" Then Exit Sub
+    Dim var: var = Split(This, vbNewLine)
     Dim sCode As String: sCode = Code_All
     Dim out, el
     ReDim out(0 To 0)
@@ -1158,8 +1155,8 @@ Public Sub InjectObjectsRelease()
             out(UBound(out)) = el
         End If
     Next
-    this = Join(out, vbNewLine)
-    If this <> "" Then oModule.CodeModule.InsertLines LineIndex(Procedure_Last), this
+    This = Join(out, vbNewLine)
+    If This <> "" Then oModule.CodeModule.InsertLines LineIndex(Procedure_Last), This
 End Sub
 
 Public Sub InjectModification()
@@ -1194,7 +1191,7 @@ Public Sub InjectModification()
         If oModule.CodeModule.Lines(lineNo + 1, 1) Like sUPDATE & "*" Then
             Do
                 lineNo = lineNo + 1
-            Loop While oModule.CodeModule.Lines(lineNo, 1 + 1) Like sUPDATE & "*"
+            Loop While oModule.CodeModule.Lines(lineNo + 1, 1) Like sUPDATE & "*"
         End If
         oModule.CodeModule.InsertLines lineNo + 1, sSecondLine
         Exit Sub
@@ -1244,10 +1241,10 @@ Public Sub MoveToBottom()
     Dim Procedures As New Collection:   Set Procedures = aModule.Init(oModule).ProceduresNames
     Dim idx As Long:                  idx = IndexInModule
     
-    If idx = Procedures.Count Then Exit Sub
+    If idx = Procedures.count Then Exit Sub
     
     Dim s As String:                    s = Code_All
-    Dim TargetProcedure As String:      TargetProcedure = Procedures(Procedures.Count)
+    Dim TargetProcedure As String:      TargetProcedure = Procedures(Procedures.count)
         
     Delete
     
@@ -1265,7 +1262,7 @@ Public Sub MoveDown()
     Dim Procedures As New Collection:   Set Procedures = aModule.Init(oModule).ProceduresNames
     Dim idx As Long:                    idx = IndexInModule
     
-    If idx = Procedures.Count Then Exit Sub
+    If idx = Procedures.count Then Exit Sub
     
     Dim s As String:                    s = Code_All
     Dim TargetProcedure As String:      TargetProcedure = Procedures(idx + 1)
@@ -1332,13 +1329,13 @@ Public Sub TestCreate()
     Set Procedures = aWorkbook.Init(oWorkbook).Procedures(True, False, False, False)
     
     Dim s As String: s = vbNewLine
-    If Not aCollection.Init(Procedures).Contains(, "test" & aProcedure) Then
+    If Not aCollection.Init(Procedures).Contains(, "test" & oProcedure) Then
         If KindAsString = "Sub" Then
-            s = s & "Sub test" & aProcedure & "()" & vbNewLine
+            s = s & "Sub test" & oProcedure & "()" & vbNewLine
             s = s & "call " & arg & vbNewLine
             s = s & "End Sub"
         Else
-            s = s & "Function test" & aProcedure & "()" & vbNewLine
+            s = s & "Function test" & oProcedure & "()" & vbNewLine
             s = s & "Something = " & arg & vbNewLine
             s = s & "End Function"
         End If
@@ -1346,7 +1343,7 @@ Public Sub TestCreate()
 
     End If
     oModule.CodeModule.InsertLines LineIndex(Procedure_First), s
-    Debug.Print "Created test" & aProcedure & " in " & oModule.Name
+    Debug.Print "Created test" & oProcedure & " in " & oModule.Name
 End Sub
 
 Public Function ArgumentStyle() As String
@@ -1487,49 +1484,52 @@ Public Property Get Dims() As Variant
 End Property
 
 Public Sub InjectToHeaderTop( _
-                    this As String, _
+                    This As String, _
                     SkipIfExists As Boolean)
     If SkipIfExists Then
-        If InStr(1, Code_Body, this) > 0 Then Exit Sub
+        If InStr(1, Code_Body, This) > 0 Then Exit Sub
     End If
-    oModule.CodeModule.InsertLines LineIndex(Procedure_First), vbNewLine & "'" & this
+    oModule.CodeModule.InsertLines LineIndex(Procedure_First), _
+                                   IIf(Len(oModule.CodeModule.Lines(LineIndex(Procedure_First), 1)) = 0, vbNewLine, "") & _
+                                   This
 End Sub
 
 Public Sub InjectToHeaderBottom( _
-                        this As String, _
+                        This As String, _
                         SkipIfExists As Boolean)
     If SkipIfExists Then
-        If InStr(1, Code_Body, this) > 0 Then Exit Sub
+        If InStr(1, Code_Body, This) > 0 Then Exit Sub
     End If
-    oModule.CodeModule.InsertLines LineIndex(Declaration_First), vbNewLine & "'" & this
+    oModule.CodeModule.InsertLines LineIndex(Declaration_First), This
 End Sub
 
 Public Sub InjectToBodyTop( _
-                    this As String, _
+                    This As String, _
                     SkipIfExists As Boolean)
     If SkipIfExists Then
-        If InStr(1, Code_Body, this) > 0 Then Exit Sub
+        If InStr(1, Code_Body, This) > 0 Then Exit Sub
     End If
-    oModule.CodeModule.InsertLines LineIndex(Body_First), vbNewLine & "'" & this
+    oModule.CodeModule.InsertLines LineIndex(Body_First), This
 End Sub
 
 Public Sub InjectToBodyAfterComments( _
-                                    this As String, _
+                                    This As String, _
                                     SkipIfExists As Boolean)
     If SkipIfExists Then
-        If InStr(1, Code_Body, this) > 0 Then Exit Sub
+        If InStr(1, Code_Body, This) > 0 Then Exit Sub
     End If
-    oModule.CodeModule.InsertLines LineIndex(Body_First_AfterComments), vbNewLine & "'" & this
+    oModule.CodeModule.InsertLines LineIndex(Body_First_AfterComments), This
 End Sub
 
 Public Sub InjectToBodyBottom( _
-                             this As String, _
+                             This As String, _
                              SkipIfExists As Boolean)
     If SkipIfExists Then
-        If InStr(1, Code_Body, this) > 0 Then Exit Sub
+        If InStr(1, Code_Body, This) > 0 Then Exit Sub
     End If
-    oModule.CodeModule.InsertLines LineIndex(Procedure_Last), vbNewLine & "'" & this
+    oModule.CodeModule.InsertLines LineIndex(Body_Last) + 1, This
 End Sub
+
 
 
 Sub InjectDescription()
@@ -1552,7 +1552,7 @@ Sub InjectDescription()
     If txtOther <> vbNullString Then txtOther = "'* Note       :" & vbTab & txtOther & vbCrLf
 
     Dim txtMedia        As String:   txtMedia = "'* " & vbLf & AUTHOR_MEDIA
-    Dim CurentCodePane  As Codepane: Set CurentCodePane = oModule.CodeModule.Codepane
+    Dim CurentCodePane  As CodePane: Set CurentCodePane = oModule.CodeModule.CodePane
     Dim i               As Byte
     Dim ProcKind        As VBIDE.vbext_ProcKind
     Dim sProc           As String: sProc = ActiveProcedure
@@ -1654,8 +1654,8 @@ Sub InjectTimer()
     Dim ProcedureText As String
     ProcedureText = Code_All
     If Contains("StartTimer", True, True, False) Then Exit Sub
-    InjectToBodyAfterComments "StartTimer " & """" & aProcedure & """", True
-    Sleep 100
+    InjectToBodyAfterComments "StartTimer " & """" & oProcedure & """", True
+    Sleep 200
     InjectToBodyBottom "EndTimer", True
 End Sub
 
@@ -1663,7 +1663,7 @@ Function SuggestedScope() As String
     
     Dim Result As String
 
-    Select Case CallerModules.Count
+    Select Case CallerModules.count
     Case 0
         SuggestedScope = "Unspecified"
         Result = Result & vbNewLine & "Procedure " & Name & " has unclarified scope in " & oWorkbook.Name
@@ -1677,12 +1677,12 @@ Function SuggestedScope() As String
         Result = Result & vbNewLine & "Suggested scope for procedure " & Name & " is Public"
     End Select
 
-    Result = Result & vbNewLine & "because it is used in " & CallerModules.Count & " module(s) of " & oWorkbook.Name
+    Result = Result & vbNewLine & "because it is used in " & CallerModules.count & " module(s) of " & oWorkbook.Name
     
 End Function
 
 Sub ScopeSuggested()
-    Dim idx         As Long:        idx = LineIndex(Procedure_First)
+    Dim idx         As Long:        idx = LineIndex(Declaration_First)
     Dim s           As String:      s = oModule.CodeModule.Lines(idx, 1)
     Dim Suggestion  As String:      Suggestion = SuggestedScope
     
@@ -1822,7 +1822,7 @@ Sub AddToLinkedTable()
     Dim cell As Range
     Dim TargetWorksheet As Worksheet
     On Error Resume Next
-    Set TargetWorksheet = ThisWorkbook.SHEETS("Linked_Table_" & aw.NameClean)
+    Set TargetWorksheet = ThisWorkbook.Sheets("Linked_Table_" & aw.NameClean)
     If TargetWorksheet Is Nothing Then Toast "Worksheet Linked_Table_" & aw.NameClean & " does not exist. Create first. Terminating": Exit Sub
     Set cell = TargetWorksheet.Columns(4).Find(aProcedure, LookAt:=xlWhole)
     If Not cell Is Nothing Then Debug.Print "Procedure " & aProcedure & " was already exporterd. Terminating.": Exit Sub
@@ -1919,27 +1919,27 @@ Public Sub Comments_ReplaceQuoteWithRem()
 End Sub
 
 
-Public Sub UpdatableVariable_Add(this As String)
+Public Sub UpdatableVariable_Add(This As String)
     Dim i As Long: i = LineLike("*UpdatableVariable = *", Body_Code)
     If i = 0 Then Exit Sub
     Dim Q As String: Q = Chr(34)
     Dim Line As String: Line = oModule.CodeModule.Lines(i, 1)
-    If UCase(Trim(Line)) Like UCase("UpdatableVariable = *") And InStr(1, Line, this, vbTextCompare) = 0 Then
-        oModule.CodeModule.ReplaceLine i, VBA.Replace(VBA.Replace(Line, Q, Q & this & ",", , 1, vbTextCompare), "," & Q, Q)
+    If UCase(Trim(Line)) Like UCase("UpdatableVariable = *") And InStr(1, Line, This, vbTextCompare) = 0 Then
+        oModule.CodeModule.ReplaceLine i, VBA.Replace(VBA.Replace(Line, Q, Q & This & ",", , 1, vbTextCompare), "," & Q, Q)
         Line = oModule.CodeModule.Lines(i, 1)
         If InStr(1, Line, Q & ",") > 0 Then oModule.CodeModule.ReplaceLine i, VBA.Replace(Line, Q & ",", Q)
     End If
 End Sub
 
-Public Sub UpdatableVariable_Remove(this As String)
+Public Sub UpdatableVariable_Remove(This As String)
     Dim i As Long: i = LineLike("*UpdatableVariable = *", Body_Code)
     If i = 0 Then Exit Sub
     Dim Q As String: Q = Chr(34)
     Dim Result As String
     Dim Line As String: Line = oModule.CodeModule.Lines(i, 1)
     If Trim(Line) Like "UpdatableVariable = *" Then
-        If InStr(1, Line, Q & this & Q, vbTextCompare) > 0 Then
-            Result = VBA.Replace(Line, Q & this & Q, "")
+        If InStr(1, Line, Q & This & Q, vbTextCompare) > 0 Then
+            Result = VBA.Replace(Line, Q & This & Q, "")
             Result = VBA.Replace(Result, ",,", ",")
             Result = VBA.Replace(Result, Q & ",", Q)
             oModule.CodeModule.ReplaceLine i, Result

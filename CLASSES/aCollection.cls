@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-'* Module     : aCollection
+'* Class      : aCollection
 '* Author     : Anastasiou Alex
 '* Contacts   : AnastasiouAlex@gmail.com
 '*
@@ -57,7 +57,7 @@ Public Function IndexOf(ByVal item As Variant, _
     Dim itemtype As Integer
 
     itemtype = VarType(item)
-    For collindex = StartIndex To myCollection.Count
+    For collindex = StartIndex To myCollection.count
         collitemtype = VarType(myCollection(collindex))
         If collitemtype = itemtype Then
             Select Case collitemtype
@@ -82,7 +82,7 @@ Public Sub RestrictionRemove()
 End Sub
 
 Public Sub Add(NewItem As Variant, Optional Description As String)
-    Err.clear
+    Err.Clear
     Select Case RestrictionTypename
     Case ""
         myCollection.Add NewItem
@@ -98,8 +98,8 @@ Public Sub Add(NewItem As Variant, Optional Description As String)
     End Select
 End Sub
 
-Public Property Get Count() As Long
-    Count = myCollection.Count
+Public Property Get count() As Long
+    count = myCollection.count
 End Property
 
 Public Sub Remove(NameOrNumber As Variant)
@@ -160,8 +160,8 @@ Public Function Sort() As aCollection
     Dim iCounter As Integer
     Dim iCounter2 As Integer
     Dim Temp As Variant
-    For iCounter = 1 To myCollection.Count - 1
-        For iCounter2 = iCounter + 1 To myCollection.Count
+    For iCounter = 1 To myCollection.count - 1
+        For iCounter2 = iCounter + 1 To myCollection.count
             If myCollection(iCounter) > myCollection(iCounter2) Then
                 Temp = myCollection(iCounter2)
                 myCollection.Remove iCounter2
@@ -173,12 +173,12 @@ Public Function Sort() As aCollection
 End Function
 
 Public Function Contains( _
-                        Optional key As Variant, _
+                        Optional Key As Variant, _
                         Optional item As Variant) As Boolean
     Dim strKey As String
     Dim var As Variant
-    If Not IsMissing(key) Then
-        strKey = CStr(key)
+    If Not IsMissing(Key) Then
+        strKey = CStr(Key)
         On Error Resume Next
         Contains = True
         var = myCollection(strKey)
@@ -210,9 +210,9 @@ NotFound:
 End Function
 
 Function ToArray() As Variant
-    Dim a() As Variant: ReDim a(0 To myCollection.Count - 1)
+    Dim a() As Variant: ReDim a(0 To myCollection.count - 1)
     Dim i As Long
-    For i = 1 To myCollection.Count
+    For i = 1 To myCollection.count
         a(i - 1) = myCollection.item(i)
     Next
     ToArray = a
@@ -221,7 +221,7 @@ End Function
 Public Function Reverse() As aCollection
     Dim Output As New Collection
     Dim i As Long
-    For i = myCollection.Count To 1 Step -1
+    For i = myCollection.count To 1 Step -1
         Output.Add myCollection.item(i)
     Next i
     Set myCollection = Output
@@ -235,26 +235,26 @@ End Function
 '------------------------------------------------------------------------'
 Public Function Mid(ByVal Start As Long, Optional ByVal Length As Variant) As aCollection
     Dim Result As New Collection
-    Dim Count As Long
+    Dim count As Long
     Dim c As Long
 
-    Count = myCollection.Count
+    count = myCollection.count
     If Start < 1 Then Error 5
-    If Start > Count Then
+    If Start > count Then
         Set Result = Result
     Else
         If IsMissing(Length) Then
-            For c = Start To Count
+            For c = Start To count
                 Result.Add myCollection(c)
             Next
-        ElseIf (Length >= (Count + 1 - Start)) Then
-            For c = Start To Count
+        ElseIf (Length >= (count + 1 - Start)) Then
+            For c = Start To count
                 Result.Add myCollection(c)
             Next
         ElseIf Length < 0 Then
             Error 5
         Else
-            For c = Start To Start + Count - 1
+            For c = Start To Start + count - 1
                 Result.Add myCollection(c)
             Next
         End If
@@ -271,15 +271,15 @@ Public Function FromTo(ByVal FromOffset As Long, ByVal ToOffset As Long) As aCol
     Dim Result As New Collection
     Dim c As Long
 
-    If FromOffset > myCollection.Count Then
+    If FromOffset > myCollection.count Then
         Set FromTo = Result
         Exit Function
     ElseIf FromOffset < 1 Then
         Error 5
     End If
 
-    If ToOffset > myCollection.Count Then
-        ToOffset = myCollection.Count
+    If ToOffset > myCollection.count Then
+        ToOffset = myCollection.count
     ElseIf ToOffset < 1 Then
         Error 5
     End If
@@ -306,7 +306,7 @@ Public Function Left(ByVal Length As Long) As aCollection
     Dim Result As New Collection
     Dim c As Long
 
-    If Length > myCollection.Count Then Length = myCollection.Count
+    If Length > myCollection.count Then Length = myCollection.count
     For c = 1 To Length
         Result.Add myCollection(c)
     Next
@@ -323,8 +323,8 @@ Public Function Right(ByVal Length As Long) As aCollection
     Dim Result As New Collection
     Dim c As Long
 
-    If Length > myCollection.Count Then Length = myCollection.Count
-    For c = myCollection.Count - Length + 1 To myCollection.Count
+    If Length > myCollection.count Then Length = myCollection.count
+    For c = myCollection.count - Length + 1 To myCollection.count
         Result.Add myCollection(c)
     Next
     Set myCollection = Result
@@ -360,15 +360,15 @@ End Function
 
 
 Public Function CollectionsToArray2D(collections As Collection) As Variant
-    If collections.Count = 0 Then Exit Function
-    Dim ColumnCount As Long:    ColumnCount = collections.Count
-    Dim RowCount As Long:       RowCount = collections.item(1).Count
+    If collections.count = 0 Then Exit Function
+    Dim ColumnCount As Long:    ColumnCount = collections.count
+    Dim RowCount As Long:       RowCount = collections.item(1).count
     Dim var As Variant
     ReDim var(1 To RowCount, 1 To ColumnCount)
     Dim cols As Long
     Dim rows As Long
     For rows = 1 To RowCount
-        For cols = 1 To collections.Count
+        For cols = 1 To collections.count
             var(rows, cols) = collections(cols).item(rows)
         Next cols
     Next rows

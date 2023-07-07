@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-'* Module     : aUserform
+'* Class      : aUserform
 '* Author     : Anastasiou Alex
 '* Contacts   : AnastasiouAlex@gmail.com
 '*
@@ -20,20 +20,27 @@ Attribute VB_Exposed = False
 '*
 '* Modified   : Date and Time       Author              Description
 '* Created    : 04-05-2023 12:19    Alex
+'* Modified   : 30-06-2023 10:01    Alex                modified save/load options/position to use ini
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
 
 Option Explicit
 
 Option Compare Text
 
+Public WithEvents DockResize As UserForm
+Attribute DockResize.VB_VarHelpID = -1
 Private oForm As Object
+
+Public TrackHeight As New Collection
+Public TrackWidth As New Collection
+Public TrackTop As New Collection
+Public TrackLeft As New Collection
 
 Rem Transparent Declarations
 Rem Private Declare PtrSafe Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long) As Long
 #If VBA7 Then
-    Private Declare PtrSafe Function DrawMenuBar Lib "user32" (ByVal hWnd As Long) As Long
-    Private Declare PtrSafe Function SetLayeredWindowAttributes Lib "user32" (ByVal hWnd As Long, ByVal crKey As Long, ByVal bAlpha As Byte, ByVal dwFlags As Long) As Long
+    Private Declare PtrSafe Function DrawMenuBar Lib "user32" (ByVal hwnd As Long) As Long
+    Private Declare PtrSafe Function SetLayeredWindowAttributes Lib "user32" (ByVal hwnd As Long, ByVal crKey As Long, ByVal bAlpha As Byte, ByVal dwFlags As Long) As Long
 #Else
     Private Declare Function DrawMenuBar Lib "user32" (ByVal hWnd As Long) As Long
     Private Declare Function SetLayeredWindowAttributes Lib "user32" (ByVal hWnd As Long, ByVal crKey As Long, ByVal bAlpha As Byte, ByVal dwFlags As Long) As Long
@@ -68,9 +75,9 @@ Private Const GWL_HWNDPARENT As Long = -8
 Private Const GW_OWNER = 4
 
 #If VBA7 Then
-    Private Declare PtrSafe Function GetWindowText Lib "user32.dll" Alias "GetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
-    Private Declare PtrSafe Function GetClassName Lib "user32" Alias "GetClassNameA" (ByVal hWnd As Long, ByVal lpClassName As String, ByVal nMaxCount As Long) As Long
-    Private Declare PtrSafe Function GetWindowLong Lib "user32.dll" Alias "GetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
+    Private Declare PtrSafe Function GetWindowText Lib "user32.dll" Alias "GetWindowTextA" (ByVal hwnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
+    Private Declare PtrSafe Function GetClassName Lib "user32" Alias "GetClassNameA" (ByVal hwnd As Long, ByVal lpClassName As String, ByVal nMaxCount As Long) As Long
+    Private Declare PtrSafe Function GetWindowLong Lib "user32.dll" Alias "GetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long) As Long
 #Else
     Private Declare Function GetWindowText Lib "user32.dll" Alias "GetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
     Private Declare Function GetClassName Lib "user32" Alias "GetClassNameA" (ByVal hWnd As Long, ByVal lpClassName As String, ByVal nMaxCount As Long) As Long
@@ -88,12 +95,12 @@ Private Const GA_ROOTOWNER As Long = 3
 Private Const GA_PARENT As Long = 1
 
 #If VBA7 Then
-    Private Declare PtrSafe Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
+    Private Declare PtrSafe Function GetWindow Lib "user32" (ByVal hwnd As Long, ByVal wCmd As Long) As Long
     Private Declare PtrSafe Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
-    Private Declare PtrSafe Function GetAncestor Lib "user32.dll" (ByVal hWnd As Long, ByVal gaFlags As Long) As Long
+    Private Declare PtrSafe Function GetAncestor Lib "user32.dll" (ByVal hwnd As Long, ByVal gaFlags As Long) As Long
     Private Declare PtrSafe Function GetDesktopWindow Lib "user32" () As Long
-    Private Declare PtrSafe Function GetParent Lib "user32.dll" (ByVal hWnd As Long) As Long
-    Private Declare PtrSafe Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+    Private Declare PtrSafe Function GetParent Lib "user32.dll" (ByVal hwnd As Long) As Long
+    Private Declare PtrSafe Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 #Else
     Private Declare Function GetWindow Lib "user32" (ByVal hWnd As Long, ByVal wCmd As Long) As Long
     Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
@@ -118,7 +125,7 @@ Private Const HWND_TOPMOST = -1
 Private Const HWND_NOTOPMOST = -2
 
 #If VBA7 Then
-    Private Declare PtrSafe Function SetWindowPos Lib "user32" (ByVal hWnd As LongPtr, ByVal hwndInsertAfter As LongPtr, ByVal x As LongPtr, ByVal y As LongPtr, ByVal cx As LongPtr, ByVal cy As LongPtr, ByVal uFlags As LongPtr) As Long
+    Private Declare PtrSafe Function SetWindowPos Lib "user32" (ByVal hwnd As LongPtr, ByVal hwndInsertAfter As LongPtr, ByVal x As LongPtr, ByVal y As LongPtr, ByVal cx As LongPtr, ByVal cy As LongPtr, ByVal uFlags As LongPtr) As Long
 #Else
     Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As LongPtr, ByVal hWndInsertAfter As LongPtr, ByVal X As LongPtr, ByVal Y As LongPtr, ByVal cx As LongPtr, ByVal cy As LongPtr, ByVal uFlags As LongPtr) As Long
 #End If
@@ -126,7 +133,7 @@ Private Const HWND_NOTOPMOST = -2
 Rem ---
 #If VBA7 Then
     Private Declare PtrSafe Function SetParent Lib "user32" (ByVal hwndChild As LongPtr, ByVal hWndNewParent As LongPtr) As LongPtr
-    Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
+    Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hwnd As LongPtr) As Long
     Private Declare PtrSafe Function FormatMessage Lib "kernel32" Alias "FormatMessageA" (ByVal dwFlags As Long, lpSource As Any, ByVal dwMessageId As Long, ByVal dwLanguageId As Long, ByVal lpBuffer As String, ByVal nSize As Long, Arguments As LongPtr) As Long
 #Else
     Private Declare Function SetParent Lib "user32" (ByVal hWndChild As Long, ByVal hWndNewParent As Long) As Long
@@ -143,15 +150,15 @@ Private Enum CloseBy
 End Enum
 
 
-Private Const Black As Long = &H80000012
-Private Const Red As Long = &HFF&
+Private Const black As Long = &H80000012
+Private Const red As Long = &HFF&
 
 Rem other
 #If VBA7 Then
     Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
     Private Declare PtrSafe Function FindWindowA Lib "user32" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
-    Private Declare PtrSafe Function GetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
-    Private Declare PtrSafe Function SetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+    Private Declare PtrSafe Function GetWindowLongA Lib "user32" (ByVal hwnd As Long, ByVal nIndex As Long) As Long
+    Private Declare PtrSafe Function SetWindowLongA Lib "user32" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 #Else
     Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
     Private Declare Function FindWindowA Lib "user32" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
@@ -161,15 +168,17 @@ Rem other
 
 Rem userform hwnd
 #If Win64 Then
-    Private Declare PtrSafe Function IUnknown_GetWindow Lib "shlwapi" Alias "#172" (ByVal pIUnk As IUnknown, ByVal hWnd As LongPtr) As Long
+    Private Declare PtrSafe Function IUnknown_GetWindow Lib "shlwapi" Alias "#172" (ByVal pIUnk As IUnknown, ByVal hwnd As LongPtr) As Long
 #Else
     Private Declare Function IUnknown_GetWindow Lib "shlwapi" Alias "#172" (ByVal pIUnk As IUnknown, ByVal hwnd As Long) As Long
 #End If
 
 Rem ___Resizeable___
+
+Public isResizable As Boolean
 #If VBA7 Then
-    Private Declare PtrSafe Function SetFocus Lib "user32" (ByVal hWnd As Long) As Long
-    Private Declare PtrSafe Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
+    Private Declare PtrSafe Function SetFocus Lib "user32" (ByVal hwnd As Long) As Long
+    Private Declare PtrSafe Function ShowWindow Lib "user32" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long
 #Else
     Private Declare Function SetFocus Lib "user32" (ByVal hwnd As Long) As Long
     Private Declare Function ShowWindow Lib "user32" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long
@@ -199,132 +208,16 @@ Rem get hwnd
 #End If
 
 
-
-Rem resize combobox List Portion
-#If VBA7 Then
-    Private Declare PtrSafe Function GetDeviceCaps Lib "gdi32" (ByVal hDC As LongPtr, ByVal nIndex As Long) As Long
-    Private Declare PtrSafe Function CreateCompatibleDC Lib "gdi32" (ByVal hDC As LongPtr) As LongPtr
-    Private Declare PtrSafe Function DeleteDC Lib "gdi32" (ByVal hDC As LongPtr) As Long
-    Private Declare PtrSafe Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hDC As LongPtr, ByVal lpStr As LongPtr, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
-    Private Declare PtrSafe Function SetMapMode Lib "gdi32" (ByVal hDC As LongPtr, ByVal nMapMode As Long) As Long
-    Private Declare PtrSafe Function GetTextExtentPoint32 Lib "gdi32" Alias "GetTextExtentPoint32W" (ByVal hDC As LongPtr, ByVal lpsz As LongPtr, ByVal cbString As Long, lpSize As ComboboxListSize) As Long
-    Private Declare PtrSafe Function SelectObject Lib "gdi32" (ByVal hDC As LongPtr, ByVal hObject As LongPtr) As LongPtr
-    Private Declare PtrSafe Function DeleteObject Lib "gdi32" (ByVal hObject As LongPtr) As Long
-    Private Declare PtrSafe Function GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
-#Else
-    Private Enum LongPtr
-        [_]
-    End Enum
-    Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hDC As LongPtr, ByVal nIndex As Long) As Long
-    Private Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hDC As LongPtr) As LongPtr
-    Private Declare Function DeleteDC Lib "gdi32" (ByVal hDC As LongPtr) As Long
-    Private Declare Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hDC As LongPtr, ByVal lpStr As LongPtr, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
-    Private Declare Function SetMapMode Lib "gdi32" (ByVal hDC As LongPtr, ByVal nMapMode As Long) As Long
-    Private Declare Function GetTextExtentPoint32 Lib "gdi32" Alias "GetTextExtentPoint32W" (ByVal hDC As LongPtr, ByVal lpsz As LongPtr, ByVal cbString As Long, lpSize As ComboboxListSize) As Long
-    Private Declare Function SelectObject Lib "gdi32" (ByVal hDC As LongPtr, ByVal hObject As LongPtr) As LongPtr
-    Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As LongPtr) As Long
-    Private Declare Function GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
-#End If
-
-#If Win64 Then
-    Private Const NULL_PTR = 0^
-#Else
-    Private Const NULL_PTR = 0&
-#End If
-
-Private Type ComboboxListSize
-    cx As Long
-    cy As Long
-End Type
-
-Private Type RECT
-    Left As Long
-    Top As Long
-    Right As Long
-    Bottom As Long
-End Type
-
-
-Public Function AutoSizeDropDown( _
-    ByVal ComboBox As MSForms.ComboBox, _
-    Optional ByVal JumpToWidestEntry As Boolean = False _
-) As Long
-
-    Const MM_TEXT = 1&
-    Const SM_CXVSCROLL = 2&
- 
-    Static bDropDownState As Boolean
-    Dim hMemDc As LongPtr
-    Dim hPrevFont As LongPtr
-    Dim IFont As stdole.IFont
-    Dim lPrevMPMode As Long
-    Dim lIndex As Long
-    Dim lMaxWidth As Long
-    Dim lMaxIndex As Long
-    Dim sItemText As String
-    Dim sWidestText As String
-    Dim tSize As ComboboxListSize
-
-    hMemDc = CreateCompatibleDC(NULL_PTR)
-    If hMemDc Then
-        lPrevMPMode = SetMapMode(hMemDc, MM_TEXT)
-        Set IFont = ComboBox.Font
-        hPrevFont = SelectObject(hMemDc, IFont.hFont)
-        With ComboBox
-            For lIndex = 0& To .ListCount - 1&
-                sItemText = .list(lIndex)
-                Call GetTextExtentPoint32(hMemDc, StrPtr(sItemText), Len(sItemText), tSize)
-                If lMaxWidth < tSize.cx Then
-                    lMaxWidth = tSize.cx
-                    sWidestText = sItemText
-                    lMaxIndex = lIndex
-                End If
-            Next lIndex
-            'Debug.Print lMaxIndex, sWidestText
-            AutoSizeDropDown = lMaxIndex
-            lMaxWidth = PXtoPT(hMemDc, lMaxWidth + 2.5 * GetSystemMetrics(SM_CXVSCROLL), False)
-            Call SetMapMode(hMemDc, lPrevMPMode)
-            Call SelectObject(hMemDc, hPrevFont)
-            Call DeleteDC(hMemDc)
-            .ListWidth = lMaxWidth
-            If JumpToWidestEntry Then
-                If bDropDownState = False Then
-                    .ListIndex = lMaxIndex
-                End If
-            End If
-            bDropDownState = Not bDropDownState
-        End With
-    End If
-
-End Function
-
-Private Function ScreenDPI(ByVal bVert As Boolean, ByVal hDC As LongPtr) As Long
-    Const LOGPIXELSX As Long = 88&
-    Const LOGPIXELSY As Long = 90&
-    Static lDPI(1&) As Long
-
-    If lDPI(0&) = 0& Then
-        lDPI(0&) = GetDeviceCaps(hDC, LOGPIXELSX)
-        lDPI(1&) = GetDeviceCaps(hDC, LOGPIXELSY)
-    End If
-    ScreenDPI = lDPI(Abs(bVert))
-End Function
-
-Private Function PXtoPT(ByVal hDC As LongPtr, ByVal Pixels As Single, ByVal bVert As Boolean) As Single
-    Const POINTSPERINCH As Long = 72&
-    PXtoPT = (Pixels / (ScreenDPI(bVert, hDC) / POINTSPERINCH))
-End Function
 '-------------------------------------------
 
 
 #If VBA7 Then
-    Function hWnd() As LongPtr
+    Function hwnd() As LongPtr
 #Else
-    Function hWnd() As Long
+    Function hwnd() As Long
 #End If
-    WindowFromAccessibleObject oForm, hWnd
+    WindowFromAccessibleObject oForm, hwnd
 End Function
-
 
 
 Public Sub Transition(ParamArray Elements() As Variant)
@@ -355,8 +248,8 @@ Rem By Robert Todaer
     Loop Until AllTransitionsComplete(CVar(Elements))
 End Sub
 
-Public Function Effect(obj As Object, Property As String, Destination As Double, MilSecs As Double) As Scripting.Dictionary
-    Dim Temp As New Scripting.Dictionary
+Public Function Effect(obj As Object, Property As String, Destination As Double, MilSecs As Double) As scripting.Dictionary
+    Dim Temp As New scripting.Dictionary
     Set Temp("obj") = obj
     Temp("property") = Property
     Temp("startValue") = CallByName(obj, Property, VbGet)
@@ -406,13 +299,13 @@ Private Function AllTransitionsComplete(Elements As Variant) As Boolean
     AllTransitionsComplete = True
 End Function
 
-Private Function TransitionComplete(ByVal el As Scripting.Dictionary) As Boolean
+Private Function TransitionComplete(ByVal el As scripting.Dictionary) As Boolean
     If Math.Round(el("destination")) = Math.Round(CallByName(el("obj"), el("property"), VbGet)) Then
         TransitionComplete = True
     End If
 End Function
 
-Private Function IncRementElement(ByVal el As Scripting.Dictionary, CurrentTime As Double) As Boolean
+Private Function IncRementElement(ByVal el As scripting.Dictionary, CurrentTime As Double) As Boolean
     '@INCLUDE TransitionComplete
     '@INCLUDE easeInAndOut
     Dim IncRementValue As Double
@@ -451,20 +344,39 @@ Private Function easeInAndOut(ByVal t As Double, ByVal b As Double, ByVal c As D
     End If
 End Function
 
+Public Sub Resizable()
+    Dim hWndForm As Long, iStyle As Long
+    If val(Application.version) < 9 Then
+        hWndForm = FindWindow("ThunderXFrame", oForm.Caption)
+    Else
+        hWndForm = FindWindow("ThunderDFrame", oForm.Caption)
+    End If
+    iStyle = GetWindowLong(hWndForm, GWL_STYLE)
+    iStyle = iStyle Or WS_THICKFRAME
+    SetWindowLong hWndForm, GWL_STYLE, iStyle
+    ShowWindow hWndForm, SW_SHOW
+    DrawMenuBar hWndForm
+    SetFocus hWndForm
+    
+    mdWidth = oForm.Width
+    mdHeight = oForm.Height
+    
+    Set DockResize = oForm
+    isResizable = True
+End Sub
 
+Public Sub DockResize_Layout()
+    DockControls
+End Sub
 
-Public Sub FormResize()
+Public Sub DockControls()
 '
 'from STEPHEN BULLEN's USERFORM RESIZER CLASS
 '
 ' _______IN USERFORM_________________
 '
-' Dim moResizer As New CFormResizer
-' Private Sub UserForm_Activate()
-'     Set moResizer.Form = Me
-' End Sub
 ' Private Sub UserForm_Resize()
-'     moResizer.FormResize
+'     auserform.init(me).DockControls
 ' End Sub
 '
 ' _______Instructions_______
@@ -489,7 +401,7 @@ Public Sub FormResize()
     dWidthAdj = oForm.Width - mdWidth
     dHeightAdj = oForm.Height - mdHeight
     For Each oCtl In oForm.Controls
-        If TypeName(oCtl) = "ListView4" Then Stop
+'        If TypeName(oCtl) = "ListView" Then Stop
         With oCtl
             sTag = UCase(.Tag)
             If InStr(1, sTag, "L", vbBinaryCompare) Then
@@ -515,7 +427,7 @@ Public Sub FormResize()
             If InStr(1, sTag, "T", vbBinaryCompare) Then .Top = .Top + dHeightAdj * ResizeFactor(sTag, "T")
             If InStr(1, sTag, "W", vbBinaryCompare) Then .Width = .Width + dWidthAdj * ResizeFactor(sTag, "W")
             If InStr(1, sTag, "H", vbBinaryCompare) Then .Height = .Height + dHeightAdj * ResizeFactor(sTag, "H")
-            
+
         End With
     Next
     mdWidth = oForm.Width
@@ -532,25 +444,6 @@ Private Function ResizeFactor(sTag As String, sChange As String)
     ResizeFactor = d
 End Function
 
-Public Sub Resizable()
-    Dim hWndForm As Long, iStyle As Long
-    If val(Application.version) < 9 Then
-        hWndForm = FindWindow("ThunderXFrame", oForm.Caption)
-    Else
-        hWndForm = FindWindow("ThunderDFrame", oForm.Caption)
-    End If
-    iStyle = GetWindowLong(hWndForm, GWL_STYLE)
-    iStyle = iStyle Or WS_THICKFRAME
-    SetWindowLong hWndForm, GWL_STYLE, iStyle
-    ShowWindow hWndForm, SW_SHOW
-    DrawMenuBar hWndForm
-    SetFocus hWndForm
-    mdWidth = oForm.Width
-    mdHeight = oForm.Height
-End Sub
-
-
-
 Public Function Init(Form As Object) As aUserform
     Set oForm = Form
     Set Init = Me
@@ -560,23 +453,20 @@ Private Sub Class_Initialize()
 'do something
 End Sub
 
-
-
-
 'Function GetUserformHwnd(Form As Object)
 '    GetUserformHwnd = FindWindow(vbNullString, Form.Caption)
 'End Function
 
-Public Sub Transparent(Optional Color As Variant)
+Public Sub TRANSPARENT(Optional color As Variant)
     '@INCLUDE MakeFormBorderless
     Dim formhandle As Long
     Dim bytOpacity As Byte
     formhandle = CLng(FindWindow(vbNullString, oForm.Caption))
-    If IsMissing(Color) Then Color = vbWhite
+    If IsMissing(color) Then color = vbWhite
     bytOpacity = 100
     SetWindowLong formhandle, GWL_EXSTYLE, GetWindowLong(formhandle, GWL_EXSTYLE) Or WS_EX_LAYERED
-    oForm.BackColor = Color
-    SetLayeredWindowAttributes formhandle, Color, bytOpacity, LWA_COLORKEY
+    oForm.BackColor = color
+    SetLayeredWindowAttributes formhandle, color, bytOpacity, LWA_COLORKEY
 End Sub
 
 Public Sub Borderless()
@@ -620,7 +510,7 @@ Sub ParentIsVBE()
         Dim ReturnOfSetParentAPI As Long
     #End If
     Dim ErrorNumber As Long
-    VBEWindowPointer = Application.VBE.MainWindow.hWnd
+    VBEWindowPointer = Application.VBE.MainWindow.hwnd
     UserFormWindowPointer = FindWindow(lpClassName:=USERFORM_WINDOW_CLASS, lpWindowName:=GivenFormCaption)
     Const ERROR_NUMBER_FOR_SETPARENT_API = 0
     ReturnOfSetParentAPI = SetParent(hwndChild:=UserFormWindowPointer, hWndNewParent:=VBEWindowPointer)
@@ -701,29 +591,28 @@ End Function
 
 Public Sub MinimizeButton()
     Dim cap     As String:  cap = oForm.Caption
-    Dim hWnd    As Long:    hWnd = FindWindowA(vbNullString, cap)
-    Dim exLong  As Long:    exLong = GetWindowLongA(hWnd, -16)
+    Dim hwnd    As Long:    hwnd = FindWindowA(vbNullString, cap)
+    Dim exLong  As Long:    exLong = GetWindowLongA(hwnd, -16)
     
-    If (exLong And &H20000) = 0 Then SetWindowLongA hWnd, -16, exLong Or &H20000
+    If (exLong And &H20000) = 0 Then SetWindowLongA hwnd, -16, exLong Or &H20000
 End Sub
 
 Public Sub SaveOptions( _
-                Optional includeCheckbox As Boolean = True, _
-                Optional includeOptionButton As Boolean = True, _
-                Optional includeTextBox As Boolean = True, _
-                Optional includeListbox As Boolean = True, _
-                Optional includeToggleButton As Boolean = True, _
-                Optional includeCombobox As Boolean = True)
-    Dim ws As Worksheet
-    Set ws = CreateOrSetSheet(oForm.Name & "_Settings", ThisWorkbook)
-    ws.Cells.clear
-    Dim coll As New Collection
-    Dim cell As Range
-    Set cell = ws.Cells(1, 1)
+    Optional includeCheckbox As Boolean = True, _
+    Optional includeOptionButton As Boolean = True, _
+    Optional includeTextBox As Boolean = True, _
+    Optional includeListbox As Boolean = True, _
+    Optional includeToggleButton As Boolean = True, _
+    Optional includeCombobox As Boolean = True)
+                
+    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\configurations\"
+    FoldersCreate configFolder
+    Dim iniFile As String: iniFile = configFolder & "UserformSettings.ini"
+    Dim Key, Value
     Dim c As MSForms.control
     For Each c In oForm.Controls
         If TypeName(c) Like "CheckBox" Then
-            If Not includeCheckbox Then GoTo SKIP
+         If Not includeCheckbox Then GoTo SKIP
         ElseIf TypeName(c) Like "OptionButton" Then
             If Not includeOptionButton Then GoTo SKIP
         ElseIf TypeName(c) Like "TextBox" Then
@@ -737,97 +626,195 @@ Public Sub SaveOptions( _
         Else
             GoTo SKIP
         End If
-        cell = c.Name
+        Key = c.Name
+        Dim coll As New Collection
         Select Case TypeName(c)
         Case "TextBox", "CheckBox", "OptionButton", "ToggleButton", "ComboBox"
-            cell.OFFSET(0, 1) = c.Value
+            IniWrite iniFile, oForm.Name, Key, c.Value
         Case "ListBox"
             Set coll = aListBox.Init(c).selectedIndexes
-            If coll.Count > 0 Then
-                cell.OFFSET(0, 1) = aCollection.Init(coll).ToString(",")
+            If coll.count > 0 Then
+                IniWrite iniFile, oForm.Name, Key, aCollection.Init(coll).ToString(",")
             Else
-                cell.OFFSET(0, 1) = -1
+                IniWrite iniFile, oForm.Name, Key, -1
             End If
         End Select
-        Set cell = cell.OFFSET(1, 0)
 SKIP:
     Next
+    
+'=== OBSOLETE
+'
+'    Dim ws As Worksheet
+'    Set ws = CreateOrSetSheet(oForm.Name & "_Settings", ThisWorkbook)
+'    ws.Cells.Clear
+'    Dim coll As New Collection
+'    Dim cell As Range
+'    Set cell = ws.Cells(1, 1)
+'    Dim c As MSForms.control
+'    For Each c In oForm.Controls
+'        If TypeName(c) Like "CheckBox" Then
+'            If Not includeCheckbox Then GoTo SKIP
+'        ElseIf TypeName(c) Like "OptionButton" Then
+'            If Not includeOptionButton Then GoTo SKIP
+'        ElseIf TypeName(c) Like "TextBox" Then
+'            If Not includeTextBox Then GoTo SKIP
+'        ElseIf TypeName(c) = "ListBox" Then
+'            If Not includeListbox Then GoTo SKIP
+'        ElseIf TypeName(c) Like "ToggleButton" Then
+'            If Not includeToggleButton Then GoTo SKIP
+'        ElseIf TypeName(c) Like "ComboBox" Then
+'            If Not includeCombobox Then GoTo SKIP
+'        Else
+'            GoTo SKIP
+'        End If
+'        cell = c.Name
+'        Select Case TypeName(c)
+'        Case "TextBox", "CheckBox", "OptionButton", "ToggleButton", "ComboBox"
+'            cell.OFFSET(0, 1) = c.Value
+'        Case "ListBox"
+'            Set coll = aListBox.Init(c).selectedIndexes
+'            If coll.count > 0 Then
+'                cell.OFFSET(0, 1) = aCollection.Init(coll).ToString(",")
+'            Else
+'                cell.OFFSET(0, 1) = -1
+'            End If
+'        End Select
+'        Set cell = cell.OFFSET(1, 0)
+'SKIP:
+'    Next
 End Sub
 
-Public Sub LoadOptions(Optional ExcludeThese As Variant)
-'ExcludeThese:=array("ListBox1","TextBox1")     '<--control names
-    Dim ws As Worksheet
-    Set ws = CreateOrSetSheet(oForm.Name & "_Settings", ThisWorkbook)
-    If ws.Range("A1") = "" Then Exit Sub
-    Dim cell As Range
-    Set cell = ws.Cells(1, 1)
+Public Sub LoadOptions(ParamArray ExcludeThese() As Variant)
+'ExcludeThese:="ListBox1","TextBox1"     '<--control names
+    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\configurations\"
+    FoldersCreate configFolder
+    Dim iniFile As String: iniFile = configFolder & "UserformSettings.ini"
+    If Not FileExists(iniFile) Then TxtOverwrite iniFile, ""
+    Dim Key, Value
     Dim c As MSForms.control
-    Dim v
+    Dim keyArray: keyArray = IniSectionKeys(iniFile, oForm.Name)
+    If Not ArrayAllocated(keyArray) Then Exit Sub
+    For Each Key In keyArray
     On Error Resume Next
-    Do While cell <> ""
-        Set c = oForm.Controls(cell.TEXT)
+        Set c = oForm.Controls(Key)
+        Value = IniReadKey(iniFile, oForm.Name, Key)
         If Not TypeName(c) = "Nothing " Then
-            If Not ArrayContains(cell, ExcludeThese) Then
+            If Not ArrayContains(Key, ExcludeThese) Then
                 Select Case TypeName(c)
                 Case "TextBox", "CheckBox", "OptionButton", "ToggleButton", "ComboBox"
-                    c.Value = cell.OFFSET(0, 1)
+                    c.Value = Value
                 Case "ListBox"
-                    If InStr(1, cell.OFFSET(0, 1), ",") > 0 Then
-                        aListBox.Init(c).SelectItems Split(cell.OFFSET(0, 1), ","), True
+                    If InStr(1, Value, ",") > 0 Then
+                        aListBox.Init(c).SelectItems Split(Value, ","), True
                     Else
-                        c.SELECTED(CInt(cell.OFFSET(0, 1))) = True
+                        c.Selected(CInt(Value)) = True
                     End If
                 End Select
             End If
         End If
-        Set cell = cell.OFFSET(1, 0)
-    Loop
+    Next
+
+'=== OBSOLETE
+'
+'    Dim ws As Worksheet
+'    Set ws = CreateOrSetSheet(oForm.Name & "_Settings", ThisWorkbook)
+'    If ws.Range("A1") = "" Then Exit Sub
+'    Dim cell As Range
+'    Set cell = ws.Cells(1, 1)
+'    Dim c As MSForms.control
+'    Dim v
+'    On Error Resume Next
+'    Do While cell <> ""
+'        Set c = oForm.Controls(cell.TEXT)
+'        If Not TypeName(c) = "Nothing " Then
+'            If Not ArrayContains(cell, ExcludeThese) Then
+'                Select Case TypeName(c)
+'                Case "TextBox", "CheckBox", "OptionButton", "ToggleButton", "ComboBox"
+'                    c.Value = cell.OFFSET(0, 1)
+'                Case "ListBox"
+'                    If InStr(1, cell.OFFSET(0, 1), ",") > 0 Then
+'                        aListBox.Init(c).SelectItems Split(cell.OFFSET(0, 1), ","), True
+'                    Else
+'                        c.Selected(CInt(cell.OFFSET(0, 1))) = True
+'                    End If
+'                End Select
+'            End If
+'        End If
+'        Set cell = cell.OFFSET(1, 0)
+'    Loop
 End Sub
 
 Public Sub SavePosition()
-    SaveSetting "My Settings Folder", oForm.Name, "Left Position", oForm.Left
-    SaveSetting "My Settings Folder", oForm.Name, "Top Position", oForm.Top
+    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\configurations\"
+    FoldersCreate configFolder
+    Dim iniFile As String: iniFile = configFolder & "UserformSettings.ini"
+    IniWrite iniFile, oForm.Name, "StartupTop", oForm.Top
+    IniWrite iniFile, oForm.Name, "StartupLeft", oForm.Left
+        
+'=== OBSOLETE
+'    SaveSetting "My Settings Folder", oForm.Name, "Left Position", oForm.Left
+'    SaveSetting "My Settings Folder", oForm.Name, "Top Position", oForm.Top
 End Sub
 
 Public Sub LoadPosition()
-    If GetSetting("My Settings Folder", oForm.Name, "Left Position") = "" _
-        And GetSetting("My Settings Folder", oForm.Name, "Top Position") = "" Then
-        oForm.StartUpPosition = 1
+    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\configurations\"
+    FoldersCreate configFolder
+    Dim iniFile As String: iniFile = configFolder & "UserformSettings.ini"
+    If Not FileExists(iniFile) Then TxtOverwrite iniFile, ""
+    Dim myLeft, myTop
+    myLeft = IniReadKey(iniFile, oForm.Name, "StartupLeft")
+    myTop = IniReadKey(iniFile, oForm.Name, "StartupTop")
+    If myLeft = "" Or myTop = "" Then
+        oForm.startupposition = 1
     Else
-        oForm.Left = GetSetting("My Settings Folder", oForm.Name, "Left Position")
-        oForm.Top = GetSetting("My Settings Folder", oForm.Name, "Top Position")
+        oForm.startupposition = 0
+        oForm.Top = myTop
+        oForm.Left = myLeft
     End If
+    
+'Setting         Value   Description
+'Manual          0       No initial setting specified.
+'CenterOwner     1       Center on the item to which the UserForm belongs.
+'CenterScreen    2       Center on the whole screen.
+'WindowsDefault  3       Position in upper-left corner of screen.
+
+'=== OBSOLETE
+'    If GetSetting("My Settings Folder", oForm.Name, "Left Position") = "" _
+'        And GetSetting("My Settings Folder", oForm.Name, "Top Position") = "" Then
+'        oForm.startupposition = 1
+'    Else
+'        oForm.Left = GetSetting("My Settings Folder", oForm.Name, "Left Position")
+'        oForm.Top = GetSetting("My Settings Folder", oForm.Name, "Top Position")
+'    End If
 End Sub
 
-Public Sub ResizeToFitControls()
+Public Sub ResizeToFitControls(Optional marginRight = 0, Optional marginBottom = 0)
     oForm.Width = 0
     oForm.Height = 0
     Dim ctr As MSForms.control
-    Dim myWidth:    myWidth = oForm.InsideWidth
-    Dim myHeight:   myHeight = oForm.InsideHeight
+    Dim myWidth:    myWidth = 0 'oForm.InsideWidth
+    Dim myHeight:   myHeight = 0 'oForm.InsideHeight
     For Each ctr In oForm.Controls
-        If ctr.Visible = True Then
-            If ctr.Left + ctr.Width > myWidth Then myWidth = ctr.Left + ctr.Width
-            If ctr.Top + ctr.Height > myHeight Then myHeight = ctr.Top + ctr.Height
+        If ctr.Parent.Name = oForm.Name Then
+            If ctr.Visible = True Then
+                If ctr.Left + ctr.Width > myWidth Then myWidth = ctr.Left + ctr.Width
+                If ctr.Top + ctr.Height > myHeight Then myHeight = ctr.Top + ctr.Height
+            End If
         End If
     Next
-    oForm.Width = myWidth + oForm.Width - oForm.InsideWidth + 50
-    oForm.Height = myHeight + oForm.Height - oForm.InsideHeight + 10
+    oForm.Width = myWidth + (oForm.Width - oForm.InsideWidth) + marginRight
+    oForm.Height = myHeight + (oForm.Height - oForm.InsideHeight) + marginBottom
 End Sub
 
 
-
-
-
-
-Public Sub MouseOnControl(Ctrl As Object)
+Public Sub MouseOnControl(ctrl As Object)
     '@INCLUDE PointsPerPixelX
     '@INCLUDE PointsPerPixelY
     Dim P As tCursor
     Dim lngHwnd As Long
     lngHwnd = CLng(FindWindow(vbNullString, oForm.Caption))
-    P.Left = (Ctrl.Left + (Ctrl.Width \ 2)) / PointsPerPixelX
-    P.Top = (Ctrl.Top + (Ctrl.Height \ 2)) / PointsPerPixelY
+    P.Left = (ctrl.Left + (ctrl.Width \ 2)) / PointsPerPixelX
+    P.Top = (ctrl.Top + (ctrl.Height \ 2)) / PointsPerPixelY
     ClientToScreen lngHwnd, P
     SetCursorPos P.Left, P.Top
 End Sub

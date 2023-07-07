@@ -7,6 +7,21 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+'* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+'* Class      : aModules
+'* Author     : Anastasiou Alex
+'* Contacts   : AnastasiouAlex@gmail.com
+'*
+'* BLOG       : https://alexofrhodes.github.io/
+'* GITHUB     : https://github.com/alexofrhodes/
+'* YOUTUBE    : https://www.youtube.com/channel/UC5QH3fn1zjx0aUjRER_rOjg
+'* VK         : https://vk.com/video/playlist/735281600_1
+'*
+'* Modified   : Date and Time       Author              Description
+'* Created    : 29-06-2023 13:46    Alex
+'* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 Option Explicit
 Private ModuleCollection As Collection
 Private oWorkbook As Workbook
@@ -176,7 +191,7 @@ Sub ImportPaths(ReplaceExisting As Boolean, ParamArray Paths() As Variant)
     Dim TargetName         As String
     Dim element
     
-    Dim pass As Boolean
+    Dim PASS As Boolean
     For Each element In Paths
         Select Case True
         Case element Like "*.cls", "*.frm", "*.bas", "*.bas"
@@ -270,7 +285,7 @@ Sub SideBySide(ParamArray TwoModuleNamesOrOneFormName() As Variant)
     Dim Module2 As VBComponent
     Set Module1 = oWorkbook.VBProject.VBComponents(TwoModuleNamesOrOneFormName(0))
     If UBound(TwoModuleNamesOrOneFormName) > 0 Then Set Module2 = oWorkbook.VBProject.VBComponents(TwoModuleNamesOrOneFormName(1))
-    With Module1.CodeModule.Codepane.Window
+    With Module1.CodeModule.CodePane.Window
         .Width = 800
         .Left = 1
         .Top = 1
@@ -280,7 +295,7 @@ Sub SideBySide(ParamArray TwoModuleNamesOrOneFormName() As Variant)
         .SetFocus
     End With
     If Not Module2 Is Nothing Then
-        With Module2.CodeModule.Codepane.Window
+        With Module2.CodeModule.CodePane.Window
             .Width = 800
             .Left = 800
             .Top = 1
@@ -370,8 +385,8 @@ Private Sub ExportModules()
 End Sub
 
 Private Sub ImportModules()
-    Dim objFSO        As Scripting.FileSystemObject
-    Dim objFile       As Scripting.File
+    Dim objFSO        As scripting.FileSystemObject
+    Dim objFile       As scripting.File
     Dim szImportPath  As String
     Dim szFileName    As String
     Dim cmpComponents As VBIDE.VBComponents
@@ -385,8 +400,8 @@ Private Sub ImportModules()
         Exit Sub
     End If
     szImportPath = FolderWithVBAProjectFiles & "\"
-    Set objFSO = New Scripting.FileSystemObject
-    If objFSO.getFolder(szImportPath).Files.Count = 0 Then
+    Set objFSO = New scripting.FileSystemObject
+    If objFSO.getFolder(szImportPath).Files.count = 0 Then
         MsgBox "There are no files to import"
         Exit Sub
     End If

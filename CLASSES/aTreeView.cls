@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-'* Module     : aTreeView
+'* Class      : aTreeView
 '* Author     : Anastasiou Alex
 '* Contacts   : AnastasiouAlex@gmail.com
 '*
@@ -62,7 +62,7 @@ End Function
 Public Sub RemoveEmpty(ColumnLevel As Long)
     Dim i As Long
     Dim nod As Node
-    For i = TV.Nodes.Count To 1 Step -1
+    For i = TV.Nodes.count To 1 Step -1
         Set nod = TV.Nodes(i)
         If GetLevel(nod) = ColumnLevel Then
             If nod.Children = 0 Then
@@ -82,7 +82,7 @@ Public Sub FilterTV(txtLike As String, MatchCase As Boolean)
 
     Dim var
     var = ArrayFilterLike(TreeviewArrayPaths(TV), txtLike, MatchCase)
-    clear
+    Clear
     Dim element
     Dim nod As Node
     On Error Resume Next
@@ -114,7 +114,7 @@ Public Function ColumnCount()
 End Function
 
 Public Function RowCount()
-    RowCount = TV.Nodes.Count
+    RowCount = TV.Nodes.count
 End Function
 
 '* Modified   : Date and Time       Author              Description
@@ -128,7 +128,7 @@ Function ToArray() As Variant
 
    On Error GoTo Catch
 
-   If TV.Nodes.Count = 0 Then
+   If TV.Nodes.count = 0 Then
       MsgBox "No nodes to export...", vbExclamation, "Nothing to do"
       Stop
    End If
@@ -189,7 +189,7 @@ Public Function TreeviewArrayPaths() As Variant  '1d
 
    On Error GoTo Catch
 
-   If TV.Nodes.Count = 0 Then
+   If TV.Nodes.count = 0 Then
       MsgBox "No nodes to export...", vbExclamation, "Nothing to do"
       Stop
    End If
@@ -240,14 +240,14 @@ End Sub
 
 Public Sub SelectNextNode()
     If Not TV.SelectedItem.child Is Nothing Then
-        TV.SelectedItem.child.SELECTED = True
+        TV.SelectedItem.child.Selected = True
     ElseIf Not TV.SelectedItem.Next Is Nothing Then
-        TV.SelectedItem.Next.SELECTED = True
+        TV.SelectedItem.Next.Selected = True
     Else
         If Not TV.SelectedItem.Parent.Next Is Nothing Then
-            TV.SelectedItem.Parent.Next.SELECTED = True
+            TV.SelectedItem.Parent.Next.Selected = True
         Else
-            TV.SelectedItem.Parent.Parent.Next.SELECTED = True
+            TV.SelectedItem.Parent.Parent.Next.Selected = True
         End If
     End If
 End Sub
@@ -255,15 +255,15 @@ End Sub
 Public Sub SelectPreviousNode()
     If Not TV.SelectedItem.Previous Is Nothing Then
         If Not TV.SelectedItem.Previous.child Is Nothing Then
-            TV.SelectedItem.Previous.child.LastSibling.SELECTED = True
+            TV.SelectedItem.Previous.child.LastSibling.Selected = True
             Do While Not TV.SelectedItem.child Is Nothing
-                TV.SelectedItem.child.LastSibling.SELECTED = True
+                TV.SelectedItem.child.LastSibling.Selected = True
             Loop
         Else
-            TV.SelectedItem.Previous.SELECTED = True
+            TV.SelectedItem.Previous.Selected = True
         End If
     ElseIf Not TV.SelectedItem.Parent Is Nothing Then
-        TV.SelectedItem.Parent.SELECTED = True
+        TV.SelectedItem.Parent.Selected = True
     End If
 End Sub
 
@@ -271,7 +271,7 @@ Public Sub SelectNodes(SingleSelect As Boolean, lvl1crit As String, Optional Cri
     Dim nd As Node
     For Each nd In TV.Nodes
         If nd.TEXT = lvl1crit Then
-            nd.SELECTED = True
+            nd.Selected = True
             nd.Expanded = True
             If SingleSelect = True Then Exit For
         End If
@@ -281,9 +281,9 @@ Public Sub SelectNodes(SingleSelect As Boolean, lvl1crit As String, Optional Cri
     Dim crit
     Dim i As Long
     For Each crit In CriteriaByLevel
-        For i = x To TV.Nodes.Count
+        For i = x To TV.Nodes.count
             If TV.Nodes.item(i).TEXT = crit Then
-                TV.Nodes.item(i).SELECTED = True
+                TV.Nodes.item(i).Selected = True
                 TV.Nodes.item(i).Expanded = True
                 If SingleSelect = True Then Exit For
             End If
@@ -297,7 +297,7 @@ Public Sub ApplyStandardStyle()
         .Sorted = False
         .Appearance = ccFlat
         .LineStyle = tvwRootLines
-        .Style = tvwTreelinesPlusMinusPictureText
+        .style = tvwTreelinesPlusMinusPictureText
         .Font.Size = 10
         .indentation = 2
     End With
@@ -305,7 +305,7 @@ End Sub
 
 Sub ExpandAll()
     Dim i As Long
-    For i = 1 To TV.Nodes.Count
+    For i = 1 To TV.Nodes.count
         TV.Nodes(i).Expanded = True
     Next
 End Sub
@@ -313,14 +313,14 @@ End Sub
 Sub CollapseAll()
 
     Dim i As Long
-    For i = 1 To TV.Nodes.Count
+    For i = 1 To TV.Nodes.count
         TV.Nodes(i).Expanded = False
     Next
 End Sub
 
-Sub clear()
+Sub Clear()
     Dim i As Long
-    For i = TV.Nodes.Count To 1 Step -1
+    For i = TV.Nodes.count To 1 Step -1
         TV.Nodes.Remove i
     Next
 End Sub
@@ -355,7 +355,7 @@ Sub LoadRange( _
                 ClearPreviousNodes As Boolean, _
                 Expanded As Boolean)
     Rem example use
-    Rem    TreeviewPopulateFromRange me.Treeview1,thisworkbook.sheets("TreeviewHierarchy").range("A1"),true,false
+    Rem    LoadRange me.Treeview1,thisworkbook.sheets("TreeviewHierarchy").range("A1"),true,false
     Rem example of sheet structure
     Rem  |1|2|3
     Rem 1|A| |
@@ -371,10 +371,10 @@ Sub LoadRange( _
     On Error Resume Next
     Dim childRange As Range
     Set childRange = FirstCell.CurrentRegion.OFFSET(0, 1)
-    Set childRange = childRange.RESIZE(, childRange.Columns.Count - 1)
+    Set childRange = childRange.Resize(, childRange.Columns.count - 1)
     Set childRange = childRange.SpecialCells(xlCellTypeConstants)
     With TV
-        If ClearPreviousNodes = True Then .Nodes.clear
+        If ClearPreviousNodes = True Then .Nodes.Clear
         For Each c In FirstCell.Parent.Columns(FirstCell.Column).SpecialCells(xlCellTypeConstants)
             Set nP = .Nodes.Add(, , c.Address, c.Value)
         Next
@@ -394,12 +394,11 @@ Sub LoadRange( _
             End If
         Next
         With .Nodes(FirstCell.Address)
-            .SELECTED = True
+            .Selected = True
             .EnsureVisible
         End With
     End With
 End Sub
-
 
 Public Sub LoadTreeArray( _
                     arr, _
@@ -410,10 +409,10 @@ Public Sub LoadTreeArray( _
     Application.DisplayAlerts = False
     Dim tmpSheet As Worksheet
     Set tmpSheet = CreateOrSetSheet("TempOps", ThisWorkbook)
-    tmpSheet.Cells.clear
+    tmpSheet.Cells.Clear
     ArrayToRange2D arr, tmpSheet.Cells(1, 1)
     LoadRange tmpSheet.Cells(1, 1), ClearPreviousNodes, Expanded
-''    tmpSheet.Delete
+    tmpSheet.Delete
     
     Application.ScreenUpdating = True
     Application.DisplayAlerts = True
@@ -444,7 +443,7 @@ Sub LoadVBProjects()
                     Next
                 End If
             End If
-            Err.clear
+            Err.Clear
         Next y
     Next x
 End Sub
@@ -459,7 +458,7 @@ Sub ActivateProjectElement()
             On Error Resume Next
             Set Module = Workbooks(.Parent.TEXT).VBProject.VBComponents(.TEXT)
             On Error GoTo 0
-            If Module Is Nothing Then Set Module = Workbooks(.Parent.TEXT).VBProject.VBComponents(Workbooks(.Parent.TEXT).SHEETS(.TEXT).codeName)
+            If Module Is Nothing Then Set Module = Workbooks(.Parent.TEXT).VBProject.VBComponents(Workbooks(.Parent.TEXT).Sheets(.TEXT).codeName)
             aModule.Init(Module).Activate
         End With
     Case Is = 3
@@ -468,12 +467,12 @@ Sub ActivateProjectElement()
         Set Module = Workbooks(.Parent.Parent.TEXT).VBProject.VBComponents(.Parent.TEXT)
         On Error GoTo 0
         If Module Is Nothing Then Set Module = _
-            Workbooks(.Parent.Parent.TEXT).VBProject.VBComponents(Workbooks(.Parent.Parent.TEXT).SHEETS(.Parent.TEXT).codeName)
+            Workbooks(.Parent.Parent.TEXT).VBProject.VBComponents(Workbooks(.Parent.Parent.TEXT).Sheets(.Parent.TEXT).codeName)
             aModule.Init(Module).Activate
             For i = 1 To Module.CodeModule.CountOfLines
                 If InStr(1, Module.CodeModule.Lines(i, 1), "Sub " & .TEXT) > 0 Or _
                     InStr(1, Module.CodeModule.Lines(i, 1), "Function " & .TEXT) > 0 Then
-                    Module.CodeModule.Codepane.SetSelection i, 1, i, 1
+                    Module.CodeModule.CodePane.SetSelection i, 1, i, 1
                     Exit Sub
                 End If
             Next
@@ -485,7 +484,7 @@ Sub ActivateProjectElement()
             DoEvents
             For i = 1 To Module.CodeModule.CountOfLines
                 If Trim(Module.CodeModule.Lines(i, 1)) = .TEXT Then
-                    Module.CodeModule.Codepane.SetSelection i, 1, i, 1
+                    Module.CodeModule.CodePane.SetSelection i, 1, i, 1
                     Exit Sub
                 End If
             Next
@@ -529,7 +528,7 @@ Public Sub FindCodeEverywhere(F As String)
                     End If
                 End If
             End If
-            Err.clear
+            Err.Clear
         Next y
     Next x
 End Sub
@@ -557,11 +556,11 @@ Sub TreeviewAssignProjectImages()
     Dim i As Long
     Dim Module As VBComponent
     Dim TargetWorkbook As Workbook
-    For i = 1 To TV.Nodes.Count
+    For i = 1 To TV.Nodes.count
         Select Case GetLevel(TV.Nodes.item(i))
         Case 1
             If InStr(1, TV.Nodes.item(i).TEXT, ".") = 0 Then GoTo SKIP
-            TV.Nodes.item(i).image = tvImages.tvProject
+            TV.Nodes.item(i).Image = tvImages.tvProject
         Case 2
             Set TargetWorkbook = Workbooks(TV.Nodes.item(i).Parent.TEXT)
             If InStr(1, TargetWorkbook.Name, ".") = 0 Then GoTo SKIP
@@ -575,66 +574,21 @@ Sub TreeviewAssignProjectImages()
             End If
             Select Case aModule.Init(Module).TypeToString
             Case "Document"
-                TV.Nodes.item(i).image = tvImages.tvSheet
+                TV.Nodes.item(i).Image = tvImages.tvSheet
             Case "UserForm"
-                TV.Nodes.item(i).image = tvImages.tvForm
+                TV.Nodes.item(i).Image = tvImages.tvForm
             Case "Module"
-                TV.Nodes.item(i).image = tvImages.tvModule
+                TV.Nodes.item(i).Image = tvImages.tvModule
             Case "Class"
-                TV.Nodes.item(i).image = tvImages.tvClass
+                TV.Nodes.item(i).Image = tvImages.tvClass
             End Select
         Case 3
-            TV.Nodes.item(i).image = tvImages.tvMacro
+            TV.Nodes.item(i).Image = tvImages.tvMacro
         Case 4
-            TV.Nodes.item(i).image = tvImages.tvText
+            TV.Nodes.item(i).Image = tvImages.tvText
         End Select
 SKIP:
     Next i
 End Sub
 
 
-
-'Private Sub ListViewControl_OLEDragDrop(Data As MSComctlLib.DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
-'    Dim dbBefore As Long: dbBefore = ListBox1.ListCount
-'    Dim FileFullPath As String
-'    Dim fileItem As Long
-'    Dim objFSO As scripting.FileSystemObject
-'    Dim objTopFolder As scripting.Folder
-'    Set objFSO = CreateObject("Scripting.FileSystemObject")
-'    Dim var As Variant, element As Variant
-'    For fileItem = 1 To Data.Files.Count
-'        FileFullPath = Data.Files(fileItem)
-'        If oLogFiles = True Then
-'            If LCase(IsFileFolderURL(FileFullPath)) = "f" Then
-'                var = Split(TextBox2.TEXT, ",")
-'                On Error Resume Next
-'                If Left(Mid(FileFullPath, InStrRev(FileFullPath, "\") + 1), 1) <> "~" And (var(0) = "*" Or var(0) = "") Then GoTo PASS
-'                For Each element In var
-'                    If InStr(1, FileFullPath, element, vbTextCompare) > 0 And Left(Mid(FileFullPath, InStrRev(FileFullPath, "\") + 1), 1) <> "~" Then
-'PASS:
-'                        If Not aListBox.Init(ListBox1).Contains(FileFullPath) Then
-'                            AddToListBox ListBox1, FileFullPath
-'                        End If
-'                    End If
-'                Next
-'            Else        'if drag dropped folder
-'                Set objTopFolder = objFSO.getFolder(FileFullPath)
-'                FileRecursive objTopFolder, oSearchInSubfolders.Value
-'            End If
-'        End If
-'        If oLogFolders = True Then
-'            If UCase(IsFileFolderURL(FileFullPath)) = "D" Then
-'                Set objTopFolder = objFSO.getFolder(FileFullPath)
-'                If Not aListBox.Init(ListBox1).Contains(objTopFolder.Path & "\") Then
-'                    AddToListBox ListBox1, objTopFolder.Path
-'                End If
-'                FolderRecursive objTopFolder, oSearchInSubfolders.Value
-'            End If
-'        End If
-'    Next fileItem
-'
-'    If ListBox1.ListCount - dbBefore > 0 Then ListboxToDatabaseSheet
-'
-'    Set objFSO = Nothing
-'    Set objTopFolder = Nothing
-'End Sub

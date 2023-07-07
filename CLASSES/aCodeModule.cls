@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-'* Module     : aCodeModule
+'* Class      : aCodeModule
 '* Author     : Anastasiou Alex
 '* Contacts   : AnastasiouAlex@gmail.com
 '*
@@ -21,7 +21,6 @@ Attribute VB_Exposed = False
 '* Modified   : Date and Time       Author              Description
 '* Created    : 04-05-2023 12:17    Alex
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
 
 Option Explicit
 
@@ -70,7 +69,7 @@ End Sub
 Private Sub AssignVariables()
 
     Dim startLine As Long, StartColumn As Long, endLine As Long, EndColumn As Long
-    cm.Codepane.GetSelection startLine, StartColumn, endLine, EndColumn
+    cm.CodePane.GetSelection startLine, StartColumn, endLine, EndColumn
     
     ColumnFirst = StartColumn
     ColumnLast = EndColumn
@@ -209,7 +208,7 @@ Sub DimMerge()
 End Sub
 
 Public Sub SetSelection(startLine As Long, StartColumn As Long, endLine As Long, EndColumn As Long)
-    cm.Codepane.SetSelection startLine, StartColumn, endLine, EndColumn
+    cm.CodePane.SetSelection startLine, StartColumn, endLine, EndColumn
     AssignVariables
 End Sub
 
@@ -286,7 +285,7 @@ End Function
 Function CopyTemplateFromSheet(Template As String)
     Dim cell As Range
     Dim ws As Worksheet
-    Set ws = ThisWorkbook.SHEETS("Templates")
+    Set ws = ThisWorkbook.Sheets("Templates")
     On Error Resume Next
     Set cell = ws.Columns(1).SpecialCells(xlCellTypeConstants).Find(Template, LookAt:=xlWhole)
     On Error GoTo 0
@@ -296,7 +295,7 @@ End Function
 
 Sub InjectTemplateFromSheet(Template As String)
     If Len(Selection) > 0 Then Exit Sub
-    Dim ws As Worksheet: Set ws = ThisWorkbook.SHEETS("Templates")
+    Dim ws As Worksheet: Set ws = ThisWorkbook.Sheets("Templates")
     Dim cell As Range
     On Error Resume Next
     Set cell = ws.Columns(1).SpecialCells(xlCellTypeConstants).Find(Template, LookAt:=xlWhole)
@@ -368,13 +367,13 @@ Private Function StringToVBA7() As String
   
 End Function
 
-Public Sub Substitute(oldValue As String, NewValue As String, Optional Count As Long = -1)
+Public Sub Substitute(oldValue As String, NewValue As String, Optional count As Long = -1)
     Dim str           As String: str = Selection
     Dim lastRowLength As Long
         lastRowLength = 1 + Len(Replace(Split(str, vbNewLine)(UBound(Split(str, vbNewLine))), oldValue, NewValue))
     Dim Code          As String
     Code = SelectionBefore & _
-           Replace(str, oldValue, NewValue, , Count, vbTextCompare) & _
+           Replace(str, oldValue, NewValue, , count, vbTextCompare) & _
            SelectionAfter
     cm.DeleteLines RowFirst, RowCount
     cm.InsertLines RowFirst, Code
@@ -748,7 +747,7 @@ Sub Comment()
     For i = RowFirst To RowLast
         CommentTargetLine i
     Next
-    oModule.CodeModule.Codepane.SetSelection RowFirst, 1, RowLast, 1000
+    oModule.CodeModule.CodePane.SetSelection RowFirst, 1, RowLast, 1000
 End Sub
 
 Public Sub CommentTargetLine(targetLine As Long)
@@ -763,7 +762,7 @@ Sub UnComment()
     For i = RowFirst To RowLast
         UncommentTargetLine i
     Next
-    oModule.CodeModule.Codepane.SetSelection RowFirst, 1, RowLast, 1000
+    oModule.CodeModule.CodePane.SetSelection RowFirst, 1, RowLast, 1000
 End Sub
 
 Public Sub UncommentTargetLine(targetLine As Long)
@@ -781,7 +780,7 @@ Sub RemAdd()
     For i = RowFirst To RowLast
         RemTargetLine i
     Next
-    oModule.CodeModule.Codepane.SetSelection RowFirst, 1, RowLast, 1000
+    oModule.CodeModule.CodePane.SetSelection RowFirst, 1, RowLast, 1000
 End Sub
 
 Sub RemTargetLine(targetLine As Long)
@@ -795,7 +794,7 @@ Sub RemRemove()
     For i = RowFirst To RowLast
         UnremTargetLine i
     Next
-    oModule.CodeModule.Codepane.SetSelection RowFirst, 1, RowLast, 1000
+    oModule.CodeModule.CodePane.SetSelection RowFirst, 1, RowLast, 1000
 End Sub
 
 Sub UnremTargetLine(targetLine As Long)

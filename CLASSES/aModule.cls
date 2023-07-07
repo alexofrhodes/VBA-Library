@@ -9,7 +9,10 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-'* Module     : aModule
+'* Class      : aModule
+'* Purpose    :
+'* Copyright  :
+'*
 '* Author     : Anastasiou Alex
 '* Contacts   : AnastasiouAlex@gmail.com
 '*
@@ -19,8 +22,9 @@ Attribute VB_Exposed = False
 '* VK         : https://vk.com/video/playlist/735281600_1
 '*
 '* Modified   : Date and Time       Author              Description
-'* Created    : 04-05-2023 12:41    Alex
+'* Created    : 29-06-2023 14:39    Alex
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 
 Option Explicit
 
@@ -91,10 +95,10 @@ Public Function ClassCalls() As Variant
             If UBound(var, 2) > 1 Then
                 ClassCalls = WorksheetFunction.Transpose(var)
             Else
-                Dim var2(1 To 1, 1 To 2)
-                var2(1, 1) = var(1, 1)
-                var2(1, 2) = var(2, 1)
-                ClassCalls = var2
+                Dim VAR2(1 To 1, 1 To 2)
+                VAR2(1, 1) = var(1, 1)
+                VAR2(1, 2) = var(2, 1)
+                ClassCalls = VAR2
             End If
         End If
     End If
@@ -193,18 +197,20 @@ Sub HeaderAdd()
 
     Dim txtName         As String: txtName = AUTHOR_NAME
     If txtName = vbNullString Then txtName = Environ("UserName")
-
+    txtName = "'* Author     :" & vbTab & txtName & vbCrLf
+    
     Dim txtContacts     As String: txtContacts = AUTHOR_EMAIL
     If txtContacts <> vbNullString Then txtContacts = "'* Contacts   :" & vbTab & txtContacts & vbCrLf
 
     Dim txtCopyright    As String:  txtCopyright = AUTHOR_COPYRIGHT
-    If txtCopyright <> vbNullString Then txtCopyright = "'* Copyright  :" & vbTab & txtCopyright & vbCrLf
-
+'    If txtCopyright <> vbNullString Then txtCopyright = "'* Copyright  :" & vbTab & txtCopyright & vbCrLf
+    txtCopyright = "'* Copyright  :" & vbTab & txtCopyright & vbCrLf
+    
     Dim txtOther        As String:   txtOther = AUTHOR_OTHERTEXT
     If txtOther <> vbNullString Then txtOther = "'* Note       :" & vbTab & txtOther & vbCrLf
 
     Dim txtMedia        As String:   txtMedia = "'* " & vbLf & AUTHOR_MEDIA
-    Dim CurentCodePane  As Codepane: Set CurentCodePane = oModule.CodeModule.Codepane
+    Dim CurentCodePane  As CodePane: Set CurentCodePane = oModule.CodeModule.CodePane
     Dim i               As Byte
     Dim ProcKind        As VBIDE.vbext_ProcKind
     Dim sProc           As String: sProc = ActiveProcedure
@@ -226,17 +232,18 @@ Sub HeaderAdd()
 
     sTemp = Replace(String(90, "*"), "**", "* ")
     sTime = Format(Now, "dd-mm-yyyy hh:nn")
-    sType = "* Module     :"
     sProc = oModule.Name
+    sType = "'* " & PadRight(Me.TypeToString, 11) & ":" & vbTab & sProc & vbCrLf
      
-    If LineLike("'* Module     : " & oModule.Name, True, True) > 0 Then GoTo UpdateHeader
-       
-    With oModule.CodeModule.Codepane
+    If LineLike("* " & PadRight(Me.TypeToString, 11) & ": " & oModule.Name, True, True) > 0 Then GoTo UpdateHeader
+    
+    With oModule.CodeModule.CodePane
         sTemp = vbLf & "'" & sTemp & vbCrLf & _
-                "'" & sType & vbTab & sProc & vbCrLf & _
-                "'* Author     :" & vbTab & txtName & vbCrLf & _
+                sType & _
+                "'* Purpose    :" & vbCrLf & _
+                txtCopyright & "'* " & vbCrLf & _
+                txtName & _
                 txtContacts & _
-                txtCopyright & _
                 txtOther & _
                 txtMedia & _
                 sFersLine & _
@@ -249,14 +256,17 @@ NormalExit:
     Exit Sub
 UpdateHeader:
     nLine = LineLike("'* Created    : *", True, True) + 1
+    'put update to bottom of changes list
     Do While Trim(oModule.CodeModule.Lines(nLine, 1)) Like "'* Modified*)"
         nLine = nLine + 1
     Loop
+    
     oModule.CodeModule.InsertLines nLine, "'* Modified   :" & vbTab & sTime & vbTab & sUser
     GoTo NormalExit
 ErrorHandler:
     GoTo NormalExit
 End Sub
+
 Function item() As VBComponent
     Set item = oModule
 End Function
@@ -264,7 +274,7 @@ End Function
 Public Sub ListProcedures()
     Dim coll As New Collection
     Set coll = ProceduresNames
-    If coll.Count = 0 Then Exit Sub
+    If coll.count = 0 Then Exit Sub
     Dim txt As String
     txt = "'@FOLDER ListOfProcedures" & vbNewLine & "'" & String(20, "-") & vbNewLine
     txt = txt & "'" & Join(aCollection.Init(coll).ToArray, vbNewLine & "'") & vbNewLine
@@ -277,7 +287,7 @@ End Sub
 Public Sub ListProceduresPublic()
     Dim coll As New Collection
     Set coll = PublicProceduresNames
-    If coll.Count = 0 Then Exit Sub
+    If coll.count = 0 Then Exit Sub
     Dim txt As String
     txt = "'@FOLDER ListOfProcedures" & vbNewLine & "'" & String(20, "-") & vbNewLine
     txt = txt & "'" & Join(aCollection.Init(coll).ToArray, vbNewLine & "'") & vbNewLine
@@ -312,11 +322,11 @@ End Sub
 Public Sub ProcedureSortByKind()
     If oModule.CodeModule.CountOfLines = 0 Then Exit Sub
     Dim coll      As New Collection: Set coll = Procedures
-    Dim var       As Variant:        ReDim var(1 To coll.Count)
+    Dim var       As Variant:        ReDim var(1 To coll.count)
     Dim P         As aProcedure
     Dim startLine As Long
     Dim i         As Long
-    For i = 1 To coll.Count
+    For i = 1 To coll.count
         Set P = coll(i)
         var(i) = P.Name
         If i = 1 Then startLine = P.LineIndex(Procedure_First)
@@ -341,11 +351,11 @@ End Sub
 Public Sub ProcedureSortByScope()
     If oModule.CodeModule.CountOfLines = 0 Then Exit Sub
     Dim coll      As New Collection: Set coll = Procedures
-    Dim var       As Variant:        ReDim var(1 To coll.Count)
+    Dim var       As Variant:        ReDim var(1 To coll.count)
     Dim P         As aProcedure
     Dim startLine As Long
     Dim i         As Long
-    For i = 1 To coll.Count
+    For i = 1 To coll.count
         Set P = coll(i)
         var(i) = P.Name
         If i = 1 Then startLine = P.LineIndex(Procedure_First)
@@ -370,11 +380,11 @@ End Sub
 Public Sub ProcedureSortAZ()
     If oModule.CodeModule.CountOfLines = 0 Then Exit Sub
     Dim coll      As New Collection: Set coll = Procedures
-    Dim var       As Variant:        ReDim var(1 To coll.Count)
+    Dim var       As Variant:        ReDim var(1 To coll.count)
     Dim P         As aProcedure
     Dim startLine As Long
     Dim i         As Long
-    For i = 1 To coll.Count
+    For i = 1 To coll.count
         Set P = coll(i)
         var(i) = P.Name
         If i = 1 Then startLine = P.LineIndex(Procedure_First)
@@ -394,18 +404,18 @@ Public Function Component() As VBComponent
 End Function
 
 Public Function LineLike( _
-                             this As String, _
+                             This As String, _
                              IgnoreIndentation As Boolean, _
                              IgnoreCase As Boolean) As Long
     If oModule.CodeModule.CountOfLines = 0 Then Exit Function
-    If IgnoreCase Then this = UCase(this)
+    If IgnoreCase Then This = UCase(This)
     Dim sLine As String
     Dim i As Long
     For i = 1 To oModule.CodeModule.CountOfLines
         sLine = oModule.CodeModule.Lines(i, 1)
         If IgnoreIndentation Then sLine = Trim(sLine)
         If IgnoreCase Then sLine = UCase(sLine)
-        If sLine Like this Then
+        If sLine Like This Then
             LineLike = i
             Exit Function
         End If
@@ -413,11 +423,11 @@ Public Function LineLike( _
 End Function
 
 Public Function LinesLike( _
-                             this As String, _
+                             This As String, _
                              IgnoreIndentation As Boolean, _
                              IgnoreCase As Boolean) As Collection
     If oModule.CodeModule.CountOfLines = 0 Then Exit Function
-    If IgnoreCase Then this = UCase(this)
+    If IgnoreCase Then This = UCase(This)
     Dim coll As New Collection
     Dim sLine As String
     Dim i As Long
@@ -425,7 +435,7 @@ Public Function LinesLike( _
         sLine = oModule.CodeModule.Lines(i, 1)
         If IgnoreIndentation Then sLine = Trim(sLine)
         If IgnoreCase Then sLine = UCase(sLine)
-        If sLine Like this Then
+        If sLine Like This Then
             coll.Add i
         End If
     Next
@@ -535,7 +545,7 @@ Function ProceduresNames() As Collection
         coll.Add ProcedureName, ProcedureName
         On Error GoTo 0
         If Err.Number > 0 Then Debug.Print ProcedureName & " exists multiple times, added only once, may lead to error"
-        Err.clear
+        Err.Clear
     Next
     Set ProceduresNames = coll
 End Function
@@ -549,7 +559,7 @@ Function PublicProceduresNames() As Collection
         If AP.Scope = "Public" Then coll.Add ProcedureName, ProcedureName
         On Error GoTo 0
         If Err.Number > 0 Then Debug.Print ProcedureName & " exists multiple times, added only once, may lead to error"
-        Err.clear
+        Err.Clear
     Next
     Set PublicProceduresNames = coll
 End Function
@@ -595,7 +605,7 @@ Sub Activate()
         .Visible = True
         .WindowState = vbext_ws_Maximize
     End With
-    With oModule.CodeModule.Codepane
+    With oModule.CodeModule.CodePane
         .Show
         .Window.Visible = True
         .Window.WindowState = vbext_ws_Maximize
@@ -619,14 +629,14 @@ Public Function body() As String
 End Function
 
 Function Contains( _
-                    this As String, _
+                    This As String, _
                     WholeWord As Boolean, _
                     MatchCase As Boolean, _
                     PatternSearch As Boolean)
 
     If oModule.CodeModule.CountOfLines = 0 Then Exit Function
     Contains = oModule.CodeModule.Find( _
-                                        this, _
+                                        This, _
                                         1, _
                                         1, _
                                         oModule.CodeModule.CountOfLines, _
@@ -643,8 +653,8 @@ Function Header() As String
     End With
 End Function
 
-Function HeaderContains(this As String) As Boolean
-    HeaderContains = (InStr(1, Header, this) > 0)
+Function HeaderContains(This As String) As Boolean
+    HeaderContains = (InStr(1, Header, This) > 0)
 End Function
 
 Function Ignore() As Boolean
@@ -653,7 +663,7 @@ End Function
 
 Public Property Get Parent() As Workbook
     Dim s As String
-    s = oModule.Collection.Parent.Filename
+    s = oModule.Collection.Parent.FileName
     s = Right(s, Len(s) - InStrRev(s, "\"))
     Set Parent = Workbooks(s)
 End Property
@@ -698,7 +708,7 @@ Sub ExportProcedures(TargetPath As String)
     FoldersCreate TargetPath
     Dim AP As aProcedure
     Dim coll As New Collection: Set coll = Procedures
-    If coll.Count > 0 Then
+    If coll.count > 0 Then
         For Each AP In coll
 '            TxtAppend TargetPath & AP.Name & " " & AP.KindAsString & ".txt", AP.Code_All
             TxtAppend TargetPath & AP.Name & ".txt", AP.Code_All
@@ -787,9 +797,9 @@ Public Function Copy( _
 
     Dim fname As String
         fname = Environ("Temp") & "\" & Name & Extension
-    oModule.Export Filename:=fname
+    oModule.Export FileName:=fname
 
-    TargetWorkbook.VBProject.VBComponents.Import Filename:=fname
+    TargetWorkbook.VBProject.VBComponents.Import FileName:=fname
     Kill fname
     Copy = True
 End Function
@@ -801,7 +811,7 @@ Sub Delete()
         If oModule.Name = "ThisWorkbook" Then
             oModule.CodeModule.DeleteLines 1, oModule.CodeModule.CountOfLines
         Else
-            If Parent.SHEETS.Count = 1 Then Parent.SHEETS.Add
+            If Parent.Sheets.count = 1 Then Parent.Sheets.Add
             GetSheetByCodeName(oWorkbook, Name).Delete
         End If
     Else

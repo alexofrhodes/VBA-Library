@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-'* Module     : aWorkbook
+'* Class      : aWorkbook
 '* Author     : Anastasiou Alex
 '* Contacts   : AnastasiouAlex@gmail.com
 '*
@@ -37,7 +37,7 @@ End Function
 
 Sub ReferencesList()
     Dim ws As Worksheet
-    Set ws = ThisWorkbook.SHEETS("References")
+    Set ws = ThisWorkbook.Sheets("References")
     ws.Cells(1, 1).Value = "Reference Description"
     ws.Cells(1, 2).Value = "GUID"
     ws.Cells(1, 3).Value = "Path"
@@ -56,9 +56,9 @@ Sub ReferencesList()
     Next myRef
 End Sub
 
-Sub AddReferenceFromFile(FilePath As String)
+Sub AddReferenceFromFile(filepath As String)
     Dim oRefs As REFERENCES: Set oRefs = oWorkbook.VBProject.REFERENCES
-    oRefs.AddFromFile FilePath
+    oRefs.AddFromFile filepath
 End Sub
 
 Sub AddReferenceFromGUID(GUID As String, Major As String, Minor As String)
@@ -100,19 +100,19 @@ Sub RemoveReferenceByGUID(refGUID As String)
     Next oRef
 End Sub
 
-Public Sub ExportReferences(FilePath As String)
+Public Sub ExportReferences(filepath As String)
     Dim Result As String
     Dim oRef As Reference
     For Each oRef In oWorkbook.VBProject.REFERENCES
         Result = Result & IIf(Result <> "", vbNewLine, "") & oRef.Name & vbTab & oRef.GUID & vbTab & oRef.Major & vbTab & oRef.Minor
     Next
-    TxtOverwrite FilePath, Result
+    TxtOverwrite filepath, Result
 End Sub
 
 
-Public Sub ImportReferences(FilePath As String)
-    Dim fso As New Scripting.FileSystemObject
-    With fso.OpenTextFile(FilePath, ForReading, True)
+Public Sub ImportReferences(filepath As String)
+    Dim fso As New scripting.FileSystemObject
+    With fso.OpenTextFile(filepath, ForReading, True)
         Dim Line As Long
         Do While Not .AtEndOfStream
             Dim Values As Variant
@@ -143,11 +143,11 @@ Function TodoList()
     TodoList = out
 End Function
 
-Function ProceduresLike(this As String) As Collection
+Function ProceduresLike(This As String) As Collection
     Dim Procedure As aProcedure
     Dim out As New Collection
     For Each Procedure In Procedures(True, False, False, False)
-        If UCase(Procedure.Name) Like UCase(this) Then
+        If UCase(Procedure.Name) Like UCase(This) Then
             out.Add Procedure
         End If
     Next
@@ -174,7 +174,7 @@ Sub ModulesMerge(TargetModule As VBComponent, ParamArray Modules() As Variant)
     Dim element As Variant
     Dim Module As VBComponent
     For Each element In Modules
-    Set Module = element
+        Set Module = element
         If Module.Type = vbext_ct_StdModule Then
             If Module.Name <> TargetModule.Name Then
                 aModule.Init(Module).CodeMove TargetModule
@@ -379,7 +379,8 @@ Public Sub ExportProject( _
     Else
         exportPath = Environ("USERprofile") & "\Documents\" & "vbArc\Backups\" & NameClean & "\"
     End If
-    exportPath = exportPath & "src " & Format(Now, "YY-MM-DD HH-NN") & "\"
+    exportPath = exportPath & "src " & NameClean & " " & Format(Now, "YY-MM-DD HH-NN") & "\"
+    
     FoldersCreate exportPath
     Dim ams As aModules:    Set ams = aModules.Init(oWorkbook)
     If bWorkbookBackup = True Then Backup exportPath
@@ -470,11 +471,11 @@ Sub CreateLinkedTable()
     CreateLinkedTable_Sheet
     
     Dim TargetWorksheet As Worksheet
-    Set TargetWorksheet = ThisWorkbook.SHEETS("Linked_Table_" & NameClean)
+    Set TargetWorksheet = ThisWorkbook.Sheets("Linked_Table_" & NameClean)
     On Error Resume Next
     TargetWorksheet.ListObjects(1).Unlist
     On Error GoTo 0
-    TargetWorksheet.Range("A1").CurrentRegion.OFFSET(1).clear
+    TargetWorksheet.Range("A1").CurrentRegion.OFFSET(1).Clear
 
     Dim var
     ReDim var(1 To 8, 1 To 1)
@@ -513,18 +514,7 @@ Sub CreateLinkedTable()
     TargetWorksheet.ListObjects.Add xlSrcRange, TargetWorksheet.Range("A1").CurrentRegion, , xlYes
     TargetWorksheet.Cells.VerticalAlignment = xlVAlignTop
 
-    '* @TODO Test
-'    Dim TargetFolder As String: TargetFolder = ThisWorkbook.Path & "\Linked Tables\"
-'    FoldersCreate TargetFolder
-'    Dim ar As New BetterArray
-'    ar.FromExcelRange TargetWorksheet.Range("A1").CurrentRegion
-'    ar.ToCSVFile TargetFolder & NameClean & ".csv"
- 
     EndTimer
-
-'=IF([@[LINKED PROCEDURES]]<>"",LEN([@[LINKED PROCEDURES]])-LEN(SUBSTITUTE([@[LINKED PROCEDURES]],CHAR(10),""))+1,0)
-'=IF([@[LINKED CLASSES]]<>"",LEN([@[LINKED CLASSES]])-LEN(SUBSTITUTE([@[LINKED CLASSES]],CHAR(10),""))+1,0)
-'=IF([@[LINKED USERFORMS]]<>"",LEN([@[LINKED USERFORMS]])-LEN(SUBSTITUTE([@[LINKED USERFORMS]],CHAR(10),""))+1,0)
 
 End Sub
 
@@ -539,13 +529,13 @@ Private Sub LinkedProceduresTableSort()
     sort3 = "D1"
 
     With TargetWorksheet.Sort
-        .SortFields.clear
-        .SortFields.Add key:=TargetWorksheet.Range(sort1), Order:=xlAscending
+        .SortFields.Clear
+        .SortFields.Add Key:=TargetWorksheet.Range(sort1), Order:=xlAscending
         If Not sort2 = "" Then
-            .SortFields.Add key:=TargetWorksheet.Range(sort2), Order:=xlAscending
+            .SortFields.Add Key:=TargetWorksheet.Range(sort2), Order:=xlAscending
         End If
         If Not sort3 = "" Then
-            .SortFields.Add key:=TargetWorksheet.Range(sort3), Order:=xlAscending
+            .SortFields.Add Key:=TargetWorksheet.Range(sort3), Order:=xlAscending
         End If
 
         .SetRange TargetWorksheet.Range("A1").CurrentRegion
@@ -567,14 +557,6 @@ End Sub
 'End Sub
 
 
-
-
-
-
-
-
-
-
 Sub ExportDeclarations(TargetPath As String)
     TargetPath = Replace(TargetPath & "\", "\\", "\")
     FoldersCreate TargetPath
@@ -589,7 +571,7 @@ End Sub
 Private Function DeclarationsWorksheetCreate() As Boolean
     If WorksheetExists("Declarations_Table", ThisWorkbook) Then Exit Function
     Dim TargetWorksheet As Worksheet
-    Set TargetWorksheet = ThisWorkbook.SHEETS.Add
+    Set TargetWorksheet = ThisWorkbook.Sheets.Add
     With TargetWorksheet
         .Name = "Declarations_Table"
         .Cells.VerticalAlignment = xlVAlignTop
@@ -604,11 +586,11 @@ Public Sub DeclarationsTableCreate()
     DeclarationsWorksheetCreate
 
     Dim TargetWorksheet As Worksheet
-    Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
+    Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
     'if sheet was created within the hour, you probably don't have new declarations
     If Format(Now, "YYMMDDHHNN") - TargetWorksheet.Range("Z1").Value < 60 Then Exit Sub
 
-    TargetWorksheet.Range("A2").CurrentRegion.OFFSET(1).clear
+    TargetWorksheet.Range("A2").CurrentRegion.OFFSET(1).Clear
     ArrayToRange2D aCollection.CollectionsToArray2D( _
                         getDeclarations( _
                             includeScope:=True, _
@@ -633,14 +615,14 @@ Private Sub DeclarationsTableSort()
     Dim sort3 As String ': sort3 = "D1"
 
     With TargetWorksheet.Sort
-        .SortFields.clear
-        .SortFields.Add key:=TargetWorksheet.Range(sort1), Order:=xlAscending
+        .SortFields.Clear
+        .SortFields.Add Key:=TargetWorksheet.Range(sort1), Order:=xlAscending
 
         If Not sort2 = "" Then
-            .SortFields.Add key:=TargetWorksheet.Range(sort2), Order:=xlAscending
+            .SortFields.Add Key:=TargetWorksheet.Range(sort2), Order:=xlAscending
         End If
         If Not sort3 = "" Then
-            .SortFields.Add key:=TargetWorksheet.Range(sort3), Order:=xlAscending
+            .SortFields.Add Key:=TargetWorksheet.Range(sort3), Order:=xlAscending
         End If
 
         .SetRange TargetWorksheet.Range("A1").CurrentRegion
@@ -652,7 +634,7 @@ End Sub
 
 Public Function DeclarationsTableKeywords() As Collection
     Dim TargetWorksheet As Worksheet
-    Set TargetWorksheet = ThisWorkbook.SHEETS("Declarations_Table")
+    Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
     Dim Lr As Long: Lr = getLastRow(TargetWorksheet)
     Dim coll As New Collection
     Dim cell As Range
@@ -715,39 +697,39 @@ Public Function getDeclarations( _
                     If Len(CStr(element)) > 0 And Not Trim(CStr(element)) Like "'*" And Not Trim(CStr(element)) Like "Rem*" Then
                         If RegexTest(CStr(element), "\b ?Enum \b") Then
                             KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", "Enum")
-                            DeclarationsCollection.Add DeclarationsKeywordSubstring(tmp, , "Enum " & KeywordsCollection.item(KeywordsCollection.Count), "End Enum", , , True)
+                            DeclarationsCollection.Add DeclarationsKeywordSubstring(tmp, , "Enum " & KeywordsCollection.item(KeywordsCollection.count), "End Enum", , , True)
                             TypeCollection.Add "Enum"
                             ComponentCollection.Add Module.Name
                             ComponentTypecollection.Add aModule.Init(Module).TypeToString
-                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
+                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.count), "Public", vbTextCompare), "Public", "Private")
                         ElseIf RegexTest(CStr(element), "\b ?Type \b") Then
                             KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", "Type")
-                            DeclarationsCollection.Add DeclarationsKeywordSubstring(tmp, , "Type " & KeywordsCollection.item(KeywordsCollection.Count), "End Type", , , True)
+                            DeclarationsCollection.Add DeclarationsKeywordSubstring(tmp, , "Type " & KeywordsCollection.item(KeywordsCollection.count), "End Type", , , True)
                             TypeCollection.Add "Type"
                             ComponentCollection.Add Module.Name
                             ComponentTypecollection.Add aModule.Init(Module).TypeToString
-                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
+                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.count), "Public", vbTextCompare), "Public", "Private")
                         ElseIf InStr(1, CStr(element), "Const ", vbTextCompare) > 0 Then
                             KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", "Const")
                             DeclarationsCollection.Add CStr(element)
                             TypeCollection.Add "Const"
                             ComponentCollection.Add Module.Name
                             ComponentTypecollection.Add aModule.Init(Module).TypeToString
-                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
+                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.count), "Public", vbTextCompare), "Public", "Private")
                         ElseIf RegexTest(CStr(element), "\b ?Sub \b") Then
                             KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", "Sub")
                             DeclarationsCollection.Add CStr(element)
                             TypeCollection.Add "Sub"
                             ComponentCollection.Add Module.Name
                             ComponentTypecollection.Add aModule.Init(Module).TypeToString
-                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
+                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.count), "Public", vbTextCompare), "Public", "Private")
                         ElseIf RegexTest(CStr(element), "\b ?Function \b") Then
                             KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", "Function")
                             DeclarationsCollection.Add CStr(element)
                             TypeCollection.Add "Function"
                             ComponentCollection.Add Module.Name
                             ComponentTypecollection.Add aModule.Init(Module).TypeToString
-                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
+                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.count), "Public", vbTextCompare), "Public", "Private")
                         ElseIf element Like "*(*) As *" Then
                             helper = Left(element, InStr(1, CStr(element), "(") - 1)
                             helper = Mid(helper, InStrRev(helper, " ") + 1)
@@ -756,14 +738,14 @@ Public Function getDeclarations( _
                             TypeCollection.Add "Other"
                             ComponentCollection.Add Module.Name
                             ComponentTypecollection.Add aModule.Init(Module).TypeToString
-                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
+                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.count), "Public", vbTextCompare), "Public", "Private")
                         ElseIf element Like "* As *" Then
                             KeywordsCollection.Add DeclarationsKeywordSubstring(CStr(element), " ", , "As")
                             DeclarationsCollection.Add CStr(element)
                             TypeCollection.Add "Other"
                             ComponentCollection.Add Module.Name
                             ComponentTypecollection.Add aModule.Init(Module).TypeToString
-                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.Count), "Public", vbTextCompare), "Public", "Private")
+                            ScopeCollection.Add IIf(InStr(1, DeclarationsCollection.item(DeclarationsCollection.count), "Public", vbTextCompare), "Public", "Private")
                         Else
                         End If
                     End If
@@ -861,7 +843,7 @@ End Function
 
 Public Sub DeclarationsTableExport()
     Dim ws As Worksheet
-    Set ws = ThisWorkbook.SHEETS("Declarations_Table")
+    Set ws = ThisWorkbook.Sheets("Declarations_Table")
     Dim codeName As String
     Dim codeText As String
     Dim cell As Range
@@ -880,7 +862,7 @@ Public Sub DeclarationsTableExport()
             codeCollection.Add cell.OFFSET(0, 1).TEXT, cell.OFFSET(0, 1).TEXT
             On Error GoTo 0
         Loop
-        codeText = aCollection.Init(codeCollection).ToString(IIf(codeCollection.Count > 1, vbNewLine, ""))
+        codeText = aCollection.Init(codeCollection).ToString(IIf(codeCollection.count > 1, vbNewLine, ""))
         TxtOverwrite LOCAL_LIBRARY_DECLARATIONS & codeName & ".txt", codeText
     Next
 End Sub
