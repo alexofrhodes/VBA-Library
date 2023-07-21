@@ -70,15 +70,118 @@ Private Const LVM_GETSELECTEDCOUNT = (LVM_FIRST + 50)
 
 Public oListView As ListView
 
-Public option_DD_LogFiles As Boolean
-Public option_DD_LogFolders As Boolean
-Public option_DD_IncludeSubfolders As Boolean
-Public option_DD_CommaSeparatedFilters As String
+Private option_DD_LogFiles As Boolean
+Private option_DD_LogFolders As Boolean
+Private option_DD_IncludeSubfolders As Boolean
+Private option_DD_CommaSeparatedFilters As String
 
 
-Public LstItmObj As listItem
+Public LstItmObj As ListItem
 Public swapNeeded As Boolean 'swap mode
 
+Private Type POINTAPI
+    X As Long
+    Y As Long
+End Type
+Private Type LVHITTESTINFO
+    pt As POINTAPI
+    Flags As Long
+    iItem As Long
+    iSubItem  As Long
+End Type
+
+Private Const LVM_HITTEST As Long = &H418
+Private Const LVM_SUBITEMHITTEST As Long = &H1039
+Private Const LVHT_ONITEM As Long = &H2
+
+Public Function Value()
+    Dim headCount As Long: headCount = oListView.ColumnHeaders.count
+    Dim rowCount As Long: rowCount = oListView.ListItems.count
+    
+    Dim arr()
+    ReDim arr(1 To rowCount, 1 To headCount)
+    Dim X As Long
+    Dim Y As Long
+    For Y = 1 To oListView.ColumnHeaders.count
+        arr(1, Y) = oListView.ColumnHeaders(Y)
+    Next
+    If oListView.ListItems.count > 0 Then
+        For X = 1 To oListView.ListItems.count
+            For Y = 1 To headCount
+                If Y = 1 Then
+                    arr(X, Y) = oListView.ListItems(X)
+                Else
+                    arr(X, Y) = oListView.ListItems(X).ListSubItems(Y - 1)
+                End If
+            Next
+        Next
+        Value = arr
+    Else
+        Value = Array()
+    End If
+End Function
+
+Public Function RowArray(targetRow As Long)
+    Dim headCount As Long: headCount = oListView.ColumnHeaders.count
+    Dim arr
+    ReDim arr(1 To headCount)
+    Dim i As Long
+    For i = 1 To headCount
+        If i = 1 Then
+            arr(i) = oListView.ListItems(targetRow)
+        Else
+            arr(i) = oListView.ListItems(targetRow).ListSubItems(i - 1)
+        End If
+    Next
+    RowArray = arr
+End Function
+
+Public Function SelectionArray()
+    Dim item As MSComctlLib.ListItem
+    Dim targetRow As Long
+    Dim arr()
+    Dim i As Long, counter As Long
+    Dim headCount As Long: headCount = oListView.ColumnHeaders.count
+    If oListView.multiSelect = False Then
+        targetRow = oListView.selectedItem.index
+        arr = RowArray(targetRow)
+    Else
+        ReDim arr(1 To 1, 1 To headCount)
+        For Each item In oListView.ListItems
+            If item.Selected Then
+                targetRow = item.index
+                counter = counter + 1
+                ReDim Preserve arr(1 To counter, 1 To headCount)
+                For i = 1 To headCount
+                    If i = 1 Then
+                        arr(counter, i) = oListView.ListItems(targetRow)
+                    Else
+                        arr(counter, i) = oListView.ListItems(targetRow).ListSubItems(i - 1)
+                    End If
+                Next
+                
+            End If
+        Next
+    End If
+    SelectionArray = arr
+End Function
+
+Public Function ClickedColumn(X, Y)
+    'call from userform ListView1_MouseDown event and such
+    ClickedColumn = -1
+    
+    Dim hitTestInfo As LVHITTESTINFO
+    hitTestInfo.pt.X = X
+    hitTestInfo.pt.Y = Y
+    SendMessage oListView.hwnd, LVM_SUBITEMHITTEST, 0, hitTestInfo
+    
+    If hitTestInfo.Flags = 4 Then
+        Dim ColumnIndex As Long
+        ColumnIndex = hitTestInfo.iSubItem
+        ClickedColumn = ColumnIndex
+    End If
+
+End Function
 
 Sub DeselectAll()
     Dim sThisItem As Long, lLvHwnd As Long, lSelectedItems As Long, lItemIndex As Long
@@ -87,14 +190,12 @@ Sub DeselectAll()
 
     With oListView
         lLvHwnd = .hwnd
-        .Visible = False             'For speed. Need to remove the line in VBA
         lSelectedItems = SendMessage(lLvHwnd, LVM_GETSELECTEDCOUNT, 0, ByVal 0&)
         lItemIndex = -1
         For sThisItem = 1 To lSelectedItems
             lItemIndex = SendMessage(lLvHwnd, LVM_GETNEXTITEM, lItemIndex, ByVal LVNI_SELECTED)
             .ListItems(lItemIndex + 1).Selected = False
         Next
-        .Visible = True              'For speed. Need to remove the line in VBA
     End With
     Exit Sub
 
@@ -109,34 +210,34 @@ Public Sub EnableDragSort()
 End Sub
 
 Private Sub EventDragSort_OLEStartDrag(Data As MSComctlLib.DataObject, AllowedEffects As Long)
-    Set LstItmObj = EventDragSort.SelectedItem
+    Set LstItmObj = EventDragSort.selectedItem
 End Sub
 
 'when drop occurs we make mouseclick to select next item and then set swap mode on
-Private Sub EventDragSort_OLEDragDrop(Data As MSComctlLib.DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub EventDragSort_OLEDragDrop(Data As MSComctlLib.DataObject, Effect As Long, button As Integer, Shift As Integer, X As Single, Y As Single)
     'that click will occur only after end of this Sub, that's why we can't make rows swaping here
     Call SingleClick
     swapNeeded = True
 End Sub
 
 'this Sub starts after OLEDragDrop ends so new row is already selected and old row is already saved to LstItmObj so here we just need to swap those two rows
-Private Sub eventdragsort_MouseUp(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As stdole.OLE_XPOS_PIXELS, ByVal y As stdole.OLE_YPOS_PIXELS)
+Private Sub eventdragsort_MouseUp(ByVal button As Integer, ByVal Shift As Integer, ByVal X As stdole.OLE_XPOS_PIXELS, ByVal Y As stdole.OLE_YPOS_PIXELS)
     If LstItmObj Is Nothing Then Exit Sub
     If (swapNeeded) Then
         Sleep 30
-        Dim insertedList As listItem
-        Dim selectedIndex As Integer
+        Dim insertedList As ListItem
+        Dim SelectedIndex As Integer
         Dim newListSubItemObj As ListSubItem
 
-        selectedIndex = EventDragSort.SelectedItem.index
+        SelectedIndex = EventDragSort.selectedItem.index
         EventDragSort.ListItems.Remove LstItmObj.index
 
-        Set insertedList = EventDragSort.ListItems.Add(selectedIndex, LstItmObj.Key, LstItmObj.TEXT, LstItmObj.Icon, LstItmObj.SmallIcon)
+        Set insertedList = EventDragSort.ListItems.Add(SelectedIndex, LstItmObj.Key, LstItmObj.text, LstItmObj.Icon, LstItmObj.SmallIcon)
         For Each newListSubItemObj In LstItmObj.ListSubItems
-                insertedList.ListSubItems.Add newListSubItemObj.index, newListSubItemObj.Key, newListSubItemObj.TEXT, newListSubItemObj.ReportIcon, newListSubItemObj.TooltipText
+                insertedList.ListSubItems.Add newListSubItemObj.index, newListSubItemObj.Key, newListSubItemObj.text, newListSubItemObj.ReportIcon, newListSubItemObj.TooltipText
         Next newListSubItemObj 'swap mode off again
         swapNeeded = False
-        Set EventDragSort.SelectedItem = EventDragSort.ListItems.item(selectedIndex)
+        Set EventDragSort.selectedItem = EventDragSort.ListItems.item(SelectedIndex)
     End If
 End Sub
 
@@ -155,7 +256,7 @@ Public Sub EnableDropFilesFolders(LogFiles As Boolean, LogFolders As Boolean, In
     Set EventDropFiles = oListView
 End Sub
 
-Private Sub EventDropFiles_OLEDragDrop(Data As MSComctlLib.DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub EventDropFiles_OLEDragDrop(Data As MSComctlLib.DataObject, Effect As Long, button As Integer, Shift As Integer, X As Single, Y As Single)
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     'The Format numbers used in the OLE DragDrop data structure, are:
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -182,8 +283,8 @@ Private Sub EventDropFiles_OLEDragDrop(Data As MSComctlLib.DataObject, Effect As
 End Sub
 
 Private Sub DD_AddToListview(FileFullPath As String)
-    Dim objFSO As scripting.FileSystemObject
-    Dim objTopFolder As scripting.Folder
+    Dim objFSO As Scripting.FileSystemObject
+    Dim objTopFolder As Scripting.Folder
     Set objFSO = CreateObject("Scripting.FileSystemObject")
     Dim FileName As String
     Dim var As Variant, element As Variant
@@ -221,14 +322,14 @@ PASS:
                 End If
             Next
         Else        'if drag dropped folder
-            Set objTopFolder = objFSO.getFolder(FileFullPath)
+            Set objTopFolder = objFSO.GetFolder(FileFullPath)
             DD_AddToListview objTopFolder.Path
         End If
     End If
 
     If option_DD_LogFolders = True Then
         If UCase(IsFileFolderURL(FileFullPath)) = "D" Then
-            Set objTopFolder = objFSO.getFolder(FileFullPath)
+            Set objTopFolder = objFSO.GetFolder(FileFullPath)
             If Not oListView.FindItem(sz:=objTopFolder.Path & "\", where:=0, fPartial:=lvwWhole) Then
                 oListView.ListItems.Add , , objTopFolder.Path
             End If
@@ -251,49 +352,50 @@ Public Function Init(LV As ListView) As aListView
 
     Set oListView = LV
     Set Init = Me
+
 End Function
-Public Function Parent()
-    Set Parent = oListView.Parent
-End Function
+'Public Function Parent()
+'
+'End Function
 Public Sub Clear()
     oListView.ListItems.Clear
     oListView.ColumnHeaders.Clear
 End Sub
 
-Public Sub InitializeFromArray(InputArray As Variant)
+Public Sub InitializeFromArray(inputArray As Variant)
     Clear
-    Dim vListItem As listItem
+    Dim vListItem As ListItem
     Dim vChildItem As ListSubItem
     Dim vHeader As Variant
     Dim iRows As Long, iColumns As Long
-    For iColumns = LBound(InputArray, 2) To UBound(InputArray, 2)
-        Set vHeader = oListView.ColumnHeaders.Add(, , InputArray(LBound(InputArray, 1), iColumns))
+    For iColumns = LBound(inputArray, 2) To UBound(inputArray, 2)
+        Set vHeader = oListView.ColumnHeaders.Add(, , inputArray(LBound(inputArray, 1), iColumns))
     Next
-    For iRows = LBound(InputArray, 1) + 1 To UBound(InputArray, 1)
-        Set vListItem = oListView.ListItems.Add(, , InputArray(iRows, 1))
-        For iColumns = LBound(InputArray, 2) + 1 To UBound(InputArray, 2)
-            Set vChildItem = vListItem.ListSubItems.Add(, , InputArray(iRows, iColumns))
+    For iRows = LBound(inputArray, 1) + 1 To UBound(inputArray, 1)
+        Set vListItem = oListView.ListItems.Add(, , inputArray(iRows, 1))
+        For iColumns = LBound(inputArray, 2) + 1 To UBound(inputArray, 2)
+            Set vChildItem = vListItem.ListSubItems.Add(, , inputArray(iRows, iColumns))
         Next
     Next
     oListView.View = lvwReport
 End Sub
 
-Public Sub AddFromArray(InputArray As Variant)
-    If UBound(InputArray, 2) + 1 <> oListView.ColumnHeaders.count Then Exit Sub
-    Dim vListItem As listItem
+Public Sub AppendArray(inputArray As Variant)
+    If ArrayDimensions(inputArray) <> 2 Then Exit Sub
+    If UBound(inputArray, 2) + IIf(LBound(inputArray, 2) = 0, 1, 0) <> oListView.ColumnHeaders.count Then Exit Sub
+    Dim vListItem As ListItem
     Dim vChildItem As ListSubItem
     Dim iRows As Long, iColumns As Long
-    For iRows = LBound(InputArray, 1) + 1 To UBound(InputArray, 1)
-        Set vListItem = oListView.ListItems.Add(, , InputArray(iRows, 1))
-        For iColumns = LBound(InputArray, 2) + 1 To UBound(InputArray, 2)
-            Set vChildItem = vListItem.ListSubItems.Add(, , InputArray(iRows, iColumns))
+    For iRows = LBound(inputArray, 1) To UBound(inputArray, 1)
+        Set vListItem = oListView.ListItems.Add(, , inputArray(iRows, 1))
+        For iColumns = LBound(inputArray, 2) + 1 To UBound(inputArray, 2)
+            Set vChildItem = vListItem.ListSubItems.Add(, , inputArray(iRows, iColumns))
         Next
     Next
-    oListView.View = lvwReport
+'    oListView.View = lvwReport
 End Sub
 
 Public Sub EventListener()
-    'add argument by multiple enum to enable desired events?
     Set aListViewEvent = oListView
 End Sub
 
@@ -301,44 +403,43 @@ End Sub
 '    MsgBox "Clicked the listview"
 'End Sub
 
-Private Sub aListViewEvent_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, _
-                                    ByVal x As stdole.OLE_XPOS_PIXELS, ByVal y As stdole.OLE_YPOS_PIXELS)
+Private Sub aListViewEvent_MouseDown(ByVal button As Integer, ByVal Shift As Integer, _
+                                    ByVal X As stdole.OLE_XPOS_PIXELS, ByVal Y As stdole.OLE_YPOS_PIXELS)
 
-'https://markdagosta.wordpress.com/2010/08/08/listview-hittest-right-click/
-
-   Dim item As MSComctlLib.listItem
+   'https://markdagosta.wordpress.com/2010/08/08/listview-hittest-right-click/
+   Dim item As MSComctlLib.ListItem
    Dim lngXPixelsPerInch As Long, lngYPixelsPerInch As Long
    Dim lngDeviceHandle As Long
-
    'Only capture the standard right-clicks; otherwise get out.
-   If (Button <> xlSecondaryButton) Or (Shift <> 0) Then Exit Sub
-
+   If (button <> xlSecondaryButton) Or (Shift <> 0) Then Exit Sub
   'We must determine the Pixels per Inch for the display device.
    lngDeviceHandle = GetDC(0)
    lngXPixelsPerInch = GetDeviceCaps(lngDeviceHandle, LOGPIXELSX)
    lngYPixelsPerInch = GetDeviceCaps(lngDeviceHandle, LOGPIXELSY)
    ReleaseDC 0, lngDeviceHandle
-
   'Convert the event's x and y arguments from Pixels to Twips
-  Set item = oListView.HitTest(x * 1440 / lngXPixelsPerInch, y * 1440 / lngYPixelsPerInch)
+  Set item = oListView.hitTest(X * 1440 / lngXPixelsPerInch, Y * 1440 / lngYPixelsPerInch)
+   MsgBox "List ID #" & item.index & ": " & item.text & " has been right-clicked!"
 
-   Toast "List ID #" & item.index & ": " & item.TEXT & " has been right-clicked!"
-
+   
 End Sub
 
-Sub PopulateListViewFromArray(TargetListView As ListView, InputArray As Variant)
-    Dim vListItem As listItem
-    Dim vChildItem As ListSubItem
-    Dim vHeader As Variant
-    Dim iRows As Long, iColumns As Long
-    For iColumns = LBound(InputArray, 2) To UBound(InputArray, 2)
-        Set vHeader = TargetListView.ColumnHeaders.Add(, , InputArray(LBound(InputArray, 1), iColumns))
+Public Sub RowsFormatOddEven()
+    Dim i As Long, Y As Long
+    For i = 1 To oListView.ListItems.count
+        If i Mod 2 Then
+            oListView.ListItems(i).ForeColor = vbBlue
+            For Y = 1 To oListView.ColumnHeaders.count - 1
+                oListView.ListItems(i).ListSubItems(Y).ForeColor = vbBlue
+            Next
+        Else
+            oListView.ListItems(i).ForeColor = vbRed
+            For Y = 1 To oListView.ColumnHeaders.count - 1
+                oListView.ListItems(i).ListSubItems(Y).ForeColor = vbRed
+            Next
+        End If
     Next
-    For iRows = LBound(InputArray, 1) + 1 To UBound(InputArray, 1)
-        Set vListItem = TargetListView.ListItems.Add(, , InputArray(iRows, 1))
-        For iColumns = LBound(InputArray, 2) + 1 To UBound(InputArray, 2)
-            Set vChildItem = vListItem.ListSubItems.Add(, , InputArray(iRows, iColumns))
-        Next
-    Next
-    TargetListView.View = lvwReport
+    oListView.Refresh
 End Sub
+
+

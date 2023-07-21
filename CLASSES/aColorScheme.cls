@@ -220,20 +220,20 @@ Private Sub ApplyColorToParent(obj As Object)
     obj.BackColor = NormalBackColor
     obj.ForeColor = NormalForeColor
     On Error GoTo 0
-    Dim ctrl As MSForms.control
-    For Each ctrl In obj.Controls
-        Select Case TypeName(ctrl)
+    Dim Ctrl As MSForms.control
+    For Each Ctrl In obj.Controls
+        Select Case TypeName(Ctrl)
             Case "CommandButton", "Label", "CheckBox", "OptionButton"
-                ctrl.BackColor = NormalBackColor
-                ctrl.ForeColor = NormalForeColor
+                Ctrl.BackColor = NormalBackColor
+                Ctrl.ForeColor = NormalForeColor
             Case "Frame"
-                ctrl.BackColor = NormalBackColor
-                ctrl.ForeColor = NormalForeColor
-                ApplyColorToParent ctrl
+                Ctrl.BackColor = NormalBackColor
+                Ctrl.ForeColor = NormalForeColor
+                ApplyColorToParent Ctrl
             Case "MultiPage"
                 Dim i As Long
-                With aMultiPage.Init(ctrl)
-                    For i = 0 To ctrl.Pages.count - 1
+                With aMultiPage.Init(Ctrl)
+                    For i = 0 To Ctrl.Pages.count - 1
                         .SetBackColor i, CLng(NormalBackColor)
                     Next
                 End With

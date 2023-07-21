@@ -30,7 +30,7 @@ Private cm    As CodeModule
 
 Public ColumnFirst As Long
 Public ColumnLast  As Long
-Public RowCount    As Long
+Public rowCount    As Long
 Public RowFirst    As Long
 Public RowLast     As Long
 
@@ -79,9 +79,9 @@ Private Sub AssignVariables()
     If RowLast > startLine And EndColumn = 1 Then
         RowLast = endLine - 1
     End If
-    RowCount = RowLast - RowFirst + 1
+    rowCount = RowLast - RowFirst + 1
     
-    SelectionLinesCode = cm.Lines(RowFirst, RowCount)
+    SelectionLinesCode = cm.Lines(RowFirst, rowCount)
     
 
     If ColumnLast - ColumnFirst = 0 Then
@@ -93,7 +93,7 @@ Private Sub AssignVariables()
     SelectionAfter = Mid(cm.Lines(RowLast, 1), ColumnLast) ' + IIf(Len(Me.Selection) > 0, 1, 0))
     SelectionBefore = Mid(cm.Lines(RowFirst, 1), 1, ColumnFirst - 1)
     
-    If RowCount = 1 And (ColumnLast - ColumnFirst > 0) Then
+    If rowCount = 1 And (ColumnLast - ColumnFirst > 0) Then
         SelectionLength = ColumnLast - ColumnFirst
     Else
         SelectionLength = Len(SelectionLinesCode) - Len(SelectionBefore) - Len(SelectionAfter) - 1 - Len(CountOfCharacters(Selection, vbNewLine)) * 2
@@ -169,7 +169,7 @@ Public Sub DimSeparate()
     Dim Code As String:         Code = SelectionLinesCode
     Dim FirstLine As Long:      FirstLine = RowFirst
     Dim iSpace As Long
-    Dim iCount As Long:         iCount = RowCount
+    Dim iCount As Long:         iCount = rowCount
     
     If iCount = 1 Then
         iSpace = IndentationCount(cm.Lines(FirstLine, 1))
@@ -193,7 +193,7 @@ End Sub
 Sub DimMerge()
     Dim Code      As String:   Code = SelectionLinesCode
     Dim FirstLine As Long:     FirstLine = RowFirst
-    Dim iCount    As Long:     iCount = RowCount
+    Dim iCount    As Long:     iCount = rowCount
     Dim iSpace    As Long:     iSpace = IndentationCount(cm.Lines(FirstLine, 1))
     Code = cm.Lines(FirstLine, iCount)
     If Code Like "*" & vbNewLine Then Code = Left(Code, Len(Code) - Len(vbNewLine))
@@ -250,8 +250,8 @@ Public Sub Inject(str As String)
     Dim Code    As String: Code = SelectionBefore & str & SelectionAfter
     Dim endLine As Long
     'catch error when selected all lines
-    If RowCount > cm.CountOfLines Then endLine = endLine - 1
-    cm.DeleteLines RowFirst, RowCount
+    If rowCount > cm.CountOfLines Then endLine = endLine - 1
+    cm.DeleteLines RowFirst, rowCount
     cm.InsertLines RowFirst, Code
     SetSelection RowFirst, _
                  ColumnFirst, _
@@ -375,7 +375,7 @@ Public Sub Substitute(oldValue As String, NewValue As String, Optional count As 
     Code = SelectionBefore & _
            Replace(str, oldValue, NewValue, , count, vbTextCompare) & _
            SelectionAfter
-    cm.DeleteLines RowFirst, RowCount
+    cm.DeleteLines RowFirst, rowCount
     cm.InsertLines RowFirst, Code
     SetSelection RowFirst, _
                  ColumnFirst, _
@@ -419,7 +419,7 @@ Public Sub Sort(delimeter As String)
            SelectionAfter
 
            
-    cm.DeleteLines RowFirst, RowCount
+    cm.DeleteLines RowFirst, rowCount
     cm.InsertLines RowFirst, Code
     SetSelection RowFirst, _
                   ColumnFirst, _
@@ -446,7 +446,7 @@ Public Sub Encapsulate(Before As String, After As String)
     Code = SelectionBefore & _
            Before & str & After & _
            SelectionAfter
-    cm.DeleteLines RowFirst, RowCount
+    cm.DeleteLines RowFirst, rowCount
     cm.InsertLines RowFirst, Code
     SetSelection RowFirst, ColumnFirst, RowLast, ColumnLast + 2
 End Sub
@@ -476,7 +476,7 @@ Public Sub EncapsulateMultiple(Before As String, After As String, Splitter As St
     Next
     Code = Join(arr, Splitter)
     Code = SelectionBefore & Code & SelectionAfter
-    cm.DeleteLines RowFirst, RowCount
+    cm.DeleteLines RowFirst, rowCount
     cm.InsertLines RowFirst, Code
     SetSelection RowFirst, ColumnFirst, RowLast, ColumnLast + ((Len(Before) + (Len(After))) * (UBound(arr) + 1))
 End Sub
@@ -488,13 +488,13 @@ Public Sub UnFoldLine()
            Join(Split(str, "_" & vbNewLine), " ") & _
            SelectionAfter
 
-    cm.DeleteLines RowFirst, RowCount
+    cm.DeleteLines RowFirst, rowCount
     cm.InsertLines RowFirst, Code
     SetSelection RowFirst, ColumnFirst, RowFirst, 10000
 End Sub
 
 Public Sub FoldLine()
-    If RowCount > 1 Then UnFoldLine
+    If rowCount > 1 Then UnFoldLine
     If InStr(1, Me.Selection, ",") = 0 And InStr(1, Me.Selection, "(") = 0 Then
         SetSelection RowFirst, ColumnFirst, RowFirst, 10000
 '        Debug.Print "Select a whole line or part of a line with comma separated arguments."
@@ -510,7 +510,7 @@ Public Sub FoldLine()
     Code = SelectionBefore & _
            str & _
            SelectionAfter
-    cm.DeleteLines RowFirst, RowCount
+    cm.DeleteLines RowFirst, rowCount
     cm.InsertLines RowFirst, Code
     SetSelection RowFirst, ColumnFirst, RowFirst + UBound(Split(Code, " _" & vbNewLine)), 10000
 End Sub
@@ -530,7 +530,7 @@ Public Sub Rotate(delim As String)
         s = Join(ArrayRotate(Split(s, delim)), delim)
         s = SelectionBefore & s & SelectionAfter
     Dim idx As Long:    idx = RowFirst
-    cm.DeleteLines idx, RowCount
+    cm.DeleteLines idx, rowCount
     cm.InsertLines idx, s
     SetSelection RowFirst, ColumnFirst, RowLast, ColumnLast
 End Sub
@@ -561,7 +561,7 @@ End Sub
 
 Sub Duplicate()
     Dim s As String
-    If RowCount > 1 Then
+    If rowCount > 1 Then
         SelectRows
         s = Selection & vbNewLine & Selection
     Else
@@ -582,7 +582,7 @@ Sub Duplicate()
 End Sub
 
 Sub Increment()
-    If RowCount > 1 Then Exit Sub
+    If rowCount > 1 Then Exit Sub
     Dim RowNumber As Long:      RowNumber = RowFirst
     Dim AP        As String:    AP = ActiveProcedure:       If AP = "" Then Exit Sub
     Dim Limit     As Long:      Limit = aProcedure.Init(, , AP).LineIndex(Body_First_AfterComments)
@@ -604,7 +604,7 @@ End Sub
 Sub Cut()
     CLIP SelectionLinesCode
     Debug.Print Selection
-    cm.DeleteLines RowFirst, RowCount
+    cm.DeleteLines RowFirst, rowCount
     SetSelection RowFirst, 1, RowFirst, 1
     AssignVariables
 End Sub
@@ -828,7 +828,7 @@ Sub Align(AlignString As String, SearchFromLeft As Boolean, Optional AlignAtColu
 
     Dim s As String:        s = StringFormatAlignRowsElements(SelectionLinesCode, AlignString, SearchFromLeft, AlignAtColumn)
     Dim LineFirst As Long:  LineFirst = RowFirst
-    oModule.CodeModule.DeleteLines LineFirst, RowCount
+    oModule.CodeModule.DeleteLines LineFirst, rowCount
     oModule.CodeModule.InsertLines LineFirst, s
     SelectRows
 End Sub

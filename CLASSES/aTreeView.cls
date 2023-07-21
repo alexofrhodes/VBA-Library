@@ -102,25 +102,27 @@ End Sub
 '* Modified   : Date and Time       Author              Description
 '* Updated    : 19-12-2022 15:09    Alex                (TVColumnsCount)
 
-Public Function ColumnCount()
-    Dim Output As Long
+Public Function columnCount()
+    Dim output As Long
     Dim counter As Long
     Dim nod As Node
     For Each nod In TV.Nodes
         counter = GetLevel(nod)
-        If counter > Output Then Output = Output + 1
+        If counter > output Then output = output + 1
     Next
-    ColumnCount = Output
+    columnCount = output
 End Function
 
-Public Function RowCount()
-    RowCount = TV.Nodes.count
+Public Function rowCount()
+    rowCount = TV.Nodes.count
 End Function
 
 '* Modified   : Date and Time       Author              Description
-'* Updated    : 19-12-2022 16:33    Alex                (TreeviewToArray)
+'* Updated    : 19-12-2022 16:33    Alex
+'* Updated    : 19-07-2023 10:23    Alex                added base 1 : ReDim output(1 To rowCount, 1 To ColumnCount)
 
 Function ToArray() As Variant
+'@LastModified 2307191023
 'Modified from https://www.excelforum.com/excel-programming-vba-macros/1102518-transfer-all-nodes-from-a-userform-treeview-into-a-treeview-on-a-worksheet-with-vba.html
    Dim nROOT            As Node
    Dim nX               As Node
@@ -138,15 +140,15 @@ Function ToArray() As Variant
    ' Get the first root node
    Set nROOT = nX.Root.FirstSibling
    'Create array placeholder
-   Dim Output()
-   ReDim Output(RowCount, ColumnCount)
+   Dim output()
+   ReDim output(1 To rowCount, 1 To columnCount)
    'Drill down and export
    Do
-      TreeviewArrayAppend 0, iRow, nROOT, Output, True
+      TreeviewArrayAppend 0, iRow, nROOT, output, True
       Set nROOT = nROOT.Next
    Loop While Not (nROOT Is Nothing)
 
-    ToArray = Output
+    ToArray = output
 Finally:
    'Cleanup
 
@@ -159,19 +161,19 @@ Catch:
 End Function
 
 Private Sub TreeviewArrayAppend(ByVal lngLevel As Integer, _
-                     ByRef lngRow As Integer, _
-                     ByRef n As Node, _
-                     ByRef TargetArray As Variant, _
-                     ByVal includeChildren As Boolean)
+                                ByRef lngRow As Integer, _
+                                ByRef N As Node, _
+                                ByRef TargetArray As Variant, _
+                                ByVal includeChildren As Boolean)
 
-      TargetArray(lngRow + 1, lngLevel + 1) = n.TEXT
+      TargetArray(lngRow + 1, lngLevel + 1) = N.text
       lngRow = lngRow + 1
       ' If there are child nodes then call recusively
       lngLevel = lngLevel + 1
       If includeChildren Then
-        If n.Children > 0 Then
+        If N.Children > 0 Then
            Dim nC As Node
-           Set nC = n.child
+           Set nC = N.child
            Do
               TreeviewArrayAppend lngLevel, lngRow, nC, TargetArray, True
               Set nC = nC.Next
@@ -199,15 +201,15 @@ Public Function TreeviewArrayPaths() As Variant  '1d
    ' Get the first root node
    Set nROOT = nX.Root.FirstSibling
    'Create array placeholder
-   Dim Output()
-   ReDim Output(RowCount(TV))
+   Dim output()
+   ReDim output(rowCount)
    'Drill down and export
    Do
-      TreeviewArrayAppendPaths 0, iRow, nROOT, Output
+      TreeviewArrayAppendPaths 0, iRow, nROOT, output
       Set nROOT = nROOT.Next
    Loop While Not (nROOT Is Nothing)
 
-    TreeviewArrayPaths = Output
+    TreeviewArrayPaths = output
 Finally:
    'Cleanup
 
@@ -221,16 +223,16 @@ End Function
 
 Public Sub TreeviewArrayAppendPaths(ByVal lngLevel As Integer, _
                      ByRef lngRow As Integer, _
-                     ByRef n As Node, _
+                     ByRef N As Node, _
                      ByRef TargetArray As Variant)
 
-    TargetArray(lngRow) = n.fullPath
+    TargetArray(lngRow) = N.fullPath
     lngRow = lngRow + 1
     ' If there are child nodes then call recusively
     lngLevel = lngLevel + 1
-    If n.Children > 0 Then
+    If N.Children > 0 Then
        Dim nC As Node
-       Set nC = n.child
+       Set nC = N.child
        Do
           TreeviewArrayAppendPaths lngLevel, lngRow, nC, TargetArray
           Set nC = nC.Next
@@ -239,56 +241,56 @@ Public Sub TreeviewArrayAppendPaths(ByVal lngLevel As Integer, _
 End Sub
 
 Public Sub SelectNextNode()
-    If Not TV.SelectedItem.child Is Nothing Then
-        TV.SelectedItem.child.Selected = True
-    ElseIf Not TV.SelectedItem.Next Is Nothing Then
-        TV.SelectedItem.Next.Selected = True
+    If Not TV.selectedItem.child Is Nothing Then
+        TV.selectedItem.child.Selected = True
+    ElseIf Not TV.selectedItem.Next Is Nothing Then
+        TV.selectedItem.Next.Selected = True
     Else
-        If Not TV.SelectedItem.Parent.Next Is Nothing Then
-            TV.SelectedItem.Parent.Next.Selected = True
+        If Not TV.selectedItem.Parent.Next Is Nothing Then
+            TV.selectedItem.Parent.Next.Selected = True
         Else
-            TV.SelectedItem.Parent.Parent.Next.Selected = True
+            TV.selectedItem.Parent.Parent.Next.Selected = True
         End If
     End If
 End Sub
 
 Public Sub SelectPreviousNode()
-    If Not TV.SelectedItem.Previous Is Nothing Then
-        If Not TV.SelectedItem.Previous.child Is Nothing Then
-            TV.SelectedItem.Previous.child.LastSibling.Selected = True
-            Do While Not TV.SelectedItem.child Is Nothing
-                TV.SelectedItem.child.LastSibling.Selected = True
+    If Not TV.selectedItem.Previous Is Nothing Then
+        If Not TV.selectedItem.Previous.child Is Nothing Then
+            TV.selectedItem.Previous.child.LastSibling.Selected = True
+            Do While Not TV.selectedItem.child Is Nothing
+                TV.selectedItem.child.LastSibling.Selected = True
             Loop
         Else
-            TV.SelectedItem.Previous.Selected = True
+            TV.selectedItem.Previous.Selected = True
         End If
-    ElseIf Not TV.SelectedItem.Parent Is Nothing Then
-        TV.SelectedItem.Parent.Selected = True
+    ElseIf Not TV.selectedItem.Parent Is Nothing Then
+        TV.selectedItem.Parent.Selected = True
     End If
 End Sub
 
 Public Sub SelectNodes(SingleSelect As Boolean, lvl1crit As String, Optional CriteriaByLevel As Variant)
     Dim nd As Node
     For Each nd In TV.Nodes
-        If nd.TEXT = lvl1crit Then
+        If nd.text = lvl1crit Then
             nd.Selected = True
             nd.Expanded = True
             If SingleSelect = True Then Exit For
         End If
     Next
-    Dim x As Long
-    x = nd.index + 1
+    Dim X As Long
+    X = nd.index + 1
     Dim crit
     Dim i As Long
     For Each crit In CriteriaByLevel
-        For i = x To TV.Nodes.count
-            If TV.Nodes.item(i).TEXT = crit Then
+        For i = X To TV.Nodes.count
+            If TV.Nodes.item(i).text = crit Then
                 TV.Nodes.item(i).Selected = True
                 TV.Nodes.item(i).Expanded = True
                 If SingleSelect = True Then Exit For
             End If
         Next
-        x = i + 1
+        X = i + 1
     Next
 End Sub
 
@@ -297,7 +299,7 @@ Public Sub ApplyStandardStyle()
         .Sorted = False
         .Appearance = ccFlat
         .LineStyle = tvwRootLines
-        .style = tvwTreelinesPlusMinusPictureText
+        .Style = tvwTreelinesPlusMinusPictureText
         .Font.Size = 10
         .indentation = 2
     End With
@@ -324,20 +326,19 @@ Sub Clear()
         TV.Nodes.Remove i
     Next
 End Sub
-
 Public Sub ChildrenCheck(Parent As MSComctlLib.Node, check As Boolean)
-    Rem In userform:
-    Rem Sub treeview1_NodeCheck(ByVal node As MSComctlLib.node)
-    Rem     TreeviewNodeCheck node, node.Checked
-    Rem End Sub
+    ' In userform:
+    ' Sub treeview1_NodeCheck(ByVal node As MSComctlLib.Node)
+    '     TreeviewNodeCheck node, node.Checked
+    ' End Sub
+    
     Dim child As MSComctlLib.Node
     Parent.Checked = check
+    
+    ' Recursively check child nodes
     Set child = Parent.child
     While Not child Is Nothing
         ChildrenCheck child, check
-        Do While Not child.child Is Nothing
-            ChildrenCheck child, check
-        Loop
         Set child = child.Next
     Wend
 End Sub
@@ -419,71 +420,72 @@ Public Sub LoadTreeArray( _
 End Sub
 
 Sub LoadVBProjects()
+    Me.Clear
     Dim nP As Node
     Dim nM As Node
     Dim nS As Node
-    Dim x, y, s, P As Variant
+    Dim X, Y, s, p As Variant
     Dim Module As VBComponent
     On Error Resume Next
     Dim element
-    For Each x In Array(Workbooks, AddIns)
-        For Each y In x
-            If Not WorkbookProjectProtected(Workbooks(y.Name)) Then
+    For Each X In Array(Workbooks, AddIns)
+        For Each Y In X
+            If Not WorkbookProjectProtected(Workbooks(Y.Name)) Then
                 If Err.Number = 0 Then
-                    Set nP = TV.Nodes.Add(, , , y.Name)
+                    Set nP = TV.Nodes.Add(, , , Y.Name)
                     For Each element In Array(vbext_ct_Document, vbext_ct_MSForm, vbext_ct_StdModule, vbext_ct_ClassModule)
-                        For Each Module In Workbooks(y.Name).VBProject.VBComponents
+                        For Each Module In Workbooks(Y.Name).VBProject.VBComponents
                             If Module.Type = element Then
                                 Set nM = TV.Nodes.Add(nP, tvwChild, , aModule.Init(Module).Name)
-                                For Each P In ProceduresOfModule(Module)
-                                    Set nS = TV.Nodes.Add(nM, tvwChild, , CStr(P))
-                                Next P
+                                For Each p In ProceduresOfModule(Module)
+                                    Set nS = TV.Nodes.Add(nM, tvwChild, , CStr(p))
+                                Next p
                             End If
                         Next Module
                     Next
                 End If
             End If
             Err.Clear
-        Next y
-    Next x
+        Next Y
+    Next X
 End Sub
 
 Sub ActivateProjectElement()
     Dim Module As VBComponent
     Dim i As Long
-    Select Case GetLevel(TV.SelectedItem)
+    Select Case GetLevel(TV.selectedItem)
     Case Is = 1
     Case Is = 2
-        With TV.SelectedItem
+        With TV.selectedItem
             On Error Resume Next
-            Set Module = Workbooks(.Parent.TEXT).VBProject.VBComponents(.TEXT)
+            Set Module = Workbooks(.Parent.text).VBProject.VBComponents(.text)
             On Error GoTo 0
-            If Module Is Nothing Then Set Module = Workbooks(.Parent.TEXT).VBProject.VBComponents(Workbooks(.Parent.TEXT).Sheets(.TEXT).codeName)
+            If Module Is Nothing Then Set Module = Workbooks(.Parent.text).VBProject.VBComponents(Workbooks(.Parent.text).Sheets(.text).codeName)
             aModule.Init(Module).Activate
         End With
     Case Is = 3
-        With TV.SelectedItem
+        With TV.selectedItem
         On Error Resume Next
-        Set Module = Workbooks(.Parent.Parent.TEXT).VBProject.VBComponents(.Parent.TEXT)
+        Set Module = Workbooks(.Parent.Parent.text).VBProject.VBComponents(.Parent.text)
         On Error GoTo 0
         If Module Is Nothing Then Set Module = _
-            Workbooks(.Parent.Parent.TEXT).VBProject.VBComponents(Workbooks(.Parent.Parent.TEXT).Sheets(.Parent.TEXT).codeName)
+            Workbooks(.Parent.Parent.text).VBProject.VBComponents(Workbooks(.Parent.Parent.text).Sheets(.Parent.text).codeName)
             aModule.Init(Module).Activate
             For i = 1 To Module.CodeModule.CountOfLines
-                If InStr(1, Module.CodeModule.Lines(i, 1), "Sub " & .TEXT) > 0 Or _
-                    InStr(1, Module.CodeModule.Lines(i, 1), "Function " & .TEXT) > 0 Then
+                If InStr(1, Module.CodeModule.Lines(i, 1), "Sub " & .text) > 0 Or _
+                    InStr(1, Module.CodeModule.Lines(i, 1), "Function " & .text) > 0 Then
                     Module.CodeModule.CodePane.SetSelection i, 1, i, 1
                     Exit Sub
                 End If
             Next
         End With
     Case Is = 4
-        With TV.SelectedItem
-            Set Module = Workbooks(.Parent.Parent.Parent.TEXT).VBProject.VBComponents(.Parent.Parent.TEXT)
+        With TV.selectedItem
+            Set Module = Workbooks(.Parent.Parent.Parent.text).VBProject.VBComponents(.Parent.Parent.text)
             aModule.Init(Module).Activate
             DoEvents
             For i = 1 To Module.CodeModule.CountOfLines
-                If Trim(Module.CodeModule.Lines(i, 1)) = .TEXT Then
+                If Trim(Module.CodeModule.Lines(i, 1)) = .text Then
                     Module.CodeModule.CodePane.SetSelection i, 1, i, 1
                     Exit Sub
                 End If
@@ -497,20 +499,20 @@ Public Sub FindCodeEverywhere(F As String)
     Dim nM As Node
     Dim nS As Node
     Dim nF As Node
-    Dim x, y, s, P As Variant
+    Dim X, Y, s, p As Variant
     Dim Module As VBComponent
     Dim am As aModule
     Dim AP As aProcedure
     Dim aw As aWorkbook
     Dim i As Long
     On Error Resume Next
-    For Each x In Array(Workbooks, AddIns)
-        For Each y In x
-            If Not WorkbookProjectProtected(Workbooks(y.Name)) Then
+    For Each X In Array(Workbooks, AddIns)
+        For Each Y In X
+            If Not WorkbookProjectProtected(Workbooks(Y.Name)) Then
                 If Err.Number = 0 Then
-                    Set aw = aWorkbook.Init(Workbooks(y.Name))
+                    Set aw = aWorkbook.Init(Workbooks(Y.Name))
                     If UBound(Filter(Split(aw.Code, vbNewLine), F, True, vbTextCompare)) > -1 Then
-                        Set nP = TV.Nodes.Add(, , , y.Name)
+                        Set nP = TV.Nodes.Add(, , , Y.Name)
                         For Each am In aModules.Init(aw.item).Items
                             If am.Contains(F, False, False, True) Then
                                 Set nM = TV.Nodes.Add(nP, tvwChild, , am.Name)
@@ -529,8 +531,8 @@ Public Sub FindCodeEverywhere(F As String)
                 End If
             End If
             Err.Clear
-        Next y
-    Next x
+        Next Y
+    Next X
 End Sub
 
 Sub ImageListLoadProjectIcons(imgList As ImageList)
@@ -559,33 +561,33 @@ Sub TreeviewAssignProjectImages()
     For i = 1 To TV.Nodes.count
         Select Case GetLevel(TV.Nodes.item(i))
         Case 1
-            If InStr(1, TV.Nodes.item(i).TEXT, ".") = 0 Then GoTo SKIP
-            TV.Nodes.item(i).Image = tvImages.tvProject
+            If InStr(1, TV.Nodes.item(i).text, ".") = 0 Then GoTo SKIP
+            TV.Nodes.item(i).image = tvImages.tvProject
         Case 2
-            Set TargetWorkbook = Workbooks(TV.Nodes.item(i).Parent.TEXT)
+            Set TargetWorkbook = Workbooks(TV.Nodes.item(i).Parent.text)
             If InStr(1, TargetWorkbook.Name, ".") = 0 Then GoTo SKIP
-            sModuleName = TV.Nodes.item(i).TEXT
+            sModuleName = TV.Nodes.item(i).text
             Set Module = Nothing
             On Error Resume Next
             Set Module = TargetWorkbook.VBProject.VBComponents(sModuleName)
             On Error GoTo 0
             If Module Is Nothing Then
-                Set Module = ModuleOfWorksheet(TargetWorkbook.Worksheets(TV.Nodes.item(i).TEXT))
+                Set Module = ModuleOfWorksheet(TargetWorkbook.Worksheets(TV.Nodes.item(i).text))
             End If
             Select Case aModule.Init(Module).TypeToString
             Case "Document"
-                TV.Nodes.item(i).Image = tvImages.tvSheet
+                TV.Nodes.item(i).image = tvImages.tvSheet
             Case "UserForm"
-                TV.Nodes.item(i).Image = tvImages.tvForm
+                TV.Nodes.item(i).image = tvImages.tvForm
             Case "Module"
-                TV.Nodes.item(i).Image = tvImages.tvModule
+                TV.Nodes.item(i).image = tvImages.tvModule
             Case "Class"
-                TV.Nodes.item(i).Image = tvImages.tvClass
+                TV.Nodes.item(i).image = tvImages.tvClass
             End Select
         Case 3
-            TV.Nodes.item(i).Image = tvImages.tvMacro
+            TV.Nodes.item(i).image = tvImages.tvMacro
         Case 4
-            TV.Nodes.item(i).Image = tvImages.tvText
+            TV.Nodes.item(i).image = tvImages.tvText
         End Select
 SKIP:
     Next i

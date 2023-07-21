@@ -148,7 +148,7 @@ End Function
 Public Sub Test()
 End Sub
 
-Public Sub BuildMenu()
+Public Sub BuildMenu(createSidebarMinimizers As Boolean)
     Dim MP As MultiPage: Set MP = oMultiPage
     oForm.Height = MP.Height + oForm.Height - oForm.InsideHeight
     oForm.BackColor = MyColors.FormBackgroundDarkGray
@@ -173,7 +173,7 @@ Public Sub BuildMenu()
         .Top = 0
 '        .Width = oForm.InsideWidth - SidebarLeft.Width
         .Height = oForm.InsideHeight
-        .style = fmTabStyleNone
+        .Style = fmTabStyleNone
         Dim i As Long
         For i = 0 To MP.Pages.count - 1
             SetBackColor i, BackColor:=MyColors.FormBackgroundDarkGray
@@ -185,6 +185,7 @@ Public Sub BuildMenu()
     Dim Page
     For Each Page In MP.Pages
         Set lbl = SidebarLeft.Controls.Add("forms.label.1")
+        lbl.Name = "sidebarLabel" & Page.Name
         With lbl
             If Page.index = 0 Then .BackColor = MyColors.FormSelectedGreen
             .BorderStyle = fmBorderStyleSingle
@@ -206,13 +207,13 @@ Public Sub BuildMenu()
 '        Set MenuLabels(MenuLabelCounter).MenuLabelEvent = lbl
     Next
     
-    Dim ctrl As control
+    Dim Ctrl As control
     Dim maxWidth As Long: maxWidth = 0
-    For Each ctrl In SidebarLeft.Controls
-        If maxWidth < ctrl.Width Then maxWidth = ctrl.Width
+    For Each Ctrl In SidebarLeft.Controls
+        If maxWidth < Ctrl.Width Then maxWidth = Ctrl.Width
     Next
-    For Each ctrl In SidebarLeft.Controls
-        ctrl.Width = maxWidth + 12
+    For Each Ctrl In SidebarLeft.Controls
+        Ctrl.Width = maxWidth + 12
     Next
     SidebarLeft.Width = maxWidth + 12
     
@@ -275,32 +276,34 @@ Public Sub BuildMenu()
     If Not SidebarRight Is Nothing Then sbRightWidth = SidebarRight.Width
     If Not SidebarBottom Is Nothing Then sbBottomHeight = SidebarBottom.Height
 
-    Dim item
-    For Each item In Array("Left", "Right")
-        If Not (item = "Right" And SidebarRight Is Nothing) Then
-            Set lbl = oForm.Controls("Sidebar" & item).Controls.Add("forms.label.1", "ResizeSidebar" & item)
-            With lbl
-                .Font.Name = "Consolas"
-                .AutoSize = False
-                .Width = oForm.Controls("Sidebar" & item).Width
-                .Height = 16
-                .Left = 0
-                .Top = oForm.Controls("Sidebar" & item).Top + oForm.Controls("Sidebar" & item).Height - lbl.Height '- 6
-                .ForeColor = vbWhite
-                .Font.Bold = True
-                .Font.Size = 14
-                .Caption = "<"
-            End With
-        End If
-    Next
+    If createSidebarMinimizers Then
+        Dim item
+        For Each item In Array("Left", "Right")
+            If Not (item = "Right" And SidebarRight Is Nothing) Then
+                Set lbl = oForm.Controls("Sidebar" & item).Controls.Add("forms.label.1", "ResizeSidebar" & item)
+                With lbl
+                    .Font.Name = "Consolas"
+                    .AutoSize = False
+                    .Width = oForm.Controls("Sidebar" & item).Width
+                    .Height = 16
+                    .Left = 0
+                    .Top = oForm.Controls("Sidebar" & item).Top + oForm.Controls("Sidebar" & item).Height - lbl.Height '- 6
+                    .ForeColor = vbWhite
+                    .Font.Bold = True
+                    .Font.Size = 14
+                    .Caption = "<"
+                End With
+            End If
+        Next
+    End If
     
-    AddContactsToSidebarBottom
+'    AddContactsToSidebarBottom
 '    AddThemeControlsSidbarRight '@TODO FIX
     
-    For Each ctrl In oForm.Controls
-        If TypeName(ctrl) = "Label" Then
-            ctrl.MouseIcon = LoadPicture(ThisWorkbook.Path & "\img\Hand Cursor Pointer.ico")
-            ctrl.MousePointer = fmMousePointerCustom
+    For Each Ctrl In oForm.Controls
+        If TypeName(Ctrl) = "Label" Then
+            Ctrl.MouseIcon = LoadPicture(ThisWorkbook.Path & "\img\Hand Cursor Pointer.ico")
+            Ctrl.MousePointer = fmMousePointerCustom
         End If
     Next
     
@@ -365,9 +368,9 @@ End Sub
 
 Public Sub Emitter_LabelClick(ByRef Label As MSForms.Label)
     If InStr(1, Label.Tag, "page-") > 0 Then
-        Dim ctrl As control
-        For Each ctrl In oForm.Controls
-            If InStr(1, ctrl.Tag, "page-") > 0 Then ctrl.BackColor = &H534848
+        Dim Ctrl As control
+        For Each Ctrl In oForm.Controls
+            If InStr(1, Ctrl.Tag, "page-") > 0 Then Ctrl.BackColor = &H534848
         Next
         Label.BackColor = &H80B91E
         If InStr(1, Label.Tag, "page-") > 0 Then

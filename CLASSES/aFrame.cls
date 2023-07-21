@@ -52,20 +52,20 @@ Public Sub ResizeToFitControls(Optional marginRight = 0, Optional marginBottom =
 End Sub
 
 Public Sub AddThemeControls()
-    Dim ctrl As MSForms.control
+    Dim Ctrl As MSForms.control
     Dim i As Long
     For i = 1 To 19
-        Set ctrl = oFrame.Controls.Add("Forms.Label.1")
-        ctrl.Visible = False
-        ctrl.Top = i * ctrl.Height
-        ctrl.Left = 12
-        ctrl.Height = 20
-        ctrl.Width = 120
-        ctrl.Font.Size = 9
-        ctrl.Font.Name = "Consolas"
-        ctrl.WordWrap = False
-        ctrl.Caption = aSwitch(i, 1, "ThemeBlackAndBlueDark", 2, "ThemeBlackAndBrownDark", 3, "ThemeBlackAndGrayDark", 4, "ThemeBlackAndGreenDark", 5, "ThemeBlackAndOrangeDark", 6, "ThemeBlackAndPinkDark", 7, "ThemeBlackAndPurpleDark", 8, "ThemeBlackAndRedDark", 9, "ThemeBlackAndYellowDark", 10, "ThemeBlueAndGreenLight", 11, "ThemeWhiteAndBlueLight", 12, "ThemeWhiteAndBrownLight", 13, "ThemeWhiteAndGrayLight", 14, "ThemeWhiteAndGreenLight", 15, "ThemeWhiteAndOrangeLight", 16, "ThemeWhiteAndPinkLight", 17, "ThemeWhiteAndPurpleLight", 18, "ThemeWhiteAndRedLight", 19, "ThemeWhiteAndYellowLight")
-        ctrl.Visible = True
+        Set Ctrl = oFrame.Controls.Add("Forms.Label.1")
+        Ctrl.Visible = False
+        Ctrl.Top = i * Ctrl.Height
+        Ctrl.Left = 12
+        Ctrl.Height = 20
+        Ctrl.Width = 120
+        Ctrl.Font.Size = 9
+        Ctrl.Font.Name = "Consolas"
+        Ctrl.WordWrap = False
+        Ctrl.Caption = aSwitch(i, 1, "ThemeBlackAndBlueDark", 2, "ThemeBlackAndBrownDark", 3, "ThemeBlackAndGrayDark", 4, "ThemeBlackAndGreenDark", 5, "ThemeBlackAndOrangeDark", 6, "ThemeBlackAndPinkDark", 7, "ThemeBlackAndPurpleDark", 8, "ThemeBlackAndRedDark", 9, "ThemeBlackAndYellowDark", 10, "ThemeBlueAndGreenLight", 11, "ThemeWhiteAndBlueLight", 12, "ThemeWhiteAndBrownLight", 13, "ThemeWhiteAndGrayLight", 14, "ThemeWhiteAndGreenLight", 15, "ThemeWhiteAndOrangeLight", 16, "ThemeWhiteAndPinkLight", 17, "ThemeWhiteAndPurpleLight", 18, "ThemeWhiteAndRedLight", 19, "ThemeWhiteAndYellowLight")
+        Ctrl.Visible = True
     Next
 '
 '    On Error Resume Next

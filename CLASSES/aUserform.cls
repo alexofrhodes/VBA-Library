@@ -125,7 +125,7 @@ Private Const HWND_TOPMOST = -1
 Private Const HWND_NOTOPMOST = -2
 
 #If VBA7 Then
-    Private Declare PtrSafe Function SetWindowPos Lib "user32" (ByVal hwnd As LongPtr, ByVal hwndInsertAfter As LongPtr, ByVal x As LongPtr, ByVal y As LongPtr, ByVal cx As LongPtr, ByVal cy As LongPtr, ByVal uFlags As LongPtr) As Long
+    Private Declare PtrSafe Function SetWindowPos Lib "user32" (ByVal hwnd As LongPtr, ByVal hwndInsertAfter As LongPtr, ByVal X As LongPtr, ByVal Y As LongPtr, ByVal cx As LongPtr, ByVal cy As LongPtr, ByVal uFlags As LongPtr) As Long
 #Else
     Private Declare Function SetWindowPos Lib "user32" (ByVal hWnd As LongPtr, ByVal hWndInsertAfter As LongPtr, ByVal X As LongPtr, ByVal Y As LongPtr, ByVal cx As LongPtr, ByVal cy As LongPtr, ByVal uFlags As LongPtr) As Long
 #End If
@@ -248,8 +248,8 @@ Rem By Robert Todaer
     Loop Until AllTransitionsComplete(CVar(Elements))
 End Sub
 
-Public Function Effect(obj As Object, Property As String, Destination As Double, MilSecs As Double) As scripting.Dictionary
-    Dim Temp As New scripting.Dictionary
+Public Function Effect(obj As Object, Property As String, Destination As Double, MilSecs As Double) As Scripting.Dictionary
+    Dim Temp As New Scripting.Dictionary
     Set Temp("obj") = obj
     Temp("property") = Property
     Temp("startValue") = CallByName(obj, Property, VbGet)
@@ -299,13 +299,13 @@ Private Function AllTransitionsComplete(Elements As Variant) As Boolean
     AllTransitionsComplete = True
 End Function
 
-Private Function TransitionComplete(ByVal el As scripting.Dictionary) As Boolean
+Private Function TransitionComplete(ByVal el As Scripting.Dictionary) As Boolean
     If Math.Round(el("destination")) = Math.Round(CallByName(el("obj"), el("property"), VbGet)) Then
         TransitionComplete = True
     End If
 End Function
 
-Private Function IncRementElement(ByVal el As scripting.Dictionary, CurrentTime As Double) As Boolean
+Private Function IncRementElement(ByVal el As Scripting.Dictionary, CurrentTime As Double) As Boolean
     '@INCLUDE TransitionComplete
     '@INCLUDE easeInAndOut
     Dim IncRementValue As Double
@@ -314,7 +314,7 @@ Private Function IncRementElement(ByVal el As scripting.Dictionary, CurrentTime 
         Exit Function
     End If
     Dim o As Object
-    Dim P As String
+    Dim p As String
     Dim Value As Double
     Dim d As Double
     IncRementValue = easeInAndOut(CurrentTime, el("startValue"), el("travel"), el("milSec"))
@@ -578,14 +578,14 @@ Private Function GetSystemErrorMessageText(ErrorNumber As Long) As String
     End If
 End Function
 
-Private Function TrimToNull(TEXT As String) As String
+Private Function TrimToNull(text As String) As String
     Rem  Returns all the text in Text to the left of the vbNullChar
     Dim NullCharIndex As Integer
-    NullCharIndex = InStr(1, TEXT, vbNullChar, vbTextCompare)
+    NullCharIndex = InStr(1, text, vbNullChar, vbTextCompare)
     If NullCharIndex > 0 Then
-        TrimToNull = Left(TEXT, NullCharIndex - 1)
+        TrimToNull = Left(text, NullCharIndex - 1)
     Else
-        TrimToNull = TEXT
+        TrimToNull = text
     End If
 End Function
 
@@ -603,9 +603,10 @@ Public Sub SaveOptions( _
     Optional includeTextBox As Boolean = True, _
     Optional includeListbox As Boolean = True, _
     Optional includeToggleButton As Boolean = True, _
-    Optional includeCombobox As Boolean = True)
+    Optional includeCombobox As Boolean = True, _
+    Optional includeMultipage As Boolean = True)
                 
-    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\configurations\"
+    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\config\"
     FoldersCreate configFolder
     Dim iniFile As String: iniFile = configFolder & "UserformSettings.ini"
     Dim Key, Value
@@ -623,14 +624,18 @@ Public Sub SaveOptions( _
             If Not includeToggleButton Then GoTo SKIP
         ElseIf TypeName(c) Like "ComboBox" Then
             If Not includeCombobox Then GoTo SKIP
+        ElseIf TypeName(c) = "MultiPage" Then
+            If Not includeMultipage Then GoTo SKIP
         Else
             GoTo SKIP
         End If
         Key = c.Name
         Dim coll As New Collection
         Select Case TypeName(c)
-        Case "TextBox", "CheckBox", "OptionButton", "ToggleButton", "ComboBox"
+        Case "CheckBox", "OptionButton", "ToggleButton", "ComboBox", "MultiPage"
             IniWrite iniFile, oForm.Name, Key, c.Value
+        Case "TextBox"
+            IniWrite iniFile, oForm.Name, Key, VBA.Replace(c.Value, vbNewLine, "||")
         Case "ListBox"
             Set coll = aListBox.Init(c).selectedIndexes
             If coll.count > 0 Then
@@ -641,52 +646,12 @@ Public Sub SaveOptions( _
         End Select
 SKIP:
     Next
-    
-'=== OBSOLETE
-'
-'    Dim ws As Worksheet
-'    Set ws = CreateOrSetSheet(oForm.Name & "_Settings", ThisWorkbook)
-'    ws.Cells.Clear
-'    Dim coll As New Collection
-'    Dim cell As Range
-'    Set cell = ws.Cells(1, 1)
-'    Dim c As MSForms.control
-'    For Each c In oForm.Controls
-'        If TypeName(c) Like "CheckBox" Then
-'            If Not includeCheckbox Then GoTo SKIP
-'        ElseIf TypeName(c) Like "OptionButton" Then
-'            If Not includeOptionButton Then GoTo SKIP
-'        ElseIf TypeName(c) Like "TextBox" Then
-'            If Not includeTextBox Then GoTo SKIP
-'        ElseIf TypeName(c) = "ListBox" Then
-'            If Not includeListbox Then GoTo SKIP
-'        ElseIf TypeName(c) Like "ToggleButton" Then
-'            If Not includeToggleButton Then GoTo SKIP
-'        ElseIf TypeName(c) Like "ComboBox" Then
-'            If Not includeCombobox Then GoTo SKIP
-'        Else
-'            GoTo SKIP
-'        End If
-'        cell = c.Name
-'        Select Case TypeName(c)
-'        Case "TextBox", "CheckBox", "OptionButton", "ToggleButton", "ComboBox"
-'            cell.OFFSET(0, 1) = c.Value
-'        Case "ListBox"
-'            Set coll = aListBox.Init(c).selectedIndexes
-'            If coll.count > 0 Then
-'                cell.OFFSET(0, 1) = aCollection.Init(coll).ToString(",")
-'            Else
-'                cell.OFFSET(0, 1) = -1
-'            End If
-'        End Select
-'        Set cell = cell.OFFSET(1, 0)
-'SKIP:
-'    Next
+   
 End Sub
 
 Public Sub LoadOptions(ParamArray ExcludeThese() As Variant)
 'ExcludeThese:="ListBox1","TextBox1"     '<--control names
-    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\configurations\"
+    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\config\"
     FoldersCreate configFolder
     Dim iniFile As String: iniFile = configFolder & "UserformSettings.ini"
     If Not FileExists(iniFile) Then TxtOverwrite iniFile, ""
@@ -701,8 +666,10 @@ Public Sub LoadOptions(ParamArray ExcludeThese() As Variant)
         If Not TypeName(c) = "Nothing " Then
             If Not ArrayContains(Key, ExcludeThese) Then
                 Select Case TypeName(c)
-                Case "TextBox", "CheckBox", "OptionButton", "ToggleButton", "ComboBox"
+                Case "CheckBox", "OptionButton", "ToggleButton", "ComboBox", "MultiPage"
                     c.Value = Value
+                Case "TextBox"
+                    c.Value = VBA.Replace(Value, "||", vbNewLine)
                 Case "ListBox"
                     If InStr(1, Value, ",") > 0 Then
                         aListBox.Init(c).SelectItems Split(Value, ","), True
@@ -745,7 +712,7 @@ Public Sub LoadOptions(ParamArray ExcludeThese() As Variant)
 End Sub
 
 Public Sub SavePosition()
-    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\configurations\"
+    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\config\"
     FoldersCreate configFolder
     Dim iniFile As String: iniFile = configFolder & "UserformSettings.ini"
     IniWrite iniFile, oForm.Name, "StartupTop", oForm.Top
@@ -757,7 +724,7 @@ Public Sub SavePosition()
 End Sub
 
 Public Sub LoadPosition()
-    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\configurations\"
+    Dim configFolder As String: configFolder = ThisWorkbook.Path & "\config\"
     FoldersCreate configFolder
     Dim iniFile As String: iniFile = configFolder & "UserformSettings.ini"
     If Not FileExists(iniFile) Then TxtOverwrite iniFile, ""
@@ -807,16 +774,16 @@ Public Sub ResizeToFitControls(Optional marginRight = 0, Optional marginBottom =
 End Sub
 
 
-Public Sub MouseOnControl(ctrl As Object)
+Public Sub MouseOnControl(Ctrl As Object)
     '@INCLUDE PointsPerPixelX
     '@INCLUDE PointsPerPixelY
-    Dim P As tCursor
+    Dim p As tCursor
     Dim lngHwnd As Long
     lngHwnd = CLng(FindWindow(vbNullString, oForm.Caption))
-    P.Left = (ctrl.Left + (ctrl.Width \ 2)) / PointsPerPixelX
-    P.Top = (ctrl.Top + (ctrl.Height \ 2)) / PointsPerPixelY
-    ClientToScreen lngHwnd, P
-    SetCursorPos P.Left, P.Top
+    p.Left = (Ctrl.Left + (Ctrl.Width \ 2)) / PointsPerPixelX
+    p.Top = (Ctrl.Top + (Ctrl.Height \ 2)) / PointsPerPixelY
+    ClientToScreen lngHwnd, p
+    SetCursorPos p.Left, p.Top
 End Sub
 
 Private Function PointsPerPixelX() As Double

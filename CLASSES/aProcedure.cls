@@ -78,6 +78,7 @@ Public Function Init( _
     Set oModule = Module
     oProcKind = ProcKind
     Set Init = Me
+    Set coll_LinkedProceduresDeep = Nothing
 End Function
 
 Public Function Active() As aProcedure
@@ -242,9 +243,9 @@ Public Property Get Parent() As VBComponent
 End Property
 
 Public Property Get ParentAssigned() As VBComponent
-    Dim ModuleName As String: ModuleName = Property(Parent_Assigned)
-    If ModuleName = "" Then Exit Property
-    Set ParentAssigned = ModuleAddOrSet(oWorkbook, ModuleName, vbext_ct_StdModule)
+    Dim moduleName As String: moduleName = Property(Parent_Assigned)
+    If moduleName = "" Then Exit Property
+    Set ParentAssigned = ModuleAddOrSet(oWorkbook, moduleName, vbext_ct_StdModule)
 'End Property
 
 'Public Property Set ParentAssigned(Module As VBComponent)
@@ -279,10 +280,10 @@ End Property
 
 
 Private Sub Class_Terminate()
-   ResetVariables
+   ReSetVariables
 End Sub
 
-Private Sub ResetVariables()
+Private Sub ReSetVariables()
     Set oWorkbook = Nothing
     Set oModule = Nothing
         oProcedure = ""
@@ -461,7 +462,11 @@ Public Function LinkedProcedures() As Collection
     Set LinkedProcedures = coll
 End Function
 
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 20-07-2023 10:45    Alex                code fix
+
 Public Function LinkedProceduresDeep() As Collection
+'@LastModified 2307201045
     Dim AllProcedures As Collection:       Set AllProcedures = aWorkbook.Init(oWorkbook).ProceduresNames(True, False, False, False)
     Dim Processed As Collection:           Set Processed = New Collection
     Dim CalledProcedures As Collection:    Set CalledProcedures = New Collection
@@ -470,6 +475,7 @@ Public Function LinkedProceduresDeep() As Collection
     Dim Module As VBComponent
 
     Processed.Add CStr(oProcedure), CStr(oProcedure)
+    CalledProcedures.Add CStr(oProcedure), CStr(oProcedure)
     On Error Resume Next
     For Each Procedure In LinkedProcedures
     CalledProcedures.Add CStr(Procedure), CStr(Procedure)
@@ -485,7 +491,7 @@ repeat:
         If Not aCollection.Init(Processed).Contains(, CStr(element)) Then
             On Error Resume Next
             Set AP = New aProcedure
-            For Each Procedure In AP.Init(oWorkbook, , CStr(Procedure)).LinkedProcedures
+            For Each Procedure In AP.Init(oWorkbook, , CStr(element)).LinkedProcedures
             CalledProcedures.Add CStr(Procedure), CStr(Procedure)
             Next
             On Error GoTo 0
@@ -540,8 +546,8 @@ Private Sub LinkedExport(Procedure As String)
     Set Module = ModuleOfProcedure(oWorkbook, Procedure)
     Dim c As New aProcedure
     c.Init oWorkbook, Module, Procedure
-    Dim proclastmod     As Long:        proclastmod = c.Property(Modified)
-    If proclastmod = 0 Then
+    Dim proclastmod     As String:        proclastmod = c.Property(Modified)
+    If proclastmod = vbNullString Then
         c.InjectLinkedLists
         c.PropertySet Modified, Format(Now, "yymmddhhnn")
         proclastmod = c.Property(Modified)
@@ -589,7 +595,7 @@ Sub ExportDeclaration(DeclarationName As String)
     If cell Is Nothing Then Exit Sub
 
     codeName = DeclarationName
-    codeText = cell.OFFSET(0, 1).TEXT
+    codeText = cell.OFFSET(0, 1).text
     TxtOverwrite LOCAL_LIBRARY_DECLARATIONS & DeclarationName & ".txt", codeText
 
 End Sub
@@ -818,7 +824,7 @@ Function DeclarationsTableKeywords() As Collection
     Dim cell As Range
     For Each cell In TargetWorksheet.Range("C2:C" & Lr)
         On Error Resume Next
-        coll.Add cell.TEXT, cell.TEXT
+        coll.Add cell.text, cell.text
         On Error GoTo 0
     Next
     Set DeclarationsTableKeywords = coll
@@ -1101,6 +1107,7 @@ Private Function EnumOptionToString(PropertyType As Property_Type) As String
 End Function
 
 Private Function PropertyGet(PropertyType As Property_Type) As String
+    PropertyGet = vbNullString
     Dim Line As String: Line = PropertyLine(PropertyType)
     If Line = 0 Then Exit Function
     Dim targetLine As String: targetLine = Trim(oModule.CodeModule.Lines(Line, 1))
@@ -1349,11 +1356,11 @@ End Sub
 Public Function ArgumentStyle() As String
     If ArgumentCount = 0 Then Exit Function
     Dim str As Variant, s As String
-    Dim firstPart As String, secondPart As String, Output As String
+    Dim firstPart As String, secondPart As String, output As String
         str = Code_Declaration_Clean
-    Output = oProcedure & "( _"
+    output = oProcedure & "( _"
     Dim indentation As String
-        indentation = Space(Len(Output) - 1)
+        indentation = Space(Len(output) - 1)
         str = Right(str, Len(str) - InStr(1, str, "("))
         str = Left(str, InStrRev(str, ")") - 1)
     If InStr(1, str, Chr(34) & "," & Chr(34)) > 0 Then
@@ -1380,10 +1387,10 @@ Public Function ArgumentStyle() As String
         Else
             secondPart = "Variant"
         End If
-        Output = Output & vbNewLine & indentation & firstPart & ":= " & "as" & secondPart & IIf(i <> UBound(str), ", _", ")")
+        output = output & vbNewLine & indentation & firstPart & ":= " & "as" & secondPart & IIf(i <> UBound(str), ", _", ")")
     Next
 
-    ArgumentStyle = Output
+    ArgumentStyle = output
 End Function
 
 Public Function ArgumentStyleClean() As String
@@ -1847,74 +1854,74 @@ End Sub
 
 
 Public Sub Enable_DebugPrint()
-    Dim n As Long
+    Dim N As Long
     Dim s As String
     With oModule.CodeModule
-        For n = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
-            s = .Lines(n, 1)
+        For N = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
+            s = .Lines(N, 1)
             If Left(Trim(s), 6) = "'Debug" Then
-                aCodeModule.Init(oModule).UncommentTargetLine n
+                aCodeModule.Init(oModule).UncommentTargetLine N
 '                s = VBA.Replace(s, "'", "", , 1)
 '                .ReplaceLine N, s
             End If
-        Next n
+        Next N
     End With
 End Sub
 Public Sub Disable_DebugPrint()
-    Dim n As Long
+    Dim N As Long
     Dim s As String
     With oModule.CodeModule
-        For n = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
-            s = .Lines(n, 1)
+        For N = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
+            s = .Lines(N, 1)
             If Left(Trim(s), 5) = "Debug" Then
-                aCodeModule.Init(oModule).CommentTargetLine n
+                aCodeModule.Init(oModule).CommentTargetLine N
 '                .ReplaceLine N, "'" & s
             End If
-        Next n
+        Next N
     End With
 End Sub
 
 
 Public Sub Enable_Stop()
-    Dim n As Long
+    Dim N As Long
     Dim s As String
     Dim Keyword As String
     Keyword = "Stop"
     With oModule.CodeModule
-        For n = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
-            s = .Lines(n, 1)
+        For N = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
+            s = .Lines(N, 1)
             If InStrExact(1, s, Keyword) > 0 Then
                 s = VBA.Replace(s, "'", "", , 1)
-                .ReplaceLine n, s
+                .ReplaceLine N, s
             End If
-        Next n
+        Next N
     End With
 End Sub
 Public Sub Disable_Stop()
-    Dim n As Long
+    Dim N As Long
     Dim s As String
     Dim Keyword As String: Keyword = "Stop"
     With oModule.CodeModule
-        For n = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
-            s = .Lines(n, 1)
+        For N = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
+            s = .Lines(N, 1)
             If InStrExact(1, s, Keyword) > 0 Then
-                .ReplaceLine n, "'" & s
+                .ReplaceLine N, "'" & s
             End If
-        Next n
+        Next N
     End With
 End Sub
 
 
 Public Sub Comments_ReplaceQuoteWithRem()
-    Dim n As Long
+    Dim N As Long
     Dim s As String
     With oModule.CodeModule
-        For n = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
-            s = .Lines(n, 1)
+        For N = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
+            s = .Lines(N, 1)
             If Left(Trim(s), 1) = "'" Then
-                .ReplaceLine n, VBA.Replace(s, "'", "Rem ", , 1)
+                .ReplaceLine N, VBA.Replace(s, "'", "Rem ", , 1)
             End If
-        Next n
+        Next N
     End With
 End Sub
 
@@ -1973,7 +1980,7 @@ Sub CreateCaller(rng As Range)
     With shp
         .OnAction = "'" & oWorkbook.Name & "'!" & oProcedure
         .Name = "Run_" & oProcedure
-        .TextFrame2.TextRange.TEXT = oProcedure
+        .TextFrame2.TextRange.text = oProcedure
         .TextFrame2.TextRange.Font.Bold = msoTrue
         .TextFrame2.TextRange.Font.Size = 11
         .TextFrame.HorizontalAlignment = xlHAlignCenter

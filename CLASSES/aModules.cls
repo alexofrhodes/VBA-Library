@@ -385,8 +385,8 @@ Private Sub ExportModules()
 End Sub
 
 Private Sub ImportModules()
-    Dim objFSO        As scripting.FileSystemObject
-    Dim objFile       As scripting.File
+    Dim objFSO        As Scripting.FileSystemObject
+    Dim objFile       As Scripting.File
     Dim szImportPath  As String
     Dim szFileName    As String
     Dim cmpComponents As VBIDE.VBComponents
@@ -400,14 +400,14 @@ Private Sub ImportModules()
         Exit Sub
     End If
     szImportPath = FolderWithVBAProjectFiles & "\"
-    Set objFSO = New scripting.FileSystemObject
-    If objFSO.getFolder(szImportPath).Files.count = 0 Then
+    Set objFSO = New Scripting.FileSystemObject
+    If objFSO.GetFolder(szImportPath).Files.count = 0 Then
         MsgBox "There are no files to import"
         Exit Sub
     End If
     Call DeleteVBAModulesAndUserForms
     Set cmpComponents = oWorkbook.VBProject.VBComponents
-    For Each objFile In objFSO.getFolder(szImportPath).Files
+    For Each objFile In objFSO.GetFolder(szImportPath).Files
         If (objFSO.GetExtensionName(objFile.Name) = "cls") Or _
             (objFSO.GetExtensionName(objFile.Name) = "frm") Or _
             (objFSO.GetExtensionName(objFile.Name) = "bas") Then
@@ -418,20 +418,20 @@ End Sub
 
 Private Function FolderWithVBAProjectFiles() As String
     Dim WshShell    As Object
-    Dim fso         As Object
+    Dim FSO         As Object
     Dim SpecialPath As String
     Set WshShell = CreateObject("WScript.Shell")
-    Set fso = CreateObject("scripting.filesystemobject")
+    Set FSO = CreateObject("scripting.filesystemobject")
     SpecialPath = WshShell.SpecialFolders("MyDocuments")
     If Right(SpecialPath, 1) <> "\" Then
         SpecialPath = SpecialPath & "\"
     End If
-    If fso.FolderExists(SpecialPath & "VBAProjectFiles") = False Then
+    If FSO.FolderExists(SpecialPath & "VBAProjectFiles") = False Then
         On Error Resume Next
         MkDir SpecialPath & "VBAProjectFiles"
         On Error GoTo 0
     End If
-    If fso.FolderExists(SpecialPath & "VBAProjectFiles") = True Then
+    If FSO.FolderExists(SpecialPath & "VBAProjectFiles") = True Then
         FolderWithVBAProjectFiles = SpecialPath & "VBAProjectFiles"
     Else
         FolderWithVBAProjectFiles = "Error"
@@ -440,14 +440,14 @@ End Function
 
 Private Sub DeleteVBAModulesAndUserForms()
     Dim vbProj As VBIDE.VBProject
-    Dim vbcomp As VBIDE.VBComponent
+    Dim vbComp As VBIDE.VBComponent
     Set vbProj = oWorkbook.VBProject
-    For Each vbcomp In vbProj.VBComponents
-        If vbcomp.Type = vbext_ct_Document Then
+    For Each vbComp In vbProj.VBComponents
+        If vbComp.Type = vbext_ct_Document Then
         Else
-            vbProj.VBComponents.Remove vbcomp
+            vbProj.VBComponents.Remove vbComp
         End If
-    Next vbcomp
+    Next vbComp
 End Sub
 
 Public Sub CommentsRemove()

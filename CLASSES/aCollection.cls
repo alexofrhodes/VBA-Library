@@ -219,12 +219,12 @@ Function ToArray() As Variant
 End Function
 
 Public Function Reverse() As aCollection
-    Dim Output As New Collection
+    Dim output As New Collection
     Dim i As Long
     For i = myCollection.count To 1 Step -1
-        Output.Add myCollection.item(i)
+        output.Add myCollection.item(i)
     Next i
-    Set myCollection = Output
+    Set myCollection = output
     Set Reverse = Me
 End Function
 
@@ -361,13 +361,13 @@ End Function
 
 Public Function CollectionsToArray2D(collections As Collection) As Variant
     If collections.count = 0 Then Exit Function
-    Dim ColumnCount As Long:    ColumnCount = collections.count
-    Dim RowCount As Long:       RowCount = collections.item(1).count
+    Dim columnCount As Long:    columnCount = collections.count
+    Dim rowCount As Long:       rowCount = collections.item(1).count
     Dim var As Variant
-    ReDim var(1 To RowCount, 1 To ColumnCount)
+    ReDim var(1 To rowCount, 1 To columnCount)
     Dim cols As Long
     Dim rows As Long
-    For rows = 1 To RowCount
+    For rows = 1 To rowCount
         For cols = 1 To collections.count
             var(rows, cols) = collections(cols).item(rows)
         Next cols

@@ -111,8 +111,8 @@ End Sub
 
 
 Public Sub ImportReferences(filepath As String)
-    Dim fso As New scripting.FileSystemObject
-    With fso.OpenTextFile(filepath, ForReading, True)
+    Dim FSO As New Scripting.FileSystemObject
+    With FSO.OpenTextFile(filepath, ForReading, True)
         Dim Line As Long
         Do While Not .AtEndOfStream
             Dim Values As Variant
@@ -640,7 +640,7 @@ Public Function DeclarationsTableKeywords() As Collection
     Dim cell As Range
     For Each cell In TargetWorksheet.Range("C2:C" & Lr)
         On Error Resume Next
-        coll.Add cell.TEXT, cell.TEXT
+        coll.Add cell.text, cell.text
         On Error GoTo 0
     Next
     Set DeclarationsTableKeywords = coll
@@ -658,7 +658,7 @@ Public Function getDeclarations( _
     Dim ComponentTypecollection As New Collection
     Dim DeclarationsCollection  As New Collection
     Dim KeywordsCollection      As New Collection
-    Dim Output                  As New Collection
+    Dim output                  As New Collection
     Dim ScopeCollection         As New Collection
     Dim TypeCollection          As New Collection
 
@@ -754,14 +754,14 @@ Public Function getDeclarations( _
 '        End If
     Next Module
 
-    If includeScope = True Then Output.Add ScopeCollection
-    If includeType = True Then Output.Add TypeCollection
-    If includeKeywords = True Then Output.Add KeywordsCollection
-    If includeDeclarations = True Then Output.Add DeclarationsCollection
-    If includeComponentType = True Then Output.Add ComponentTypecollection
-    If includeComponentName = True Then Output.Add ComponentCollection
+    If includeScope = True Then output.Add ScopeCollection
+    If includeType = True Then output.Add TypeCollection
+    If includeKeywords = True Then output.Add KeywordsCollection
+    If includeDeclarations = True Then output.Add DeclarationsCollection
+    If includeComponentType = True Then output.Add ComponentTypecollection
+    If includeComponentName = True Then output.Add ComponentCollection
 
-    Set getDeclarations = Output
+    Set getDeclarations = output
 End Function
 
 Private Function DeclarationsKeywordSubstring( _
@@ -851,15 +851,15 @@ Public Sub DeclarationsTableExport()
     Lr = getLastRow(ws)
     Dim codeCollection As Collection
     For Each cell In ws.Range("C2:C" & Lr)
-        codeName = cell.TEXT
+        codeName = cell.text
         Set codeCollection = New Collection
         On Error Resume Next
-        codeCollection.Add cell.OFFSET(0, 1).TEXT, cell.OFFSET(0, 1).TEXT
+        codeCollection.Add cell.OFFSET(0, 1).text, cell.OFFSET(0, 1).text
         On Error GoTo 0
-        Do While cell.OFFSET(1, 0).TEXT = cell.TEXT
+        Do While cell.OFFSET(1, 0).text = cell.text
             Set cell = cell.OFFSET(1, 0)
             On Error Resume Next
-            codeCollection.Add cell.OFFSET(0, 1).TEXT, cell.OFFSET(0, 1).TEXT
+            codeCollection.Add cell.OFFSET(0, 1).text, cell.OFFSET(0, 1).text
             On Error GoTo 0
         Loop
         codeText = aCollection.Init(codeCollection).ToString(IIf(codeCollection.count > 1, vbNewLine, ""))

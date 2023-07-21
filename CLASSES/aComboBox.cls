@@ -70,7 +70,7 @@ Private Type RECT
     Bottom As Long
 End Type
 
-Public Function Init(cbx As ComboBox)
+Public Function Init(cbx As ComboBox) As aComboBox
     Set oComboBox = cbx
     Set Init = Me
 End Function
@@ -141,4 +141,46 @@ Private Function PXtoPT(ByVal hDC As LongPtr, ByVal Pixels As Single, ByVal bVer
     Const POINTSPERINCH As Long = 72&
     PXtoPT = (Pixels / (ScreenDPI(bVert, hDC) / POINTSPERINCH))
 End Function
+
+
+
+Public Sub LoadVBProjects()
+    Dim coll As New Collection
+    Dim WB As Workbook
+    For Each WB In Workbooks
+        If Len(WB.Path) > 0 Then
+            If WorkbookProjectProtected(WB) = False Then
+                On Error Resume Next
+                coll.Add WB.Name, WB.Name
+                On Error GoTo 0
+            End If
+        End If
+    Next
+    Rem list addins
+    Dim vbProj As VBProject
+    Dim wbPath As String
+    For Each vbProj In Application.VBE.VBProjects
+        On Error GoTo ErrorHandler
+        wbPath = vbProj.FileName
+        If Right(wbPath, 4) = "xlam" Or Right(wbPath, 3) = "xla" Then
+            Dim wbName As String
+            wbName = Mid(wbPath, InStrRev(wbPath, "\") + 1)
+            If WorkbookProjectProtected(Workbooks(wbName)) = False Then
+                On Error Resume Next
+                coll.Add wbName, wbName
+                On Error GoTo 0
+            End If
+        End If
+SKIP:
+    Next vbProj
+
+    Dim el As Variant
+    For Each el In coll
+        oComboBox.AddItem el
+    Next
+
+    Exit Sub
+ErrorHandler:
+    If Err.Number = 76 Then GoTo SKIP
+End Sub
 

@@ -1,5 +1,7 @@
 
+
 Public Function ArraySubSet(vIn As Variant, Optional ByVal iStartRow As Integer, Optional ByVal iStartCol As Integer, Optional ByVal iHeight As Integer, Optional ByVal iWidth As Integer) As Variant
+'@LastModified 2307201044
     Dim vReturn As Variant
     Dim iInRowLower As Integer
     Dim iInRowUpper As Integer
@@ -42,6 +44,3 @@ Public Function ArraySubSet(vIn As Variant, Optional ByVal iStartRow As Integer,
 
     ArraySubSet = vReturn
 End Function
-
-'
-

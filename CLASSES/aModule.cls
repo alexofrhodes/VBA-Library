@@ -323,22 +323,22 @@ Public Sub ProcedureSortByKind()
     If oModule.CodeModule.CountOfLines = 0 Then Exit Sub
     Dim coll      As New Collection: Set coll = Procedures
     Dim var       As Variant:        ReDim var(1 To coll.count)
-    Dim P         As aProcedure
+    Dim p         As aProcedure
     Dim startLine As Long
     Dim i         As Long
     For i = 1 To coll.count
-        Set P = coll(i)
-        var(i) = P.Name
-        If i = 1 Then startLine = P.LineIndex(Procedure_First)
+        Set p = coll(i)
+        var(i) = p.Name
+        If i = 1 Then startLine = p.LineIndex(Procedure_First)
     Next
     ArrayQuickSort var
     Dim h As String:    h = Header
     Dim s As String
     Dim TheSubs As String, TheFunctions As String
     For i = LBound(var) To UBound(var)
-        Set P = aProcedure.Init(Parent, oModule, CStr(var(i)))
-        s = P.Code_All
-        If P.KindAsString = "Sub" Then
+        Set p = aProcedure.Init(Parent, oModule, CStr(var(i)))
+        s = p.Code_All
+        If p.KindAsString = "Sub" Then
             TheSubs = TheSubs & IIf(TheSubs <> "", vbNewLine, "") & s
         Else
             TheFunctions = TheFunctions & IIf(TheFunctions <> "", vbNewLine, "") & s
@@ -352,22 +352,22 @@ Public Sub ProcedureSortByScope()
     If oModule.CodeModule.CountOfLines = 0 Then Exit Sub
     Dim coll      As New Collection: Set coll = Procedures
     Dim var       As Variant:        ReDim var(1 To coll.count)
-    Dim P         As aProcedure
+    Dim p         As aProcedure
     Dim startLine As Long
     Dim i         As Long
     For i = 1 To coll.count
-        Set P = coll(i)
-        var(i) = P.Name
-        If i = 1 Then startLine = P.LineIndex(Procedure_First)
+        Set p = coll(i)
+        var(i) = p.Name
+        If i = 1 Then startLine = p.LineIndex(Procedure_First)
     Next
     ArrayQuickSort var
     Dim h As String:    h = Header
     Dim s As String
     Dim ThePublic As String, ThePrivate As String
     For i = LBound(var) To UBound(var)
-        Set P = aProcedure.Init(Parent, oModule, CStr(var(i)))
-        s = P.Code_All
-        If P.Scope = "Public" Then
+        Set p = aProcedure.Init(Parent, oModule, CStr(var(i)))
+        s = p.Code_All
+        If p.Scope = "Public" Then
             ThePublic = ThePublic & IIf(ThePublic <> "", vbNewLine, "") & s
         Else
             ThePrivate = ThePrivate & IIf(ThePublic <> "", vbNewLine, "") & s
@@ -381,19 +381,19 @@ Public Sub ProcedureSortAZ()
     If oModule.CodeModule.CountOfLines = 0 Then Exit Sub
     Dim coll      As New Collection: Set coll = Procedures
     Dim var       As Variant:        ReDim var(1 To coll.count)
-    Dim P         As aProcedure
+    Dim p         As aProcedure
     Dim startLine As Long
     Dim i         As Long
     For i = 1 To coll.count
-        Set P = coll(i)
-        var(i) = P.Name
-        If i = 1 Then startLine = P.LineIndex(Procedure_First)
+        Set p = coll(i)
+        var(i) = p.Name
+        If i = 1 Then startLine = p.LineIndex(Procedure_First)
     Next
     ArrayQuickSort var
     Dim s As String:    s = Header
     For i = LBound(var) To UBound(var)
-        Set P = aProcedure.Init(Parent, oModule, CStr(var(i)))
-        s = s & IIf(s <> "", vbNewLine, "") & P.Code_All
+        Set p = aProcedure.Init(Parent, oModule, CStr(var(i)))
+        s = s & IIf(s <> "", vbNewLine, "") & p.Code_All
     Next i
     CodeRemove
     oModule.CodeModule.AddFromString s

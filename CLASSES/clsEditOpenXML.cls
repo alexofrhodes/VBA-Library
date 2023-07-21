@@ -191,9 +191,9 @@ Public Sub ZipAllFilesInFolder()
     Dim sDate As String
     Dim sDefPath As String
     Dim vFileNameZip As Variant
-    Dim fso As Object
+    Dim FSO As Object
     Dim lFileCt As Long
-    Set fso = CreateObject("scripting.filesystemobject")
+    Set FSO = CreateObject("scripting.filesystemobject")
     sDate = Format(Now, " dd-mmm-yy h-mm-ss")
     vFileNameZip = SourceFile & sDate & ".zip"
     NewZip vFileNameZip
@@ -208,15 +208,15 @@ Public Sub ZipAllFilesInFolder()
     Kill SourceFile
     Name vFileNameZip As SourceFile
     On Error Resume Next
-    fso.DeleteFolder FolderName & "Unzipped " & FileName, True
+    FSO.DeleteFolder FolderName & "Unzipped " & FileName, True
     On Error GoTo 0
     Set oShellApp = Nothing
 End Sub
 
 Public Sub UnzipFile()
-    Dim fso As Object
+    Dim FSO As Object
     Dim oShellApp As Object
-    Set fso = CreateObject("scripting.filesystemobject")
+    Set FSO = CreateObject("scripting.filesystemobject")
     XMLFolderRoot = FolderName
     If Right(XMLFolderRoot, 1) <> Application.PathSeparator Then
         XMLFolderRoot = XMLFolderRoot & "\UnZipped " & FileName & Application.PathSeparator
@@ -224,7 +224,7 @@ Public Sub UnzipFile()
         XMLFolderRoot = XMLFolderRoot & "UnZipped " & FileName & Application.PathSeparator
     End If
     On Error Resume Next
-    fso.DeleteFolder XMLFolderRoot & "*", True
+    FSO.DeleteFolder XMLFolderRoot & "*", True
     Kill XMLFolderRoot & "*.*"
     If FolderExists(XMLFolderRoot) = False Then
         MkDir XMLFolderRoot
@@ -232,9 +232,9 @@ Public Sub UnzipFile()
     Set oShellApp = CreateObject("Shell.Application")
     oShellApp.Namespace(XMLFolderRoot).CopyHere oShellApp.Namespace(SourceFile).Items
     On Error Resume Next
-    fso.DeleteFolder Environ("Temp") & "\Temporary Directory*", True
+    FSO.DeleteFolder Environ("Temp") & "\Temporary Directory*", True
     Set oShellApp = Nothing
-    Set fso = Nothing
+    Set FSO = Nothing
     Exit Sub
 End Sub
 
@@ -338,12 +338,12 @@ Private Property Let AddedZip(ByVal bAddedZip As Boolean)
 End Property
 
 Private Sub Class_Terminate()
-    Dim fso As Object
+    Dim FSO As Object
     If AddedZip Then
         Name SourceFile As Left(SourceFile, Len(SourceFile) - 4)
     End If
     On Error Resume Next
-    fso.DeleteFolder XMLFolderRoot, True
+    FSO.DeleteFolder XMLFolderRoot, True
 End Sub
 
 Private Property Get XMLFolderRoot() As Variant
