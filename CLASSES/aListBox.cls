@@ -8,9 +8,6 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
-
-'@TODO C:\Users\acer\Dropbox\SOFTWARE\EXCEL\Manfred van den Noort\      '-> listbox_drag_drop_advanced
-
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 '* Class      : aListBox
 '* Author     : Anastasiou Alex
@@ -47,6 +44,11 @@ Public WithEvents DragTarget As MSForms.ListBox
 Attribute DragTarget.VB_VarHelpID = -1
 Private from_lb_index As Long
 Private to_lb_index As Long
+Private dragindexes As Collection
+Private dragArray
+Private isUpdatingSelection As Boolean
+
+
 
 Private oListBox As MSForms.ListBox
 Private oList
@@ -59,7 +61,7 @@ Private isDoubleClick As Boolean
     Private Declare PtrSafe Function GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
     Private Declare PtrSafe Function GetKeyState Lib "user32" (ByVal nVirtKey As Long) As Integer
 #Else
-    Private Declare Function GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
+    Private Declare Function  GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
     Private Declare Function GetKeyState Lib "user32" (ByVal nVirtKey As Long) As Integer
 #End If
 
@@ -136,10 +138,6 @@ End Sub
 
 
 
-
-
-
-
 Private Sub Emitter_Click(control As Object)
     If control.Name Like "lblHeader-*" Then
         Dim col As Long
@@ -177,55 +175,120 @@ Public Sub ListenToDragDrop(Optional ToLbx As MSForms.ListBox)
     DragTarget.columnCount = DragSource.columnCount
     DragSource.MousePointer = 5
 End Sub
+
+
+Private Sub DragSource_Change()
+    Dim AltPressed As Boolean:     AltPressed = CBool(GetKeyState(&H12) And &H8000)
+    Dim CtrlPressed As Boolean:    CtrlPressed = CBool(GetKeyState(&H11) And &H8000)
+    Dim ShiftPressed As Boolean:   ShiftPressed = CBool(GetKeyState(&HA0) And &HFF80)
+    
+    If AltPressed Then Exit Sub
+    
+    If Not isUpdatingSelection _
+    And ArrayAllocated(ItemsSelected) _
+    And Not CtrlPressed _
+    And Not ShiftPressed Then
+        isUpdatingSelection = True
+        With DragSource
+            Dim i As Long
+            For i = 0 To .ListCount - 1
+                If ItemsSelected(i) <> .Selected(i) Then
+                    .Selected(i) = ItemsSelected(i)
+                End If
+            Next i
+        End With
+        isUpdatingSelection = False
+    End If
+End Sub
+Private Sub DragSource_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    Dim AltPressed As Boolean:     AltPressed = CBool(GetKeyState(&H12) And &H8000)
+    Dim CtrlPressed As Boolean:    CtrlPressed = CBool(GetKeyState(&H11) And &H8000)
+    Dim ShiftPressed As Boolean:   ShiftPressed = CBool(GetKeyState(&HA0) And &HFF80)
+    
+    If AltPressed Then Exit Sub
+    
+    If Not CtrlPressed And Not ShiftPressed And ArrayAllocated(ItemsSelected) Then
+        Dim index As Long: index = Int(Y * 0.85 / DragSource.Font.Size)
+        If index > UBound(ItemsSelected) Then Exit Sub
+        ItemsSelected(index) = True
+        With DragSource
+            Dim i As Long
+            For i = 0 To .ListCount - 1
+                ItemsSelected(i) = .Selected(i)
+            Next i
+        End With
+    End If
+
+End Sub
+Private Sub DragSource_MouseUp(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    With DragSource
+        ReDim ItemsSelected(0 To .ListCount - 1) As Boolean
+        Dim i As Long
+        For i = 0 To .ListCount - 1
+            ItemsSelected(i) = .Selected(i)
+        Next i
+    End With
+End Sub
+
 Private Sub DragTarget_BeforeDragOver(ByVal Cancel As MSForms.ReturnBoolean, ByVal Data As MSForms.DataObject, ByVal X As Single, ByVal Y As Single, ByVal DragState As MSForms.fmDragState, ByVal Effect As MSForms.ReturnEffect, ByVal Shift As Integer)
     Effect = fmDropEffectMove
     Cancel = True
 End Sub
 Private Sub DragTarget_BeforeDropOrPaste(ByVal Cancel As MSForms.ReturnBoolean, ByVal Action As MSForms.fmAction, ByVal Data As MSForms.DataObject, ByVal X As Single, ByVal Y As Single, ByVal Effect As MSForms.ReturnEffect, ByVal Shift As Integer)
     With DragTarget
-'        Dim to_lb_index As Long
         to_lb_index = Int(Y * 0.85 / .Font.Size)
         If to_lb_index >= .ListCount Then to_lb_index = .ListCount
         Cancel = True
         Effect = fmDropEffectMove
-        If DragTarget.ListCount = 0 Then
-            .AddItem
-        Else
-            .AddItem , to_lb_index 'Data.GetText, to_lb_index
-        End If
-        Dim i As Long
-        For i = 0 To DragSource.columnCount - 1
-            DragTarget.List(to_lb_index, i) = DragSource.List(DragSource.ListIndex, i)
+        Dim difIndexes As Long
+        Dim indexesCounter As Long
+        For indexesCounter = dragindexes.count To 1 Step -1
+            DragSource.RemoveItem dragindexes(indexesCounter)
+            If dragindexes(indexesCounter) < to_lb_index Then to_lb_index = to_lb_index - 1
         Next
         
-        If .Name = DragSource.Name And to_lb_index < from_lb_index Then
-            .RemoveItem (from_lb_index + 1)
-        Else
-            DragSource.RemoveItem from_lb_index
-        End If
+        For indexesCounter = 1 To dragindexes.count 'To 1 Step -1
+            If DragTarget.ListCount = 0 Then
+                .AddItem
+            Else
+                .AddItem , to_lb_index 'Data.GetText, to_lb_index
+            End If
+            Dim i As Long
+           
+            Dim cellTxt As String
+            For i = 1 To UBound(dragArray, 2)
+                cellTxt = IIf( _
+                            IsNull(dragArray(indexesCounter, i)), _
+                                "", _
+                                dragArray(indexesCounter, i))
+                DragTarget.List(to_lb_index, i - 1) = cellTxt
+            Next
+            to_lb_index = to_lb_index + 1
+        Next
     End With
     
-    If DragTarget.multiSelect = fmMultiSelectSingle Then
-'        DragTarget.ListIndex = -1
-        ClearSelection
-    Else
-        ClearSelection
-    End If
-'    oForm.Repaint
+    ClearSelection
+    DoEvents
+    oForm.Repaint
 End Sub
-
-
-Private Sub DragSource_MouseMove(ByVal button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub DragSource_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     Dim obj As DataObject
     Dim drageff As Long
-    If button = 1 Then
+    If Button = 1 Then
         Set obj = New DataObject
 '        obj.SetText DragSource.text
+
         from_lb_index = DragSource.ListIndex
+        
+        Set dragindexes = selectedIndexes  'test
+        dragArray = SelectedRowsArray
+    
         drageff = obj.StartDrag
         Set obj = Nothing
     End If
 End Sub
+
+
 
 
 Public Sub ListenToExtendedSelection()
@@ -233,37 +296,37 @@ Public Sub ListenToExtendedSelection()
 End Sub
 Private Sub ExtendedSelectionEvents_Change()
 'author: Petr Radimersky
-Dim i As Long
-If CBool(GetKeyState(&HA0) And &HFF80) Then
-    With ExtendedSelectionEvents
-        For i = 0 To .ListCount - 1
-            If ItemsSelected(i) = False And .Selected(i) = True Then
-                ItemsSelected(i) = True
-            End If
-        Next i
-    End With
-End If
+    Dim i As Long
+    If CBool(GetKeyState(&HA0) And &HFF80) Then
+        With ExtendedSelectionEvents
+            For i = 0 To .ListCount - 1
+                If ItemsSelected(i) = False And .Selected(i) = True Then
+                    ItemsSelected(i) = True
+                End If
+            Next i
+        End With
+    End If
 End Sub
-Private Sub ExtendedSelectionEvents_MouseDown(ByVal button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-Dim i As Long
-If CBool(GetKeyState(&HA0) And &HFF80) Then
-    With ExtendedSelectionEvents
-        ReDim ItemsSelected(0 To .ListCount - 1) As Boolean
-        For i = 0 To .ListCount - 1
-            ItemsSelected(i) = .Selected(i)
-        Next i
-    End With
-End If
+Private Sub ExtendedSelectionEvents_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    Dim i As Long
+    If CBool(GetKeyState(&HA0) And &HFF80) Then
+        With ExtendedSelectionEvents
+            ReDim ItemsSelected(0 To .ListCount - 1) As Boolean
+            For i = 0 To .ListCount - 1
+                ItemsSelected(i) = .Selected(i)
+            Next i
+        End With
+    End If
 End Sub
-Private Sub ExtendedSelectionEvents_MouseUp(ByVal button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-Dim i As Long
-If CBool(GetKeyState(&HA0) And &HFF80) Then
-    With ExtendedSelectionEvents
-        For i = 0 To .ListCount - 1
-            .Selected(i) = ItemsSelected(i)
-        Next i
-    End With
-End If
+Private Sub ExtendedSelectionEvents_MouseUp(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    Dim i As Long
+    If CBool(GetKeyState(&HA0) And &HFF80) Then
+        With ExtendedSelectionEvents
+            For i = 0 To .ListCount - 1
+                .Selected(i) = ItemsSelected(i)
+            Next i
+        End With
+    End If
 End Sub
 
 
@@ -276,7 +339,7 @@ Private Sub DoubleClickEvents_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
     isDoubleClick = True
 End Sub
 
-Public Sub DoubleClickEvents_MouseUp(ByVal button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Public Sub DoubleClickEvents_MouseUp(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     If Not isDoubleClick Then Exit Sub
     MsgBox oListBox.List(oListBox.ListIndex, targetColumn(X, Y) - 1)
     isDoubleClick = False
@@ -323,6 +386,7 @@ End Function
 
 
 Public Sub AutofitColumns(ResizeListbox As Boolean)
+    oListBox.Font.Name = "consolas" '<---!
     Dim lRowCt As Long
     Dim lColCt As Long
     Dim lLengths()
@@ -339,22 +403,22 @@ Public Sub AutofitColumns(ResizeListbox As Boolean)
     Dim lCt As Long
     Dim sWidths As String
     Dim dTotWidth As Double
-    Dim lblHidden As MSForms.Label
-    Set lblHidden = oForm.Controls.Add("Forms.Label.1")
+    Dim lblHidden As MSForms.control
+    Set lblHidden = oForm.Controls.Add("Forms.commandbutton.1")
+    With lblHidden
+        .Caption = "Measure size"
+        .Font.Size = oListBox.Font.Size
+        .Font.Name = oListBox.Font.Name
+        .WordWrap = False
+        .AutoSize = True
+    End With
     For lCt = LBound(lLengths) To UBound(lLengths)
-        With lblHidden
-            .Font.Size = oListBox.Font.Size
-            .Font.Name = "consolas" 'oListBox.Font.Name
-            .Font.Bold = oListBox.Font.Bold
-            .WordWrap = False
-            .AutoSize = True
-            .Caption = String(lLengths(lCt), "a")
-        End With
+        lblHidden.Caption = String(lLengths(lCt), "M")
         dTotWidth = dTotWidth + lblHidden.Width
         If Len(sWidths) = 0 Then
-            sWidths = CStr(Int(lblHidden.Width) + 1) + 6
+            sWidths = CStr(Int(lblHidden.Width))  '+ 12)
         Else
-            sWidths = sWidths & ";" & CStr(Int(lblHidden.Width) + 1) + 6
+            sWidths = sWidths & ";" & CStr(Int(lblHidden.Width))  '+ 12)
         End If
     Next
    
@@ -367,7 +431,7 @@ Public Sub AutofitColumns(ResizeListbox As Boolean)
    
     'Listbox will always be at least 200 wide
 '    oListBox.Width = Application.Min(Application.Max(200, dTotWidth + 12), oListBox.Width)
-    oListBox.Width = TotalColumnsWidth  'Evaluate(Replace(Join(Split(oListBox.columnWidths, ";"), "+"), "pt", "")) + 10
+    oListBox.Width = Application.Max(TotalColumnsWidth, 200)
     aUserform.Init(oForm).ResizeToFitControls marginRight:=10, marginBottom:=10
     'Listbox will always be at least 48 high.
 '    oListBox.Height = Application.Min(Application.Max((oListBox.ListCount + 1) * 12, 48), oListBox.Height)
@@ -865,6 +929,7 @@ Public Function SelectedRowsArray()
     
     Dim indexColl As New Collection
     Set indexColl = selectedIndexes
+    If indexColl.count = 0 Then SelectedRowsArray = Array(): Exit Function
     Dim out() As Variant
     ReDim out(1 To indexColl.count, 1 To oListBox.columnCount)
     For X = 1 To indexColl.count

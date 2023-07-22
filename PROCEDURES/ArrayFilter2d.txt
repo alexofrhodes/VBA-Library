@@ -1,6 +1,10 @@
 
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 21-07-2023 11:49    Alex                (ArrayFilter2D)
+
 Function ArrayFilter2D(inputArray As Variant, matchString As String, Optional targetColumn As Long = -1) As Variant
-'@LastModified 2307201044
+'@LastModified 2307211149
 '@INCLUDE PROCEDURE ArraySubSet
     Dim numRows As Long, numCols As Long
     numRows = UBound(inputArray, 1)
@@ -41,7 +45,11 @@ Function ArrayFilter2D(inputArray As Variant, matchString As String, Optional ta
     Next i
     
     ' Resize the result array to remove any empty rows
-    resultArray = ArraySubSet(resultArray, LBound(resultArray, 1), LBound(resultArray, 2), resultIndex, numCols)
-    ' Return the filtered array
-    ArrayFilter2D = resultArray
+    If resultIndex = -1 Then
+        ArrayFilter2D = Array()
+    Else
+        resultArray = ArraySubSet(resultArray, LBound(resultArray, 1), LBound(resultArray, 2), resultIndex, numCols)
+        ' Return the filtered array
+        ArrayFilter2D = resultArray
+    End If
 End Function
