@@ -315,3 +315,6 @@ Private Sub ComboBox_MouseMove(ByVal button As Integer, ByVal Shift As Integer, 
     Emitter.EmitEvent This.control, MouseMove, ToCollection("Button", button, "Shift", Shift, "X", X, "Y", Y)
 End Sub
 
+Private Sub ComboBox_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    Emitter.EmitEvent This.control, KeyDown, ToCollection("KeyCode", KeyCode, "Shift", Shift)
+End Sub

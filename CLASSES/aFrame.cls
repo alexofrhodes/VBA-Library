@@ -51,7 +51,7 @@ Public Sub ResizeToFitControls(Optional marginRight = 0, Optional marginBottom =
     oFrame.Height = myHeight + (oFrame.Height - oFrame.InsideHeight) + marginBottom
 End Sub
 
-Public Sub AddThemeControls()
+Public Sub AddThemeControls(Optional ThemeObject As Object)
     Dim Ctrl As MSForms.control
     Dim i As Long
     For i = 1 To 19
@@ -75,7 +75,10 @@ Public Sub AddThemeControls()
 '            ctrl.Font.Bold = True
 '        Next
 '    On Error GoTo 0
-    
-    aColorScheme.Init oFrame.Parent
+    If ThemeObject Is Nothing Then
+        aColorScheme.Init oFrame.Parent
+    Else
+        aColorScheme.Init ThemeObject
+    End If
 End Sub
 
