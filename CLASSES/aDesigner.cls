@@ -373,3 +373,228 @@ Public Sub PasteSubControlProperties()
 End Sub
 
 
+
+
+
+
+' Obsolete, I suggest the use of aMultipage class
+
+Public Sub addFrameFormCode()
+    Dim s As String
+    s = s & vbnewline & "Private WithEvents Emitter As EventListeneRemitter"
+    s = s & vbnewline & ""
+
+    s = s & vbnewline & "Private Sub Emitter_LabelMouseOut(Label As MSForms.Label)"
+    s = s & vbnewline & "    If InStr(1, Label.Tag, " & """" & "reframe" & """" & ", vbTextCompare) > 0 Then"
+    s = s & vbnewline & "        If Label.BackColor <> &H80B91E Then Label.BackColor = &H534848"
+    s = s & vbnewline & "    End If"
+    s = s & vbnewline & "End Sub"
+    s = s & vbnewline & ""
+    s = s & vbnewline & "Private Sub Emitter_LabelMouseOver(Label As MSForms.Label)"
+    s = s & vbnewline & "    If InStr(1, Label.Tag, " & """" & "reframe" & """" & ", vbTextCompare) > 0 Then"
+    s = s & vbnewline & "        If Label.BackColor <> &H80B91E Then Label.BackColor = &H808080"
+    s = s & vbnewline & "    End If"
+    s = s & vbnewline & "End Sub"
+    s = s & vbnewline & ""
+    s = s & vbnewline & "Sub Emitter_LabelClick(ByRef Label As MSForms.Label)"
+    s = s & vbnewline & "    If InStr(1, Label.Tag, " & """" & "reframe" & """" & ", vbTextCompare) > 0 Then Reframe Me, Label"
+    s = s & vbnewline & "End Sub"
+    s = s & vbnewline & ""
+
+    s = s & vbnewline & "Private Sub UserForm_Initialize()"
+    s = s & vbnewline & "    startFrameForm Me"
+    s = s & vbnewline & "End Sub"
+    If InStr(1, aModule.Init(oModule).Code, oModule.Name & "_Initialize") Then
+        Toast "Threre is already _Initialize_ code in this form. Code will be put in cilpboard and immediate window."
+        dp s
+        CLIP s
+    Else
+        oModule.CodeModule.AddFromString s
+    End If
+End Sub
+
+Public Sub CreateFrameMenu()
+    Select Case SelectedControls.Count
+    Case Is = 0
+        ActiveModule.Designer.BackColor = MyColors.FormBackgroundDarkGray
+        addFrameSidebar ActiveModule
+        addFrameFormCode
+    Case Is = 1
+        addFrameSidebar SelectedControl
+    End Select
+End Sub
+
+Private Sub addFrameSidebar(Form As Object, Optional dockRight As Boolean)
+    '@INCLUDE askFormMenuElements
+    '@INCLUDE UnderlineFrameName
+    '@INCLUDE CreateOrSetFrame
+    Dim F As MSForms.control
+    Dim L As MSForms.control
+    Set F = CreateOrSetFrame(Form, "SideBar" & Form.Name)
+    F.Tag = "skip"
+    F.BackColor = 5457992
+    F.ForeColor = vbWhite
+    F.BorderStyle = 1
+    F.BorderStyle = 0
+    F.Width = 80
+    If TypeName(Form) = "VBComponent" Then
+        F.Height = 800
+    Else
+        F.Height = Form.Height
+    End If
+    dockRight = IIf(TypeName(Form) = "VBComponent", False, True)
+    If dockRight = True Then
+        F.Left = Form.Width - F.Width
+    Else
+        F.Left = 0
+    End If
+    UnderlineFrameName Form, F
+    If TypeName(Form) = "VBComponent" Then
+        Set L = Form.Designer.Controls.Add(ControlIDLabel, "Anchor" & Form.Name)
+    Else
+        Set L = Form.Controls.Add(ControlIDLabel, "Anchor" & Form.Name)
+    End If
+    L.Visible = False
+    L.Left = IIf(TypeName(Form) = "VBComponent", F.Left + F.Width + 9, 1)
+    L.Top = 12
+    L.Width = 1
+    L.BackColor = vbWhite
+    L.Visible = False
+    askFormMenuElements Form
+End Sub
+
+Private Sub askFormMenuElements(Form As Object)
+    '@INCLUDE InputboxString
+    '@INCLUDE addFrameMenu
+    Dim FormElements As String
+    FormElements = InputboxString("Form Menus", "Type comma delimited menu names")
+    If FormElements = "" Then Exit Sub
+    Dim var
+    var = Split(FormElements, ",")
+    Dim i As Long
+    For i = LBound(var) To UBound(var)
+        var(i) = Trim(var(i))
+    Next
+    Dim coll As New Collection
+    Dim element
+    On Error Resume Next
+    For Each element In var
+        If Not IsNumeric(Left(element, 1)) _
+            And InStr(1, element, " ") = 0 Then
+            coll.Add CStr(element), CStr(element)
+        End If
+    Next
+    On Error GoTo 0
+    For Each element In coll
+        addFrameMenu Form, CStr(element)
+    Next
+End Sub
+
+Private Sub addFrameMenu(Form As Object, FrameCaptionNoSpace As String)
+    '@INCLUDE Reframe
+    '@INCLUDE UnderlineFrameName
+    '@INCLUDE CreateOrSetFrame
+    '@INCLUDE AvailableFormOrFrameRow
+    '@INCLUDE AvailableFormOrFrameColumn
+    Dim F As MSForms.control
+    Dim L As MSForms.control
+    Dim Module As VBComponent
+    If TypeName(Form) = "VBComponent" Then
+        Set Module = Form
+        Set F = Module.Designer.Controls.Add(ControlIDFrame, FrameCaptionNoSpace)
+    Else
+        Set Module = ThisWorkbook.VBProject.VBComponents(Form.Parent.Name)
+        Set F = CreateOrSetFrame(Module.Designer.Controls(Form.Name), FrameCaptionNoSpace)
+    End If
+    F.Tag = "anchor" & Form.Name
+    F.Caption = FrameCaptionNoSpace
+    F.ForeColor = vbWhite
+    F.Visible = False
+    If TypeName(Form) = "VBComponent" Then
+        F.Left = AvailableFormOrFrameColumn(Form.Designer)
+    Else
+        F.Left = 0
+    End If
+    F.Visible = True
+    F.BorderStyle = 1
+    F.BorderStyle = 0
+    F.Top = 12
+    F.Width = 100
+    UnderlineFrameName Form, F
+    If TypeName(Form) = "VBComponent" Then
+        Set L = Module.Designer.Controls("SideBar" & Form.Name).Controls.Add(ControlIDLabel)
+    Else
+        Set L = Module.Designer.Controls("SideBar" & Form.Name).Add(ControlIDLabel)
+    End If
+    L.Caption = FrameCaptionNoSpace
+    L.ForeColor = vbWhite
+    L.Visible = False
+    L.Top = AvailableFormOrFrameRow(Module.Designer.Controls("SideBar" & Form.Name))
+    L.Left = L.Left + 3
+    L.Visible = True
+    L.Tag = "reframe"
+    L.Width = F.Width
+End Sub
+
+Private Sub AddControlsToFrame(isSubFrame As Boolean)
+    '@INCLUDE SelectedControl
+    '@INCLUDE SelectedControls
+    '@INCLUDE SelectedFrameControl
+    '@INCLUDE ActiveModule
+    '@INCLUDE InputboxString
+    If ActiveModule.Type <> vbext_ct_MSForm Then Exit Sub
+    Dim ad As New aDesigner
+    If ad.SelectedControls.Count <> 1 Then Exit Sub
+    If TypeName(ad.SelectedControl) <> "Frame" Then Exit Sub
+    Dim Module As VBComponent
+    Dim TargetFrame As MSForms.control
+    If isSubFrame = False Then
+        Set TargetFrame = ad.SelectedControl
+        Set Module = ActiveModule
+    Else
+        Set TargetFrame = ad.SelectedFrameControl
+        Set Module = ThisWorkbook.VBProject.VBComponents(TargetFrame.Parent.Parent.Name)
+    End If
+    Dim ControlNames As String
+    ControlNames = InputboxString("Form Menus", "Type comma delimited menu names")
+    If ControlNames = "" Then Exit Sub
+    Dim var
+    var = Split(ControlNames, ",")
+    Dim i As Long
+    For i = LBound(var) To UBound(var)
+        var(i) = Trim(var(i))
+    Next
+    Dim coll As New Collection
+    Dim element
+    On Error Resume Next
+    For Each element In var
+        If Not IsNumeric(Left(element, 1)) _
+            And InStr(1, element, " ") = 0 Then
+            coll.Add CStr(element), CStr(element)
+        End If
+    Next
+    On Error GoTo 0
+    Dim L As MSForms.control
+    For Each element In coll
+        Set L = Module.Designer.Controls(TargetFrame.Name).Controls.Add(ControlIDCommandButton, element)
+        L.Top = 7 + ((TargetFrame.Controls.Count - 1) * L.Height)
+        L.BackColor = vbWhite
+    Next
+End Sub
+
+Private Sub UnderlineFrameName(Form As Object, F As MSForms.control)
+    Dim Module As VBComponent
+    If TypeName(Form) = "VBComponent" Then
+        Set Module = Form
+    Else
+        Set Module = ThisWorkbook.VBProject.VBComponents(Form.Parent.Name)
+    End If
+    Dim L As MSForms.Label
+    Set L = Module.Designer.Controls(F.Name).Controls.Add(ControlIDLabel)
+    L.Top = 6
+    L.Height = 1
+    L.Width = 100
+    L.BackColor = vbWhite
+    L.Tag = "skip"
+End Sub
+
