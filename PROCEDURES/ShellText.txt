@@ -1,5 +1,0 @@
-
-Function ShellText(sCmd As String) As String
-    Dim oShell   As New WshShell        'requires ref to Windows Script Host Object Model
-    ShellText = oShell.Exec(sCmd).StdOut.ReadAll
-End Function

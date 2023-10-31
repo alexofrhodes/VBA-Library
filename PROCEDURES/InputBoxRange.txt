@@ -1,7 +1,0 @@
-
-
-Public Function InputBoxRange(Optional sTitle As String, Optional sPrompt As String) As Range
-    On Error Resume Next
-    Set InputBoxRange = Application.InputBox(Title:=sTitle, Prompt:=sPrompt, Type:=8, _
-    Default:=IIf(TypeName(Selection) = "Range", Selection.Address, ""))
-End Function

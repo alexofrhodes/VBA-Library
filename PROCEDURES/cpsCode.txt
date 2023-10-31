@@ -1,9 +1,0 @@
-
-Public Function cpsCode() As String
-'@AssignedModule F_Vbe_Selection
-'@INCLUDE PROCEDURE cpsLineFirst
-'@INCLUDE PROCEDURE cpsLinesCount
-'@INCLUDE PROCEDURE ActiveModule
-    cpsCode = ActiveModule.CodeModule.CodePane.CodeModule.Lines(cpsLineFirst, cpsLinesCount)
-End Function
-

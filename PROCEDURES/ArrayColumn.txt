@@ -1,5 +1,0 @@
-
-
-Function ArrayColumn(arr As Variant, col As Long) As Variant
-    ArrayColumn = WorksheetFunction.index(arr, 0, col)
-End Function

@@ -1,9 +1,0 @@
-
-Public Function FirstDigit(ByVal strData As String) As Integer
-    Dim RE As Object
-    Dim Rematches As Object
-    Set RE = CreateObject("vbscript.regexp")
-    RE.pattern = "[0-9]"
-    Set Rematches = RE.Execute(strData)
-    FirstDigit = Rematches(0).FirstIndex + 1
-End Function

@@ -24,73 +24,78 @@ Attribute VB_Exposed = False
 
 Option Explicit
 
-Public oComboBox As ComboBox
+Public oComboBox    As ComboBox
 
 Rem resize combobox List Portion
 #If VBA7 Then
-    Private Declare PtrSafe Function GetDeviceCaps Lib "gdi32" (ByVal hDC As LongPtr, ByVal nIndex As Long) As Long
-    Private Declare PtrSafe Function CreateCompatibleDC Lib "gdi32" (ByVal hDC As LongPtr) As LongPtr
-    Private Declare PtrSafe Function DeleteDC Lib "gdi32" (ByVal hDC As LongPtr) As Long
-    Private Declare PtrSafe Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hDC As LongPtr, ByVal lpStr As LongPtr, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
-    Private Declare PtrSafe Function SetMapMode Lib "gdi32" (ByVal hDC As LongPtr, ByVal nMapMode As Long) As Long
-    Private Declare PtrSafe Function GetTextExtentPoint32 Lib "gdi32" Alias "GetTextExtentPoint32W" (ByVal hDC As LongPtr, ByVal lpsz As LongPtr, ByVal cbString As Long, lpSize As ComboboxListSize) As Long
-    Private Declare PtrSafe Function SelectObject Lib "gdi32" (ByVal hDC As LongPtr, ByVal hObject As LongPtr) As LongPtr
-    Private Declare PtrSafe Function DeleteObject Lib "gdi32" (ByVal hObject As LongPtr) As Long
-    Private Declare PtrSafe Function GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
+Private Declare PtrSafe Function GetDeviceCaps Lib "gdi32" (ByVal hdc As LongPtr, ByVal nIndex As Long) As Long
+Private Declare PtrSafe Function CreateCompatibleDC Lib "gdi32" (ByVal hdc As LongPtr) As LongPtr
+Private Declare PtrSafe Function DeleteDC Lib "gdi32" (ByVal hdc As LongPtr) As Long
+Private Declare PtrSafe Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hdc As LongPtr, ByVal lpStr As LongPtr, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
+Private Declare PtrSafe Function SetMapMode Lib "gdi32" (ByVal hdc As LongPtr, ByVal nMapMode As Long) As Long
+Private Declare PtrSafe Function GetTextExtentPoint32 Lib "gdi32" Alias "GetTextExtentPoint32W" (ByVal hdc As LongPtr, ByVal lpsz As LongPtr, ByVal cbString As Long, lpSize As ComboboxListSize) As Long
+Private Declare PtrSafe Function SelectObject Lib "gdi32" (ByVal hdc As LongPtr, ByVal hObject As LongPtr) As LongPtr
+Private Declare PtrSafe Function DeleteObject Lib "gdi32" (ByVal hObject As LongPtr) As Long
+Private Declare PtrSafe Function GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
 #Else
-    Private Enum LongPtr
-        [_]
-    End Enum
-    Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hDC As LongPtr, ByVal nIndex As Long) As Long
-    Private Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hDC As LongPtr) As LongPtr
-    Private Declare Function DeleteDC Lib "gdi32" (ByVal hDC As LongPtr) As Long
-    Private Declare Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hDC As LongPtr, ByVal lpStr As LongPtr, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
-    Private Declare Function SetMapMode Lib "gdi32" (ByVal hDC As LongPtr, ByVal nMapMode As Long) As Long
-    Private Declare Function GetTextExtentPoint32 Lib "gdi32" Alias "GetTextExtentPoint32W" (ByVal hDC As LongPtr, ByVal lpsz As LongPtr, ByVal cbString As Long, lpSize As ComboboxListSize) As Long
-    Private Declare Function SelectObject Lib "gdi32" (ByVal hDC As LongPtr, ByVal hObject As LongPtr) As LongPtr
-    Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As LongPtr) As Long
-    Private Declare Function GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
+Private Enum LongPtr
+    [_]
+End Enum
+Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hDC As LongPtr, ByVal nIndex As Long) As Long
+Private Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hDC As LongPtr) As LongPtr
+Private Declare Function DeleteDC Lib "gdi32" (ByVal hDC As LongPtr) As Long
+Private Declare Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hDC As LongPtr, ByVal lpStr As LongPtr, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
+Private Declare Function SetMapMode Lib "gdi32" (ByVal hDC As LongPtr, ByVal nMapMode As Long) As Long
+Private Declare Function GetTextExtentPoint32 Lib "gdi32" Alias "GetTextExtentPoint32W" (ByVal hDC As LongPtr, ByVal lpsz As LongPtr, ByVal cbString As Long, lpSize As ComboboxListSize) As Long
+Private Declare Function SelectObject Lib "gdi32" (ByVal hDC As LongPtr, ByVal hObject As LongPtr) As LongPtr
+Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As LongPtr) As Long
+Private Declare Function GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
 #End If
 
 #If Win64 Then
-    Private Const NULL_PTR = 0^
+Private Const NULL_PTR = 0^
 #Else
-    Private Const NULL_PTR = 0&
+Private Const NULL_PTR = 0&
 #End If
 
 Private Type ComboboxListSize
-    cx As Long
-    cy As Long
+    cx              As Long
+    cy              As Long
 End Type
 
 Private Type RECT
-    Left As Long
-    Top As Long
-    Right As Long
-    Bottom As Long
+    Left            As Long
+    Top             As Long
+    Right           As Long
+    Bottom          As Long
 End Type
 
 Public Function Init(cbx As ComboBox) As aComboBox
+    '@AssignedModule aComboBox
+    '@INCLUDE CLASS aComboBox
     Set oComboBox = cbx
     Set Init = Me
 End Function
 
 Public Function AutoSizeDropDown(Optional ByVal JumpToWidestEntry As Boolean = False) As Long
+    '@AssignedModule aComboBox
+    '@INCLUDE CLASS aComboBox
+    '@INCLUDE DECLARATION GetSystemMetrics
 
     Const MM_TEXT = 1&
     Const SM_CXVSCROLL = 2&
- 
+
     Static bDropDownState As Boolean
-    Dim hMemDc As LongPtr
-    Dim hPrevFont As LongPtr
-    Dim IFont As stdole.IFont
+    Dim hMemDc      As LongPtr
+    Dim hPrevFont   As LongPtr
+    Dim IFont       As stdole.IFont
     Dim lPrevMPMode As Long
-    Dim lIndex As Long
-    Dim lMaxWidth As Long
-    Dim lMaxIndex As Long
-    Dim sItemText As String
+    Dim lIndex      As Long
+    Dim lMaxWidth   As Long
+    Dim lMaxIndex   As Long
+    Dim sItemText   As String
     Dim sWidestText As String
-    Dim tSize As ComboboxListSize
+    Dim tSize       As ComboboxListSize
 
     hMemDc = CreateCompatibleDC(NULL_PTR)
     If hMemDc Then
@@ -99,7 +104,7 @@ Public Function AutoSizeDropDown(Optional ByVal JumpToWidestEntry As Boolean = F
         hPrevFont = SelectObject(hMemDc, IFont.hFont)
         With oComboBox
             For lIndex = 0& To .ListCount - 1&
-                sItemText = .List(lIndex)
+                sItemText = .list(lIndex)
                 Call GetTextExtentPoint32(hMemDc, StrPtr(sItemText), Len(sItemText), tSize)
                 If lMaxWidth < tSize.cx Then
                     lMaxWidth = tSize.cx
@@ -125,43 +130,53 @@ Public Function AutoSizeDropDown(Optional ByVal JumpToWidestEntry As Boolean = F
 
 End Function
 
-Private Function ScreenDPI(ByVal bVert As Boolean, ByVal hDC As LongPtr) As Long
+Private Function ScreenDPI(ByVal bVert As Boolean, ByVal hdc As LongPtr) As Long
+    '@AssignedModule aComboBox
+    '@INCLUDE CLASS aComboBox
+    '@INCLUDE DECLARATION LOGPIXELSX
+    '@INCLUDE DECLARATION LOGPIXELSY
+    '@INCLUDE DECLARATION GetDeviceCaps
     Const LOGPIXELSX As Long = 88&
     Const LOGPIXELSY As Long = 90&
     Static lDPI(1&) As Long
 
     If lDPI(0&) = 0& Then
-        lDPI(0&) = GetDeviceCaps(hDC, LOGPIXELSX)
-        lDPI(1&) = GetDeviceCaps(hDC, LOGPIXELSY)
+        lDPI(0&) = GetDeviceCaps(hdc, LOGPIXELSX)
+        lDPI(1&) = GetDeviceCaps(hdc, LOGPIXELSY)
     End If
     ScreenDPI = lDPI(Abs(bVert))
 End Function
 
-Private Function PXtoPT(ByVal hDC As LongPtr, ByVal Pixels As Single, ByVal bVert As Boolean) As Single
+Private Function PXtoPT(ByVal hdc As LongPtr, ByVal Pixels As Single, ByVal bVert As Boolean) As Single
+    '@AssignedModule aComboBox
+    '@INCLUDE CLASS aComboBox
     Const POINTSPERINCH As Long = 72&
-    PXtoPT = (Pixels / (ScreenDPI(bVert, hDC) / POINTSPERINCH))
+    PXtoPT = (Pixels / (ScreenDPI(bVert, hdc) / POINTSPERINCH))
 End Function
 
 
 
 Public Sub LoadVBProjects()
-    Dim coll As New Collection
-    Dim WB As Workbook
-    For Each WB In Workbooks
-        If Len(WB.Path) > 0 Then
-            If WorkbookProjectProtected(WB) = False Then
+    '@AssignedModule aComboBox
+    '@INCLUDE PROCEDURE WorkbookProjectProtected
+    '@INCLUDE CLASS aComboBox
+    Dim coll        As New Collection
+    Dim wb          As Workbook
+    For Each wb In Workbooks
+        If Len(wb.path) > 0 Then
+            If WorkbookProjectProtected(wb) = False Then
                 On Error Resume Next
-                coll.Add WB.Name, WB.Name
+                coll.Add wb.Name, wb.Name
                 On Error GoTo 0
             End If
         End If
     Next
     Rem list addins
-    Dim vbProj As VBProject
-    Dim wbPath As String
+    Dim vbProj      As VBProject
+    Dim wbPath      As String
     For Each vbProj In Application.VBE.VBProjects
         On Error GoTo ErrorHandler
-        wbPath = vbProj.FileName
+        wbPath = vbProj.fileName
         If Right(wbPath, 4) = "xlam" Or Right(wbPath, 3) = "xla" Then
             Dim wbName As String
             wbName = Mid(wbPath, InStrRev(wbPath, "\") + 1)
@@ -174,7 +189,7 @@ Public Sub LoadVBProjects()
 SKIP:
     Next vbProj
 
-    Dim el As Variant
+    Dim el          As Variant
     For Each el In coll
         oComboBox.AddItem el
     Next

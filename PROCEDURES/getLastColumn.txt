@@ -1,6 +1,0 @@
-
-Function getLastColumn(TargetSheet As Worksheet) As Long
-    Dim LastCell As Range
-    Set LastCell = ActiveSheet.Cells.Find("*", SearchOrder:=xlByColumns, SearchDirection:=xlPrevious)
-    getLastColumn = LastCell.Column
-End Function

@@ -1,8 +1,0 @@
-
-Public Function FileExists(ByVal Filename As String) As Boolean
-'@BlogPosted
-'@AssignedModule F_FileFolder
-    If InStr(1, Filename, "\") = 0 Then Exit Function
-    If Right(Filename, 1) = "\" Then Filename = Left(Filename, Len(Filename) - 1)
-    FileExists = (Dir(Filename, vbArchive + vbHidden + vbReadOnly + vbSystem) <> "")
-End Function

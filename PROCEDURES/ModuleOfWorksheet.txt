@@ -1,5 +1,0 @@
-
-Function ModuleOfWorksheet(TargetSheet As Worksheet) As VBComponent
-'@LastModified 2305231030
-    Set ModuleOfWorksheet = TargetSheet.Parent.VBProject.VBComponents(TargetSheet.codeName)
-End Function

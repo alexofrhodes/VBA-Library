@@ -63,8 +63,12 @@ Public Event CommandButtonClick(ByRef CommandButton As MSForms.CommandButton)
 Public Event CommandButtonDoubleClick(ByRef CommandButton As MSForms.CommandButton, ByRef Cancel As MSForms.ReturnBoolean)
 Public Event CommandButtonMouseMove(ByRef CommandButton As MSForms.CommandButton, ByRef Shift As Integer, ByRef X As Single, ByRef Y As Single)
 
+' Events to Images
+Public Event ImageMouseDown(ByRef Image As MSForms.Image, ByRef Button As Integer, ByRef Shift As Integer, ByRef X As Single, ByRef Y As Single)
+
 ' Types of events that can occur
 Public Enum EmittedEvent
+    Change
     Click
     DoubleClick
     MouseMove
@@ -81,117 +85,128 @@ End Enum
 ' Called by EventListenerItem class - main entryway of emitting all events
 Public Sub EmitEvent(ByRef control As Object, ByVal EventType As EmittedEvent, Optional ByRef EventParameters As Collection)
     ' Event raised for all events. This is a way for the user to collect from a single location.
+    '@AssignedModule EventListenerEmitter
+    '@INCLUDE CLASS EventListenerItem
+    '@INCLUDE CLASS EventListenerEmitter
     RaiseEvent EmittedEvent(control, EventType, EventParameters)
 
     ' Specific events
     Select Case EventType
 
-    Case Click
-        RaiseEvent Click(control)
+        Case Click
+            RaiseEvent Click(control)
 
-    Case DoubleClick
-        RaiseEvent DblClick(control, EventParameters("Cancel"))
+        Case DoubleClick
+            RaiseEvent DblClick(control, EventParameters("Cancel"))
 
-    Case KeyUp
-        RaiseEvent KeyUp(control, EventParameters("KeyCode"), EventParameters("Shift"))
+        Case KeyUp
+            RaiseEvent KeyUp(control, EventParameters("KeyCode"), EventParameters("Shift"))
 
-    Case KeyDown
-        RaiseEvent KeyDown(control, EventParameters("KeyCode"), EventParameters("Shift"))
+        Case KeyDown
+            RaiseEvent KeyDown(control, EventParameters("KeyCode"), EventParameters("Shift"))
 
-    Case MouseOver
-        RaiseEvent MouseOver(control)
+        Case MouseOver
+            RaiseEvent MouseOver(control)
 
-    Case MouseOut
-        RaiseEvent MouseOut(control)
+        Case MouseOut
+            RaiseEvent MouseOut(control)
 
-    Case Focus
-        RaiseEvent Focus(control)
+        Case Focus
+            RaiseEvent Focus(control)
 
-    Case Blur
-        RaiseEvent Blur(control)
+        Case Blur
+            RaiseEvent Blur(control)
 
-    Case MouseMove
-        RaiseEvent MouseMove(control, EventParameters("Shift"), EventParameters("X"), EventParameters("Y"))
+        Case MouseMove
+            RaiseEvent MouseMove(control, EventParameters("Shift"), EventParameters("X"), EventParameters("Y"))
 
     End Select
 
     ' Call the specific control type events
     Select Case TypeName(control)
-    Case "Label"
-        EmitLabelEvent control, EventType, EventParameters
+        Case "Label"
+            EmitLabelEvent control, EventType, EventParameters
 
-    Case "Textbox"
-        EmitTextboxEvent control, EventType, EventParameters
+        Case "Textbox"
+            EmitTextboxEvent control, EventType, EventParameters
 
-    Case "CommandButton"
-        EmitCommandButtonEvent control, EventType, EventParameters
+        Case "CommandButton"
+            EmitCommandButtonEvent control, EventType, EventParameters
+        Case "Image"
+            EmitCommandButtonEvent control, EventType, EventParameters
 
     End Select
 End Sub
 
 ' Events for Labels
 Private Sub EmitLabelEvent(ByRef Label As MSForms.Label, ByVal EventType As String, ByRef EventParameters As Collection)
+    '@AssignedModule EventListenerEmitter
+    '@INCLUDE CLASS EventListenerEmitter
     Select Case EventType
-    Case EmittedEvent.Click
-        RaiseEvent LabelClick(Label)
+        Case EmittedEvent.Click
+            RaiseEvent LabelClick(Label)
 
-    Case EmittedEvent.DoubleClick
-        RaiseEvent LabelDoubleClick(Label, EventParameters("Cancel"))
+        Case EmittedEvent.DoubleClick
+            RaiseEvent LabelDoubleClick(Label, EventParameters("Cancel"))
 
-    Case EmittedEvent.MouseOver
-        RaiseEvent LabelMouseOver(Label)
+        Case EmittedEvent.MouseOver
+            RaiseEvent LabelMouseOver(Label)
 
-    Case EmittedEvent.MouseOut
-        RaiseEvent LabelMouseOut(Label)
+        Case EmittedEvent.MouseOut
+            RaiseEvent LabelMouseOut(Label)
 
-    Case EmittedEvent.MouseMove
-        RaiseEvent MouseMove(Label, EventParameters("Shift"), EventParameters("X"), EventParameters("Y"))
+        Case EmittedEvent.MouseMove
+            RaiseEvent MouseMove(Label, EventParameters("Shift"), EventParameters("X"), EventParameters("Y"))
     End Select
 End Sub
 
 ' Events for Textboxes
 Private Sub EmitTextboxEvent(ByRef Textbox As MSForms.Textbox, ByVal EventType As String, ByRef EventParameters As Collection)
+    '@AssignedModule EventListenerEmitter
+    '@INCLUDE CLASS EventListenerEmitter
     Select Case EventType
-    Case EmittedEvent.Blur
-        RaiseEvent TextboxBlur(Textbox)
+        Case EmittedEvent.Blur
+            RaiseEvent TextboxBlur(Textbox)
 
-    Case EmittedEvent.Focus
-        RaiseEvent TextboxFocus(Textbox)
+        Case EmittedEvent.Focus
+            RaiseEvent TextboxFocus(Textbox)
 
-    Case EmittedEvent.Click
-        RaiseEvent TextboxClick(Textbox)
+        Case EmittedEvent.Click
+            RaiseEvent TextboxClick(Textbox)
 
-    Case EmittedEvent.DoubleClick
-        RaiseEvent TextboxDoubleClick(Textbox, EventParameters("Cancel"))
+        Case EmittedEvent.DoubleClick
+            RaiseEvent TextboxDoubleClick(Textbox, EventParameters("Cancel"))
 
-    Case EmittedEvent.MouseOver
-        RaiseEvent TextboxMouseOver(Textbox)
+        Case EmittedEvent.MouseOver
+            RaiseEvent TextboxMouseOver(Textbox)
 
-    Case EmittedEvent.MouseOut
-        RaiseEvent TextboxMouseOut(Textbox)
+        Case EmittedEvent.MouseOut
+            RaiseEvent TextboxMouseOut(Textbox)
 
-    Case EmittedEvent.MouseMove
-        RaiseEvent MouseMove(Textbox, EventParameters("Shift"), EventParameters("X"), EventParameters("Y"))
+        Case EmittedEvent.MouseMove
+            RaiseEvent MouseMove(Textbox, EventParameters("Shift"), EventParameters("X"), EventParameters("Y"))
     End Select
 End Sub
 
 ' Events for CommandButton
 Private Sub EmitCommandButtonEvent(ByRef CommandButton As MSForms.CommandButton, ByVal EventType As String, ByRef EventParameters As Collection)
+    '@AssignedModule EventListenerEmitter
+    '@INCLUDE CLASS EventListenerEmitter
     Select Case EventType
-    Case EmittedEvent.Click
-        RaiseEvent CommandButtonClick(CommandButton)
+        Case EmittedEvent.Click
+            RaiseEvent CommandButtonClick(CommandButton)
 
-    Case EmittedEvent.DoubleClick
-        RaiseEvent CommandButtonDoubleClick(CommandButton, EventParameters("Cancel"))
+        Case EmittedEvent.DoubleClick
+            RaiseEvent CommandButtonDoubleClick(CommandButton, EventParameters("Cancel"))
 
-    Case EmittedEvent.MouseOver
-        RaiseEvent CommandButtonMouseOver(CommandButton)
+        Case EmittedEvent.MouseOver
+            RaiseEvent CommandButtonMouseOver(CommandButton)
 
-    Case EmittedEvent.MouseOut
-        RaiseEvent CommandButtonMouseOut(CommandButton)
+        Case EmittedEvent.MouseOut
+            RaiseEvent CommandButtonMouseOut(CommandButton)
 
-    Case EmittedEvent.MouseMove
-        RaiseEvent MouseMove(CommandButton, EventParameters("Shift"), EventParameters("X"), EventParameters("Y"))
+        Case EmittedEvent.MouseMove
+            RaiseEvent MouseMove(CommandButton, EventParameters("Shift"), EventParameters("X"), EventParameters("Y"))
     End Select
 End Sub
 
@@ -199,6 +214,8 @@ End Sub
 Public Sub SetFocusToControl(ByRef control As Object)
     'If the user was to set focus through VBA then this code will fall apart considering
     'it is unaware of that event occurring.
+    '@AssignedModule EventListenerEmitter
+    '@INCLUDE CLASS EventListenerEmitter
     If Not control Is Nothing Then
         control.SetFocus
         EmitEvent control, Focus
@@ -208,6 +225,9 @@ End Sub
 ' ADD EVENT Listeners ON SPECIFIC CONTROLS - ALSO CALLED BY AddEventListenerAll
 Public Sub AddEventListener(ByRef control As Object)
     ' Events are stored in a private EventListenerItem array
+    '@AssignedModule EventListenerEmitter
+    '@INCLUDE CLASS EventListenerItem
+    '@INCLUDE CLASS EventListenerEmitter
     If IsArrayEmpty(EventList) Then
         ReDim EventList(0 To 0)
     Else
@@ -220,15 +240,13 @@ End Sub
 
 'ADD EVENT Listener TO ALL CONTROLS INCLUDING THE FORM
 Public Sub AddEventListenerAll(ByRef Form As Object)
+    '@AssignedModule EventListenerEmitter
+    '@INCLUDE CLASS EventListenerEmitter
     AddEventListener Form
 
-    Dim control As MSForms.control
+    Dim control     As MSForms.control
     For Each control In Form.Controls
-        Select Case TypeName(control)
-        Case "MultiPage"
-        Case Else
-            AddEventListener control
-        End Select
+        AddEventListener control
     Next control
 End Sub
 
@@ -242,8 +260,10 @@ Private Function IsArrayEmpty(arr As Variant) As Boolean
     ' allocated and unallocated arrays. This function tests whether the array has actually
     ' been allocated.
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    '@AssignedModule EventListenerEmitter
+    '@INCLUDE CLASS EventListenerEmitter
 
-    Err.Clear
+    Err.clear
     On Error Resume Next
     If IsArray(arr) = False Then
         ' we weren't passed an array, return True
@@ -252,8 +272,8 @@ Private Function IsArrayEmpty(arr As Variant) As Boolean
 
     ' Attempt to get the UBound of the array. If the array is
     ' unallocated, an error will occur.
-    Dim UB As Long
-    UB = UBound(arr, 1)
+    Dim ub          As Long
+    ub = UBound(arr, 1)
     If (Err.Number <> 0) Then
         IsArrayEmpty = True
     Else
@@ -263,10 +283,10 @@ Private Function IsArrayEmpty(arr As Variant) As Boolean
         ' UBound is -1. To accommodate the weird behavior, test to see if LB > UB.
         ' If so, the array is not allocated.
         ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        Err.Clear
-        Dim LB As Long
+        Err.clear
+        Dim LB      As Long
         LB = LBound(arr)
-        If LB > UB Then
+        If LB > ub Then
             IsArrayEmpty = True
         Else
             IsArrayEmpty = False

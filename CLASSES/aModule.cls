@@ -25,49 +25,59 @@ Attribute VB_Exposed = False
 '* Created    : 29-06-2023 14:39    Alex
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-
 Option Explicit
 
-Private oModule As VBComponent
-Private oWorkbook As Workbook
+Private oModule     As VBComponent
+Private oWorkbook   As Workbook
 
+Public Sub PredeclaredIDenable()
+    SetPredeclaredId True
+End Sub
 
 Public Sub SetPredeclaredId(Toggle As Boolean)
-    
-    Dim FName1 As String: FName1 = ThisWorkbook.Path & "\" & "TempClass.cls"
-    oWorkbook.VBProject.VBComponents(oModule.Name).Export FName1
-        TxtOverwrite FName1, VBA.Replace( _
-                                VBA.Replace(TxtRead(FName1), _
-                                    IIf(Toggle = True, _
-                                        "Attribute VB_PredeclaredId = False", _
-                                        "Attribute VB_PredeclaredId = True"), _
-                                    IIf(Toggle = True, _
-                                        "Attribute VB_PredeclaredId = True", _
-                                        "Attribute VB_PredeclaredId = False"), _
-                                    1, _
-                                    1), _
-                                vbLf, vbCrLf, _
-                                1, _
-                                -1)
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE TxtOverwrite
+    '@INCLUDE PROCEDURE TxtRead
+    '@INCLUDE CLASS aModule
 
-   
+    Dim FName1      As String: FName1 = ThisWorkbook.path & "\" & "TempClass.cls"
+    oWorkbook.VBProject.VBComponents(oModule.Name).Export FName1
+    TxtOverwrite FName1, VBA.Replace( _
+            VBA.Replace(TxtRead(FName1), _
+            IIf(Toggle = True, _
+            "Attribute VB_PredeclaredId = False", _
+            "Attribute VB_PredeclaredId = True"), _
+            IIf(Toggle = True, _
+            "Attribute VB_PredeclaredId = True", _
+            "Attribute VB_PredeclaredId = False"), _
+            1, _
+            1), _
+            vbLf, vbCrLf, _
+            1, _
+            -1)
+
     Delete
     oWorkbook.VBProject.VBComponents.Import FName1
     Kill FName1
-    
+
 End Sub
 
 Public Function ClassCalls() As Variant
     'classCallsOfModule(0) is the class name
     'classCallsOfModule(1) is the keyword for the class name (eg dim clsCal as new classCalendar)
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE ClassNames
+    '@INCLUDE PROCEDURE classCallsOfModule
+    '@INCLUDE CLASS aModule
+    '@INCLUDE CLASS aModules
 
-    Dim Code      As Variant
-    Dim element   As Variant
-    Dim Keyword   As Variant
-    Dim var       As Variant
+    Dim Code        As Variant
+    Dim element     As Variant
+    Dim Keyword     As Variant
+    Dim var         As Variant
     ReDim var(1 To 2, 1 To 1)
-    Dim counter   As Long: counter = 0
-    Dim ClassName As Variant
+    Dim counter     As Long: counter = 0
+    Dim ClassName   As Variant
     If oModule.CodeModule.CountOfDeclarationLines > 0 Then
         Code = oModule.CodeModule.Lines(1, oModule.CodeModule.CountOfDeclarationLines)
         Code = Replace(Code, "_" & vbNewLine, "")
@@ -86,7 +96,7 @@ Public Function ClassCalls() As Variant
                         var(1, UBound(var, 2)) = element
                         var(2, UBound(var, 2)) = Keyword
                         counter = counter + 1
-'                        Exit For
+                        '                        Exit For
                     End If
                 Next
             End If
@@ -105,30 +115,41 @@ Public Function ClassCalls() As Variant
 
 End Function
 Public Function Active() As aModule
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE ActiveModule
+    '@INCLUDE CLASS aModule
     Init ActiveModule
     Set Active = Me
 End Function
 
-Public Function Init(Module As Variant) As aModule
-    If TypeName(Module) = "VBComponent" Then
-        Set oModule = Module
+Public Function Init(module As Variant) As aModule
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
+    If TypeName(module) = "VBComponent" Then
+        Set oModule = module
     Else
-        Set Module = Module.Parent.VBProject.VBComponents(Module.codeName)
+        Set module = module.Parent.VBProject.VBComponents(module.codeName)
     End If
     Set oWorkbook = Parent
     Set Init = Me
 End Function
 
-
 Sub PrintListOfInclude()
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE dp
+    '@INCLUDE CLASS aModule
     dp ListOfInclude
 End Sub
 
 Function ListOfInclude() As Collection
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE ArrayQuickSort
+    '@INCLUDE CLASS aModule
+    '@INCLUDE CLASS aCollection
 
     Dim var: var = Split(Code, vbNewLine)
-    ArrayQuickSort Filter(var, "'@INCLUDE ", True)
-    Dim coll As New Collection
+    ArrayQuickSort Filter(Filter(var, "'@INCLUDE ", True), """", False)
+    Dim coll        As New Collection
     Dim el
     On Error Resume Next
     For Each el In var
@@ -139,18 +160,20 @@ Function ListOfInclude() As Collection
     Next
     On Error GoTo 0
     var = aCollection.Init(coll).ToArray
-    Dim matches As String: matches = Join(var, vbNewLine)
-    Dim out As String: out = out & vbNewLine & "'=== Module: " & oModule.Name & "===" & vbNewLine & matches
+    Dim matches     As String: matches = Join(var, vbNewLine)
+    Dim out         As String: out = out & vbNewLine & "'=== Module: " & oModule.Name & "===" & vbNewLine & matches
     Set ListOfInclude = coll
 End Function
 
 Public Function Duplicate( _
-                        Optional NewName As String, _
-                        Optional ActivateNewModule As Boolean = True) As Boolean
-    
+        Optional NewName As String, _
+        Optional ActivateNewModule As Boolean = True) As Boolean
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
+
     If NewName = "" Then NewName = Name & "_Copy"
     On Error GoTo Error_Handler
-    Dim TargetFile    As String
+    Dim TargetFile  As String
     TargetFile = Environ("Temp") & "\" & NewName & Extension
     oModule.Name = NewName
     oModule.Export TargetFile
@@ -158,74 +181,84 @@ Public Function Duplicate( _
     oWorkbook.VBProject.VBComponents.Import TargetFile
     If Len(Dir(TargetFile)) > 0 Then Kill Replace(TargetFile, Extension, ".*")
     If ActivateNewModule = True Then oWorkbook.VBProject.VBComponents(NewName).Activate
-'    DuplicateUserForm = True
+    '    DuplicateUserForm = True
 Error_Handler_Exit:
     On Error Resume Next
     Exit Function
 Error_Handler:
     MsgBox "The following error has occured" & vbCrLf & vbCrLf & _
-    "Error Number: " & Err.Number & vbCrLf & _
-    "Error Source: aModule.Duplicate" & vbCrLf & _
-    "Error Description: " & Err.Description & _
-    Switch(Erl = 0, "", Erl <> 0, vbCrLf & "Line No: " & Erl) _
-    , vbOKOnly + vbCritical, "An Error has Occured!"
+            "Error Number: " & Err.Number & vbCrLf & _
+            "Error Source: aModule.Duplicate" & vbCrLf & _
+            "Error Description: " & Err.Description & _
+            Switch(Erl = 0, "", Erl <> 0, vbCrLf & "Line No: " & Erl) _
+            , vbOKOnly + vbCritical, "An Error has Occured!"
     Resume Error_Handler_Exit
 End Function
 
 Sub PrintTodoList()
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE dp
+    '@INCLUDE CLASS aModule
     dp TodoList
 End Sub
 
 Function TodoList()
-    Dim out     As String
-    Dim matches As String
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
+    Dim out         As String
+    Dim matches     As String
     matches = Join(Filter(Split(Code, vbNewLine), "@TODO", True), vbNewLine)
     out = out & vbNewLine & "'---------"
     out = out & vbNewLine & "'Module: " & Name
     out = out & vbNewLine & "'---------"
-'    out = out & vbNewLine & "'" & Replace(Matches, vbNewLine, vbNewLine & "'")
-    out = out & vbNewLine & matches ' "'" & Replace(Matches, vbNewLine, vbNewLine & "'")
+    '    out = out & vbNewLine & "'" & Replace(Matches, vbNewLine, vbNewLine & "'")
+    out = out & vbNewLine & matches    ' "'" & Replace(Matches, vbNewLine, vbNewLine & "'")
     TodoList = out
 End Function
 
 
 Sub HeaderAdd()
-    
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE ActiveProcedure
+    '@INCLUDE PROCEDURE PadRight
+    '@INCLUDE CLASS aModule
+    '@INCLUDE DECLARATION AUTHOR_COPYRIGHT
+    '@INCLUDE DECLARATION AUTHOR_EMAIL
+    '@INCLUDE DECLARATION AUTHOR_NAME
+    '@INCLUDE DECLARATION AUTHOR_OTHERTEXT
+
     Const vbTab2 = vbTab & vbTab
     Const vbTab4 = vbTab & vbTab & vbTab & vbTab
-    Const sFersLine     As String = "'* Modified   :" & vbTab & "Date and Time" & vbTab & vbTab & "Author" & vbTab4 & "Description" & vbCrLf
+    Const sFersLine As String = "'* Modified   :" & vbTab & "Date and Time" & vbTab & vbTab & "Author" & vbTab4 & "Description" & vbCrLf
 
-    Dim txtName         As String: txtName = AUTHOR_NAME
+    Dim txtName     As String: txtName = AUTHOR_NAME
     If txtName = vbNullString Then txtName = Environ("UserName")
     txtName = "'* Author     :" & vbTab & txtName & vbCrLf
-    
-    Dim txtContacts     As String: txtContacts = AUTHOR_EMAIL
+
+    Dim txtContacts As String: txtContacts = AUTHOR_EMAIL
     If txtContacts <> vbNullString Then txtContacts = "'* Contacts   :" & vbTab & txtContacts & vbCrLf
 
-    Dim txtCopyright    As String:  txtCopyright = AUTHOR_COPYRIGHT
-'    If txtCopyright <> vbNullString Then txtCopyright = "'* Copyright  :" & vbTab & txtCopyright & vbCrLf
+    Dim txtCopyright As String: txtCopyright = AUTHOR_COPYRIGHT
+    '    If txtCopyright <> vbNullString Then txtCopyright = "'* Copyright  :" & vbTab & txtCopyright & vbCrLf
     txtCopyright = "'* Copyright  :" & vbTab & txtCopyright & vbCrLf
-    
-    Dim txtOther        As String:   txtOther = AUTHOR_OTHERTEXT
+
+    Dim txtOther    As String: txtOther = AUTHOR_OTHERTEXT
     If txtOther <> vbNullString Then txtOther = "'* Note       :" & vbTab & txtOther & vbCrLf
 
-    Dim txtMedia        As String:   txtMedia = "'* " & vbLf & AUTHOR_MEDIA
-    Dim CurentCodePane  As CodePane: Set CurentCodePane = oModule.CodeModule.CodePane
-    Dim i               As Byte
-    Dim ProcKind        As VBIDE.vbext_ProcKind
-    Dim sProc           As String: sProc = ActiveProcedure
-    Dim nLine           As Long: nLine = 1
-    Dim sTemp           As String
-    Dim sTime           As String
-    Dim sType           As String
+    Dim txtMedia    As String: txtMedia = "'* " & vbLf & AUTHOR_MEDIA
+    Dim CurentCodePane As CodePane: Set CurentCodePane = oModule.CodeModule.CodePane
+    Dim i           As Byte
+    Dim ProcKind    As VBIDE.vbext_ProcKind
+    Dim sProc       As String: sProc = ActiveProcedure
+    Dim nLine       As Long: nLine = 1
+    Dim sTemp       As String
+    Dim sTime       As String
+    Dim sType       As String
     Dim sProcDeclartion As String
-    Dim sProcArguments  As String
+    Dim sProcArguments As String
 
-    Dim sUser As String
+    Dim sUser       As String
     On Error GoTo ErrorHandler
-
-    '* @TODO Created: 01-02-2023 08:20 Author: Anastasiou Alex
-    '* @TODO if name is too long have to recalculate tab length
 
     sUser = "Alex"
     If sUser = vbNullString Then sUser = Environ("UserName")
@@ -234,9 +267,9 @@ Sub HeaderAdd()
     sTime = Format(Now, "dd-mm-yyyy hh:nn")
     sProc = oModule.Name
     sType = "'* " & PadRight(Me.TypeToString, 11) & ":" & vbTab & sProc & vbCrLf
-     
+
     If LineLike("* " & PadRight(Me.TypeToString, 11) & ": " & oModule.Name, True, True) > 0 Then GoTo UpdateHeader
-    
+
     With oModule.CodeModule.CodePane
         sTemp = vbLf & "'" & sTemp & vbCrLf & _
                 sType & _
@@ -250,60 +283,142 @@ Sub HeaderAdd()
                 "'* Created    :" & vbTab & sTime & vbTab & sUser & vbCrLf & _
                 sProcArguments & _
                 "'" & sTemp
+        sTemp = sTemp & vbNewLine & IIf(HeaderContains("Option Explicit"), "", "Option Explicit" & vbNewLine) & _
+                                    IIf(HeaderContains("Option Private Module"), "", "Option Private Module" & vbNewLine) & _
+                                    IIf(HeaderContains("Option Base 1"), "", "Option Base 1") & vbNewLine & _
+                                    IIf(HeaderContains("C_MODULE_NAME"), "", "C_MODULE_NAME = " & """" & Me.Name & """" & vbNewLine)
+         
+'         sTemp = sTemp & "'You may later want to use: amodule.active.ListProceduresPublic"
         .CodeModule.InsertLines 1, sTemp & vbNewLine
     End With
+    
 NormalExit:
     Exit Sub
+    
 UpdateHeader:
     nLine = LineLike("'* Created    : *", True, True) + 1
     'put update to bottom of changes list
     Do While Trim(oModule.CodeModule.Lines(nLine, 1)) Like "'* Modified*)"
         nLine = nLine + 1
     Loop
-    
     oModule.CodeModule.InsertLines nLine, "'* Modified   :" & vbTab & sTime & vbTab & sUser
     GoTo NormalExit
+    
 ErrorHandler:
     GoTo NormalExit
 End Sub
 
 Function item() As VBComponent
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
     Set item = oModule
 End Function
 
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 22-08-2023 09:21    Alex                (aModule.cls > ListProcedures)
+
 Public Sub ListProcedures()
-    Dim coll As New Collection
+'@LastModified 2308220921
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
+    '@INCLUDE CLASS aCollection
+    Dim coll        As New Collection
     Set coll = ProceduresNames
-    If coll.count = 0 Then Exit Sub
-    Dim txt As String
-    txt = "'@FOLDER ListOfProcedures" & vbNewLine & "'" & String(20, "-") & vbNewLine
-    txt = txt & "'" & Join(aCollection.Init(coll).ToArray, vbNewLine & "'") & vbNewLine
-    txt = txt & "'" & String(20, "-") & vbNewLine
+    If coll.Count = 0 Then Exit Sub
+    
+    Dim txt         As String
+    txt = "'@FOLDER ListOfProcedures" & vbNewLine & "'" & String(100, "-") & vbNewLine
+    
+    Dim tmp
+    Dim arr:    arr = aCollection.Init(coll).ToArray
+    Dim ll:     ll = LargestLength(coll)
+    Dim ap As aProcedure
+    For Each ap In Procedures
+        Dim ks
+        ks = ap.KindAsString
+        Select Case ks
+        Case "Get"
+            tmp = "'" & Space(4) & "|> " & ks & " | --- " & ap.Name
+        Case "Let", "Set"
+            tmp = "'" & Space(4) & "|> --- | " & ks & " " & ap.Name
+        Case "Sub"
+            tmp = "'" & Space(4) & "|> Sub " & String(5, "-") & " " & ap.Name
+        Case "Function"
+            tmp = "'" & Space(4) & "|> Fun " & String(5, "-") & " " & ap.Name
+        End Select
+        tmp = tmp & Space(4 + (ll - Len(ap.Name))) & ":"
+        
+        Dim Desc As String, index As Long
+        index = ap.LineLike("*'@Description*", Body_Code)
+        If index > 0 Then
+            Desc = ap.Parent.CodeModule.Lines(index, 1)
+            tmp = tmp & " " & Desc
+        End If
+        txt = txt & tmp & vbNewLine
+    Next
+    txt = txt & "'" & String(100, "-") & vbNewLine
     txt = txt & "'@EndFolder ListOfProcedures" & vbNewLine
     FolderDelete "ListOfProcedures"
     oModule.CodeModule.InsertLines 1, txt
 End Sub
 
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 22-08-2023 09:21    Alex                (aModule.cls > ListProceduresPublic)
+
 Public Sub ListProceduresPublic()
-    Dim coll As New Collection
+'@LastModified 2308220921
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
+    '@INCLUDE CLASS aCollection
+    Dim coll        As New Collection
     Set coll = PublicProceduresNames
-    If coll.count = 0 Then Exit Sub
-    Dim txt As String
-    txt = "'@FOLDER ListOfProcedures" & vbNewLine & "'" & String(20, "-") & vbNewLine
-    txt = txt & "'" & Join(aCollection.Init(coll).ToArray, vbNewLine & "'") & vbNewLine
-    txt = txt & "'" & String(20, "-") & vbNewLine
+    If coll.Count = 0 Then Exit Sub
+    
+    Dim txt         As String
+    
+    txt = "'@FOLDER ListOfProcedures" & vbNewLine & "'" & String(100, "-") & vbNewLine
+    
+    Dim tmp
+    Dim arr:    arr = aCollection.Init(coll).ToArray
+    Dim ll:     ll = LargestLength(coll)
+    Dim ap As aProcedure
+    For Each ap In Procedures
+        Dim ks
+        ks = ap.KindAsString
+        Select Case ks
+        Case "Get"
+            tmp = "'" & Space(4) & "|> " & ks & " | --- " & ap.Name
+        Case "Let", "Set"
+            tmp = "'" & Space(4) & "|> --- | " & ks & " " & ap.Name
+        Case "Sub"
+            tmp = "'" & Space(4) & "|> Sub " & String(5, "-") & " " & ap.Name
+        Case "Function"
+            tmp = "'" & Space(4) & "|> Fun " & String(5, "-") & " " & ap.Name
+        End Select
+        tmp = tmp & Space(4 + (ll - Len(ap.Name))) & ":"
+        
+        Dim Desc As String, index As Long
+        index = ap.LineLike("*'@Description*", Body_Code)
+        If index > 0 Then
+            Desc = ap.Parent.CodeModule.Lines(index, 1)
+            tmp = tmp & " " & Desc
+        End If
+        txt = txt & tmp & vbNewLine
+    Next
+    txt = txt & "'" & String(100, "-") & vbNewLine
     txt = txt & "'@EndFolder ListOfProcedures" & vbNewLine
     FolderDelete "ListOfProcedures"
     oModule.CodeModule.InsertLines 1, txt
 End Sub
 
 Public Sub FolderDelete(FolderName As String)
-'    If oModule.CodeModule.CountOfDeclarationLines = 0 Then Exit Sub
-'    If Not HeaderContains("'@FOLDER " & FolderName) Then Exit Sub
-'    If Not HeaderContains("'@EndFolder " & FolderName) Then Exit Sub
+'@LastModified 2310251309
+    '@AssignedModule aModule
+'@INCLUDE DECLARATION oModule
+'@INCLUDE CLASS aModule
     Dim startLine As Long, endLine As Long
-    Dim sLine As String
-    Dim i As Long
+    Dim sLine       As String
+    Dim i           As Long
     For i = 1 To oModule.CodeModule.CountOfLines
         sLine = Trim(oModule.CodeModule.Lines(i, 1))
         If sLine = "'@FOLDER " & FolderName Then startLine = i
@@ -312,65 +427,71 @@ Public Sub FolderDelete(FolderName As String)
         End If
         If startLine <> 0 And endLine <> 0 Then Exit For
     Next
-    'for some unknown reason this procedure failed
-    'and for another ur adding the following line (which will not execute!!!!) fixes it........
+'
     If startLine = 0 Or endLine = 0 Then Exit Sub
     oModule.CodeModule.DeleteLines startLine, endLine - startLine + 1
-'    If LineLike("'@FOLDER" & FolderName, False, False) < 0 Then FolderDelete FolderName
 End Sub
 
 Public Sub ProcedureSortByKind()
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE ArrayQuickSort
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
     If oModule.CodeModule.CountOfLines = 0 Then Exit Sub
-    Dim coll      As New Collection: Set coll = Procedures
-    Dim var       As Variant:        ReDim var(1 To coll.count)
-    Dim p         As aProcedure
-    Dim startLine As Long
-    Dim i         As Long
-    For i = 1 To coll.count
+    Dim coll        As New Collection: Set coll = Procedures
+    Dim var         As Variant: ReDim var(1 To coll.Count)
+    Dim p           As aProcedure
+    Dim startLine   As Long
+    Dim i           As Long
+    For i = 1 To coll.Count
         Set p = coll(i)
         var(i) = p.Name
-        If i = 1 Then startLine = p.LineIndex(Procedure_First)
+        If i = 1 Then startLine = p.Line_First
     Next
     ArrayQuickSort var
-    Dim h As String:    h = Header
-    Dim s As String
+    Dim h           As String: h = Header
+    Dim S           As String
     Dim TheSubs As String, TheFunctions As String
     For i = LBound(var) To UBound(var)
         Set p = aProcedure.Init(Parent, oModule, CStr(var(i)))
-        s = p.Code_All
+        S = p.Code_All
         If p.KindAsString = "Sub" Then
-            TheSubs = TheSubs & IIf(TheSubs <> "", vbNewLine, "") & s
+            TheSubs = TheSubs & IIf(TheSubs <> "", vbNewLine, "") & S
         Else
-            TheFunctions = TheFunctions & IIf(TheFunctions <> "", vbNewLine, "") & s
+            TheFunctions = TheFunctions & IIf(TheFunctions <> "", vbNewLine, "") & S
         End If
     Next i
     CodeRemove
     oModule.CodeModule.AddFromString h & vbLf & TheSubs & vbLf & TheFunctions
-    
+
 End Sub
 Public Sub ProcedureSortByScope()
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE ArrayQuickSort
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
     If oModule.CodeModule.CountOfLines = 0 Then Exit Sub
-    Dim coll      As New Collection: Set coll = Procedures
-    Dim var       As Variant:        ReDim var(1 To coll.count)
-    Dim p         As aProcedure
-    Dim startLine As Long
-    Dim i         As Long
-    For i = 1 To coll.count
+    Dim coll        As New Collection: Set coll = Procedures
+    Dim var         As Variant: ReDim var(1 To coll.Count)
+    Dim p           As aProcedure
+    Dim startLine   As Long
+    Dim i           As Long
+    For i = 1 To coll.Count
         Set p = coll(i)
         var(i) = p.Name
-        If i = 1 Then startLine = p.LineIndex(Procedure_First)
+        If i = 1 Then startLine = p.Line_First
     Next
     ArrayQuickSort var
-    Dim h As String:    h = Header
-    Dim s As String
+    Dim h           As String: h = Header
+    Dim S           As String
     Dim ThePublic As String, ThePrivate As String
     For i = LBound(var) To UBound(var)
         Set p = aProcedure.Init(Parent, oModule, CStr(var(i)))
-        s = p.Code_All
+        S = p.Code_All
         If p.Scope = "Public" Then
-            ThePublic = ThePublic & IIf(ThePublic <> "", vbNewLine, "") & s
+            ThePublic = ThePublic & IIf(ThePublic <> "", vbNewLine, "") & S
         Else
-            ThePrivate = ThePrivate & IIf(ThePublic <> "", vbNewLine, "") & s
+            ThePrivate = ThePrivate & IIf(ThePublic <> "", vbNewLine, "") & S
         End If
     Next i
     CodeRemove
@@ -378,44 +499,52 @@ Public Sub ProcedureSortByScope()
 End Sub
 
 Public Sub ProcedureSortAZ()
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE ArrayQuickSort
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
     If oModule.CodeModule.CountOfLines = 0 Then Exit Sub
-    Dim coll      As New Collection: Set coll = Procedures
-    Dim var       As Variant:        ReDim var(1 To coll.count)
-    Dim p         As aProcedure
-    Dim startLine As Long
-    Dim i         As Long
-    For i = 1 To coll.count
+    Dim coll        As New Collection: Set coll = Procedures
+    Dim var         As Variant: ReDim var(1 To coll.Count)
+    Dim p           As aProcedure
+    Dim startLine   As Long
+    Dim i           As Long
+    For i = 1 To coll.Count
         Set p = coll(i)
         var(i) = p.Name
-        If i = 1 Then startLine = p.LineIndex(Procedure_First)
+        If i = 1 Then startLine = p.Line_First
     Next
     ArrayQuickSort var
-    Dim s As String:    s = Header
+    Dim S           As String: S = Header
     For i = LBound(var) To UBound(var)
         Set p = aProcedure.Init(Parent, oModule, CStr(var(i)))
-        s = s & IIf(s <> "", vbNewLine, "") & p.Code_All
+        S = S & IIf(S <> "", vbNewLine, "") & p.Code_All
     Next i
     CodeRemove
-    oModule.CodeModule.AddFromString s
+    oModule.CodeModule.AddFromString S
 End Sub
 
 Public Function Component() As VBComponent
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
     Set Component = oModule
 End Function
 
 Public Function LineLike( _
-                             This As String, _
-                             IgnoreIndentation As Boolean, _
-                             IgnoreCase As Boolean) As Long
+        this As String, _
+        IgnoreIndentation As Boolean, _
+        IgnoreCase As Boolean) As Long
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
     If oModule.CodeModule.CountOfLines = 0 Then Exit Function
-    If IgnoreCase Then This = UCase(This)
-    Dim sLine As String
-    Dim i As Long
+    If IgnoreCase Then this = UCase(this)
+    Dim sLine       As String
+    Dim i           As Long
     For i = 1 To oModule.CodeModule.CountOfLines
         sLine = oModule.CodeModule.Lines(i, 1)
         If IgnoreIndentation Then sLine = Trim(sLine)
         If IgnoreCase Then sLine = UCase(sLine)
-        If sLine Like This Then
+        If sLine Like this Then
             LineLike = i
             Exit Function
         End If
@@ -423,19 +552,21 @@ Public Function LineLike( _
 End Function
 
 Public Function LinesLike( _
-                             This As String, _
-                             IgnoreIndentation As Boolean, _
-                             IgnoreCase As Boolean) As Collection
+        this As String, _
+        IgnoreIndentation As Boolean, _
+        IgnoreCase As Boolean) As Collection
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
     If oModule.CodeModule.CountOfLines = 0 Then Exit Function
-    If IgnoreCase Then This = UCase(This)
-    Dim coll As New Collection
-    Dim sLine As String
-    Dim i As Long
+    If IgnoreCase Then this = UCase(this)
+    Dim coll        As New Collection
+    Dim sLine       As String
+    Dim i           As Long
     For i = 1 To oModule.CodeModule.CountOfLines
         sLine = oModule.CodeModule.Lines(i, 1)
         If IgnoreIndentation Then sLine = Trim(sLine)
         If IgnoreCase Then sLine = UCase(sLine)
-        If sLine Like This Then
+        If sLine Like this Then
             coll.Add i
         End If
     Next
@@ -443,61 +574,97 @@ Public Function LinesLike( _
 
 End Function
 
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 22-08-2023 13:56    Alex                (aModule.cls > RemoveLinesLike)
+
+Public Sub RemoveLinesLike(this As String)
+'@LastModified 2308221356
+    Dim ap          As aProcedure
+    For Each ap In Procedures
+        ap.RemoveLinesLike this
+    Next
+End Sub
+
 Public Sub ProcedureScopePrivate()
-    Dim AP As aProcedure
-    For Each AP In Procedures
-        AP.ScopePrivate
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
+    Dim ap          As aProcedure
+    For Each ap In Procedures
+        ap.ScopePrivate
     Next
 End Sub
 
 Public Sub ProcedureScopePublic()
-    Dim AP As aProcedure
-    For Each AP In Procedures
-        AP.ScopePublic
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
+    Dim ap          As aProcedure
+    For Each ap In Procedures
+        ap.ScopePublic
     Next
 End Sub
 Sub EnableDebugPrint()
-    Dim AP As aProcedure
-    For Each AP In Procedures
-        AP.Enable_DebugPrint
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
+    Dim ap          As aProcedure
+    For Each ap In Procedures
+        ap.Enable_DebugPrint
     Next
 End Sub
 Sub DisableDebugPrint()
-    Dim AP As aProcedure
-    For Each AP In Procedures
-        AP.Disable_DebugPrint
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
+    Dim ap          As aProcedure
+    For Each ap In Procedures
+        ap.Disable_DebugPrint
     Next
 End Sub
 Public Sub EnableStop()
-    Dim AP As aProcedure
-    For Each AP In Procedures
-        AP.Enable_Stop
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
+    Dim ap          As aProcedure
+    For Each ap In Procedures
+        ap.Enable_Stop
     Next
 End Sub
 Public Sub DisableStop()
-    Dim AP As aProcedure
-    For Each AP In Procedures
-        AP.Disable_Stop
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
+    Dim ap          As aProcedure
+    For Each ap In Procedures
+        ap.Disable_Stop
     Next
 End Sub
 
 Public Sub ProcedureFoldDeclarations()
-    Dim AP As aProcedure
-    For Each AP In Procedures
-        AP.FoldDeclaration
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
+    Dim ap          As aProcedure
+    For Each ap In Procedures
+        ap.FoldDeclaration
     Next
 End Sub
 
 
 Public Function Procedures() As Collection  'ExcludeUnderscore as Boolean '@TODO
-    Dim lineNum       As Long
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
+    Dim lineNum     As Long
     Dim ProcedureName As String
-    Dim ProcKind      As Long
-    Dim coll          As New Collection
-    Dim i             As Long
-    Dim cProcedure    As aProcedure
+    Dim ProcKind    As Long
+    Dim coll        As New Collection
+    Dim i           As Long
+    Dim cProcedure  As aProcedure
     With oModule.CodeModule
-    
+
         lineNum = .CountOfDeclarationLines + 1
         Do Until lineNum >= .CountOfLines
             On Error Resume Next
@@ -509,7 +676,7 @@ Public Function Procedures() As Collection  'ExcludeUnderscore as Boolean '@TODO
             On Error GoTo 0
             'Err.clear
             If ProcedureName = vbNullString Then Exit Function
-            
+
             'Possible Error:
             '---------------
             ' Procedures with an underscore _ which is used in events
@@ -521,10 +688,10 @@ Public Function Procedures() As Collection  'ExcludeUnderscore as Boolean '@TODO
                 Set cProcedure = New aProcedure
                 cProcedure.Init oWorkbook, oModule, ProcedureName, ProcKind
                 On Error Resume Next
-                coll.Add cProcedure ', cProcedure.Name
-'                    coll.Add ProcedureName, ProcedureName
-'                    If Err.Number > 0 Then Debug.Print ProcedureName & " exists multiple times, added only once, may lead to error"
-'                    Err.clear
+                coll.Add cProcedure    ', cProcedure.Name
+                '                    coll.Add ProcedureName, ProcedureName
+                '                    If Err.Number > 0 Then Debug.Print ProcedureName & " exists multiple times, added only once, may lead to error"
+                '                    Err.clear
                 On Error GoTo 0
                 lineNum = .procStartLine(ProcedureName, ProcKind) + .ProcCountLines(ProcedureName, ProcKind) + 1
             End If
@@ -536,71 +703,89 @@ Public Function Procedures() As Collection  'ExcludeUnderscore as Boolean '@TODO
 End Function
 
 Function ProceduresNames() As Collection
-    Dim AP            As aProcedure
-    Dim coll          As New Collection
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
+    Dim ap          As aProcedure
+    Dim coll        As New Collection
     Dim ProcedureName As String
-    For Each AP In Procedures
-        ProcedureName = AP.Name
+    For Each ap In Procedures
+        ProcedureName = ap.Name
         On Error Resume Next
         coll.Add ProcedureName, ProcedureName
         On Error GoTo 0
         If Err.Number > 0 Then Debug.Print ProcedureName & " exists multiple times, added only once, may lead to error"
-        Err.Clear
+        Err.clear
     Next
     Set ProceduresNames = coll
 End Function
 Function PublicProceduresNames() As Collection
-    Dim AP            As aProcedure
-    Dim coll          As New Collection
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
+    Dim ap          As aProcedure
+    Dim coll        As New Collection
     Dim ProcedureName As String
-    For Each AP In Procedures
-        ProcedureName = AP.Name
+    For Each ap In Procedures
+        ProcedureName = ap.Name
         On Error Resume Next
-        If AP.Scope = "Public" Then coll.Add ProcedureName, ProcedureName
+        If ap.Scope = "Public" Then coll.Add ProcedureName, ProcedureName
         On Error GoTo 0
         If Err.Number > 0 Then Debug.Print ProcedureName & " exists multiple times, added only once, may lead to error"
-        Err.Clear
+        Err.clear
     Next
     Set PublicProceduresNames = coll
 End Function
 Sub UpdateProcedures()
-    Dim Procedure As aProcedure
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aProcedure
+    '@INCLUDE CLASS aModule
+    Dim Procedure   As aProcedure
     For Each Procedure In Procedures
         Procedure.Update
     Next
 End Sub
 
 Sub CommentsToOwnLine()
-    Dim s As String
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE CommentsMoveToOwnLine
+    '@INCLUDE CLASS aModule
+    Dim S           As String
     With oModule.CodeModule
         If .CountOfLines = 0 Then Exit Sub
-        s = CommentsMoveToOwnLine(Code)
+        S = CommentsMoveToOwnLine(Code)
         CodeRemove
-        .AddFromString s
+        .AddFromString S
     End With
 End Sub
 
 Public Sub Indent()
+    '@AssignedModule aModule
+    '@INCLUDE PROCEDURE IsBlockEnd
+    '@INCLUDE PROCEDURE IsBlockStart
+    '@INCLUDE CLASS aModule
     If oModule.CodeModule.CountOfLines = 0 Then Exit Sub
     Dim LineStart As Long, LineEnd As Long
     LineStart = 1
     LineEnd = oModule.CodeModule.CountOfLines
-    Dim nIndent As Long
-    Dim s As String
-    Dim i As Long
+    Dim nIndent     As Long
+    Dim S           As String
+    Dim i           As Long
     For i = LineStart To LineEnd
-        s = LTrim$(oModule.CodeModule.Lines(i, 1))
-        If Trim(s) <> "" Then
-            If IsBlockEnd(s) Then nIndent = nIndent - 1
+        S = LTrim$(oModule.CodeModule.Lines(i, 1))
+        If Trim(S) <> "" Then
+            If IsBlockEnd(S) Then nIndent = nIndent - 1
             If nIndent < 0 Then nIndent = 0
-            s = Space$(nIndent * 4) & s
-            oModule.CodeModule.ReplaceLine i, s
-            If IsBlockStart(LTrim$(s)) Then nIndent = nIndent + 1
+            S = Space$(nIndent * 4) & S
+            oModule.CodeModule.ReplaceLine i, S
+            If IsBlockStart(LTrim$(S)) Then nIndent = nIndent + 1
         End If
     Next
 End Sub
 
 Sub Activate()
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
     With Application.VBE.MainWindow
         .Visible = True
         .WindowState = vbext_ws_Maximize
@@ -615,6 +800,8 @@ Sub Activate()
 End Sub
 
 Function Code() As String
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
     With oModule.CodeModule
         If .CountOfLines = 0 Then Code = "": Exit Function
         Code = .Lines(1, .CountOfLines)
@@ -622,6 +809,8 @@ Function Code() As String
 End Function
 
 Public Function body() As String
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
     With oModule.CodeModule
         If .CountOfLines - .CountOfDeclarationLines = 0 Then Exit Function
         body = .Lines(.CountOfDeclarationLines + 1, .CountOfLines - .CountOfDeclarationLines)
@@ -629,43 +818,51 @@ Public Function body() As String
 End Function
 
 Function Contains( _
-                    This As String, _
-                    WholeWord As Boolean, _
-                    MatchCase As Boolean, _
-                    PatternSearch As Boolean)
+        this As String, _
+        WholeWord As Boolean, _
+        MatchCase As Boolean, _
+        PatternSearch As Boolean)
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
 
     If oModule.CodeModule.CountOfLines = 0 Then Exit Function
     Contains = oModule.CodeModule.Find( _
-                                        This, _
-                                        1, _
-                                        1, _
-                                        oModule.CodeModule.CountOfLines, _
-                                        10000, _
-                                        WholeWord, _
-                                        MatchCase, _
-                                        PatternSearch)
+            this, _
+            1, _
+            1, _
+            oModule.CodeModule.CountOfLines, _
+            10000, _
+            WholeWord, _
+            MatchCase, _
+            PatternSearch)
 End Function
 
 Function Header() As String
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
     If oModule.CodeModule.CountOfDeclarationLines = 0 Then Exit Function
     With oModule.CodeModule
         Header = .Lines(1, .CountOfDeclarationLines)
     End With
 End Function
 
-Function HeaderContains(This As String) As Boolean
-    HeaderContains = (InStr(1, Header, This) > 0)
+Function HeaderContains(this As String) As Boolean
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
+    HeaderContains = (InStr(1, Header, this) > 0)
 End Function
 
 Function Ignore() As Boolean
+    '@AssignedModule aModule
+    '@INCLUDE CLASS aModule
     Ignore = InStr(1, Header, "@IGNORE", vbTextCompare) > 0
 End Function
 
 Public Property Get Parent() As Workbook
-    Dim s As String
-    s = oModule.Collection.Parent.FileName
-    s = Right(s, Len(s) - InStrRev(s, "\"))
-    Set Parent = Workbooks(s)
+    Dim S           As String
+    S = oModule.Collection.Parent.fileName
+    S = Right(S, Len(S) - InStrRev(S, "\"))
+    Set Parent = Workbooks(S)
 End Property
 
 Function Name() As String
@@ -687,87 +884,59 @@ End Function
 
 Function TypeToString() As String
     Select Case oModule.Type
-    Case vbext_ct_ActiveXDesigner
-        TypeToString = "ActiveX Designer"
-    Case vbext_ct_ClassModule
-        TypeToString = "Class"
-    Case vbext_ct_Document
-        TypeToString = "Document"
-    Case vbext_ct_MSForm
-        TypeToString = "UserForm"
-    Case vbext_ct_StdModule
-        TypeToString = "Module"
-    Case Else
-        TypeToString = "Unknown Type: " & CStr(oModule.Type)
+        Case vbext_ct_ActiveXDesigner
+            TypeToString = "ActiveX Designer"
+        Case vbext_ct_ClassModule
+            TypeToString = "Class"
+        Case vbext_ct_Document
+            TypeToString = "Document"
+        Case vbext_ct_MSForm
+            TypeToString = "UserForm"
+        Case vbext_ct_StdModule
+            TypeToString = "Module"
+        Case Else
+            TypeToString = "Unknown Type: " & CStr(oModule.Type)
     End Select
 End Function
 
-Sub ExportProcedures(TargetPath As String)
-    If TargetPath = "" Then Exit Sub '<- FOR when called with FolderPicker
-    TargetPath = Replace(TargetPath & "\", "\\", "\")
-    FoldersCreate TargetPath
-    Dim AP As aProcedure
-    Dim coll As New Collection: Set coll = Procedures
-    If coll.count > 0 Then
-        For Each AP In coll
-'            TxtAppend TargetPath & AP.Name & " " & AP.KindAsString & ".txt", AP.Code_All
-            TxtAppend TargetPath & AP.Name & ".txt", AP.Code_All
+Sub ExportProcedures(targetPath As String)
+    If targetPath = "" Then Exit Sub    '<- FOR when called with FolderPicker
+    targetPath = Replace(targetPath & "\", "\\", "\")
+    FoldersCreate targetPath
+    Dim ap          As aProcedure
+    Dim coll        As New Collection: Set coll = Procedures
+    If coll.Count > 0 Then
+        For Each ap In coll
+            TxtOverwrite targetPath & ap.Name & ".txt", ap.Code_All
         Next
     End If
 End Sub
 
-Sub Export(TargetPath As String)
-    If TargetPath = "" Then Exit Sub '<- FOR when called with FolderPicker
-    TargetPath = Replace(TargetPath & "\", "\\", "\")
-    FoldersCreate TargetPath
-    oModule.Export TargetPath & Name & Extension
+Sub Export(targetPath As String)
+    If targetPath = "" Then Exit Sub    '<- FOR when called with FolderPicker
+    targetPath = Replace(targetPath & "\", "\\", "\")
+    FoldersCreate targetPath
+    oModule.Export targetPath & Name & Extension
 End Sub
 
-'Public Sub ToggleOnAttributePredeclaredID()
-'    ToggleAttribute True, , , , True
-'End Sub
-
-'Sub ToggleAttribute(NewValue As Boolean, _
-'                   Optional Creatable As Boolean, _
-'                   Optional Exposed As Boolean, _
-'                   Optional GlobalNameSpace As Boolean, _
-'                   Optional PredeclaredID As Boolean)
-
-'NOTE: THIS DOESN'T WORK.
-'Modifying the .cls file like this causes it to be imported as normal module.
-'I don't know why it breaks
-
-'    If Not Extension Like "*cls" Then Exit Sub
-'    Dim Path As String: Path = ThisWorkbook.Path & "\"
-'    Export Path
-'    Sleep 1000
-'    Debug.Print "Exported to " & Path
-'    Dim s As String: s = TxtRead(Path & Name & Extension)
-'    If Creatable Then s = VBA.Replace(s, "Attribute VB_Creatable = " & IIf(NewValue = True, CStr("False"), CStr("True")), "Attribute VB_Creatable = " & IIf(NewValue = True, CStr("True"), CStr("False")), 1, 1, vbTextCompare)
-'    If Exposed Then s = VBA.Replace(s, "Attribute VB_GlobalNameSpace = " & IIf(NewValue = True, CStr("False"), CStr("True")), "Attribute VB_GlobalNameSpace = " & IIf(NewValue = True, CStr("True"), CStr("False")), 1, 1, vbTextCompare)
-'    If PredeclaredID Then s = VBA.Replace(s, "Attribute VB_PredeclaredId = " & IIf(NewValue = True, CStr("False"), CStr("True")), "Attribute VB_PredeclaredId = " & IIf(NewValue = True, CStr("True"), CStr("False")), 1, 1, vbTextCompare)
-'    If Exposed Then s = VBA.Replace(s, "Attribute VB_Exposed = " & IIf(NewValue = True, CStr("False"), CStr("True")), "Attribute VB_Exposed = " & IIf(NewValue = True, CStr("True"), CStr("False")), 1, 1, vbTextCompare)
-'    TxtOverwrite Path & Name & Extension, s
-'    aModules.Init(ThisWorkbook).ImportPaths True, Path & Name & Extension
-'End Sub
 
 Public Sub Rename(NewName As String)
     If Not ModuleExists(NewName, oWorkbook) Then oModule.Name = NewName
 End Sub
 
 Function Extension() As String
-    Dim ext As String
+    Dim ext         As String
     Select Case oModule.Type
         Case vbext_ct_MSForm
             ext = ".frm"
         Case vbext_ct_ClassModule, vbext_ct_Document
             ext = ".cls"
-'        Case vbext_ct_Document
-'            If oModule.Name = "ThisWorkbook" Then
-'                Extension = ".WBcls"
-'            Else
-'                Extension = ".DOCcls"
-'            End If
+            '        Case vbext_ct_Document
+            '            If oModule.Name = "ThisWorkbook" Then
+            '                Extension = ".WBcls"
+            '            Else
+            '                Extension = ".DOCcls"
+            '            End If
         Case vbext_ct_StdModule
             ext = ".bas"
         Case Else
@@ -777,13 +946,13 @@ Function Extension() As String
 End Function
 
 Public Function Copy( _
-                    TargetWorkbook As Workbook, _
-                    OverwriteExisting As Boolean) As Boolean
+        TargetWorkbook As Workbook, _
+        OverwriteExisting As Boolean) As Boolean
 
     If Name = "ThisWorkbook" Then Exit Function
     If oModule.Type = vbext_ct_Document Then Exit Function
     If Parent.Name = TargetWorkbook.Name Then Exit Function
-    Dim TempModule As VBIDE.VBComponent
+    Dim TempModule  As VBIDE.VBComponent
 
     If ModuleExists(Name, TargetWorkbook) Then
         If OverwriteExisting = True Then
@@ -795,11 +964,11 @@ Public Function Copy( _
         End If
     End If
 
-    Dim fname As String
-        fname = Environ("Temp") & "\" & Name & Extension
-    oModule.Export FileName:=fname
+    Dim fname       As String
+    fname = Environ("Temp") & "\" & Name & Extension
+    oModule.Export fileName:=fname
 
-    TargetWorkbook.VBProject.VBComponents.Import FileName:=fname
+    TargetWorkbook.VBProject.VBComponents.Import fileName:=fname
     Kill fname
     Copy = True
 End Function
@@ -811,7 +980,7 @@ Sub Delete()
         If oModule.Name = "ThisWorkbook" Then
             oModule.CodeModule.DeleteLines 1, oModule.CodeModule.CountOfLines
         Else
-            If Parent.Sheets.count = 1 Then Parent.Sheets.Add
+            If Parent.Sheets.Count = 1 Then Parent.Sheets.Add
             GetSheetByCodeName(oWorkbook, Name).Delete
         End If
     Else
@@ -823,7 +992,7 @@ End Sub
 Sub CodeRemove()
     If Ignore Then Exit Sub
     If oModule.CodeModule.CountOfLines = 0 Then Exit Sub
-    oModule.CodeModule.DeleteLines 1, oModule.CodeModule.CountOfLines '+ 1
+    oModule.CodeModule.DeleteLines 1, oModule.CodeModule.CountOfLines    '+ 1
 End Sub
 
 Sub CodeMove(ToModule As VBComponent)
@@ -842,9 +1011,9 @@ Sub DeleteIfEmpty()
 End Sub
 
 Public Sub RemoveEmptyLinesButLeaveOne()
-    Dim Code As String
+    Dim Code        As String
     Dim currentline As String, nextline As String
-    Dim i As Long
+    Dim i           As Long
     With oModule.CodeModule
         If .CountOfLines > 0 Then
             For i = .CountOfLines - 1 To 1 Step -1
@@ -859,10 +1028,25 @@ Public Sub RemoveEmptyLinesButLeaveOne()
         End If
     End With
 End Sub
+Public Sub RemoveEmptyLines()
+    Dim Code        As String
+    Dim currentline As String, nextline As String
+    Dim i           As Long
+    With oModule.CodeModule
+        If .CountOfLines > 0 Then
+            For i = .CountOfLines - 1 To 1 Step -1
+                currentline = Trim(.Lines(i, 1))
+                If Len(currentline) = 0 Then
+                    .DeleteLines i, 1
+                End If
+            Next
+        End If
+    End With
+End Sub
 
 Public Sub CommentsRemove()
-    Dim AP As aProcedure
-    For Each AP In Procedures
-        AP.CommentsRemove False, Body_Code
-    Next AP
+    Dim ap          As aProcedure
+    For Each ap In Procedures
+        ap.CommentsRemove False, Body_Code
+    Next ap
 End Sub

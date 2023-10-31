@@ -1,9 +1,0 @@
-
-Sub RemoveArrows()
-    Dim shp As Shape
-    For Each shp In ActiveSheet.Shapes
-        If shp.Name = "myArrow" Then
-            shp.Delete
-        End If
-    Next
-End Sub

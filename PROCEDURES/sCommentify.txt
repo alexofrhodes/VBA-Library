@@ -1,8 +1,0 @@
-
-'* Modified   : Date and Time       Author              Description
-'* Updated    : 19-10-2022 14:44    Alex                initial release (sCommentify)
-
-Function sCommentify(sInput As String)
-    sCommentify = Replace(sInput, vbNewLine, vbLf)
-    sCommentify = "'" & Join(Split(sCommentify, vbLf), vbLf & "'")
-End Function

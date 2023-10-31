@@ -1,6 +1,0 @@
-
-Function splitLineBreaks(ByVal str As String) As String
-    str = Replace(str, vbCrLf, vbCr)
-    str = Replace(str, vbLf, vbCr)
-    splitLineBreaks = Split(str, vbCr)
-End Function

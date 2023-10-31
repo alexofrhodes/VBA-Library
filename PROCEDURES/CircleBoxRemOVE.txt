@@ -1,9 +1,0 @@
-
-Sub CircleBoxRemOVE()
-    Dim shp As Shape
-    For Each shp In ActiveSheet.Shapes
-        If shp.Name = "myCircle" Then
-            shp.Delete
-        End If
-    Next
-End Sub

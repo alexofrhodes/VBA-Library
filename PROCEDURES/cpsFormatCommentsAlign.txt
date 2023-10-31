@@ -1,7 +1,0 @@
-
-Sub cpsFormatCommentsAlign()
-'@BlogPosted
-'@AssignedModule F_Vbe_Comments
-'@INCLUDE PROCEDURE cpsFormatAlignRowsElements
-    cpsFormatAlignRowsElements "'"
-End Sub

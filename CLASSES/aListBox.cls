@@ -50,19 +50,19 @@ Private isUpdatingSelection As Boolean
 
 
 
-Private oListBox As MSForms.ListBox
+Private oListBox    As MSForms.ListBox
 Private oList
-Private oForm As Object
+Private oForm       As Object
 Private previousFilterLength As Long
 
 Private isDoubleClick As Boolean
 
 #If VBA7 Then
-    Private Declare PtrSafe Function GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
-    Private Declare PtrSafe Function GetKeyState Lib "user32" (ByVal nVirtKey As Long) As Integer
+Private Declare PtrSafe Function GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
+Private Declare PtrSafe Function GetKeyState Lib "user32" (ByVal nVirtKey As Long) As Integer
 #Else
-    Private Declare Function  GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
-    Private Declare Function GetKeyState Lib "user32" (ByVal nVirtKey As Long) As Integer
+Private Declare Function  GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
+Private Declare Function GetKeyState Lib "user32" (ByVal nVirtKey As Long) As Integer
 #End If
 
 Private Type POINTAPI
@@ -71,101 +71,115 @@ Private Type POINTAPI
 End Type
 
 #If VBA7 Then
-    
-    Private Type Msg
-        hwnd            As LongPtr
-        message         As Long
-        wParam          As LongPtr
-        lParam          As LongPtr
-        time            As Long
-        pt              As POINTAPI
-    End Type
-    
-    #If Win64 Then
-    Private Declare PtrSafe Function WindowFromPoint Lib "user32" (ByVal POINT As LongPtr) As LongPtr
-    #Else
-    Private Declare PtrSafe Function WindowFromPoint Lib "user32" (ByVal xPoint As Long, ByVal yPoint As Long) As LongPtr
-    #End If
-    
-    Private Declare PtrSafe Function GetMessage Lib "user32" Alias "GetMessageA" (lpMsg As Msg, ByVal hwnd As LongPtr, ByVal wMsgFilterMin As Long, ByVal wMsgFilterMax As Long) As Long
-    Private Declare PtrSafe Function DispatchMessage Lib "user32" Alias "DispatchMessageA" (lpMsg As Msg) As LongPtr
-    Private Declare PtrSafe Function TranslateMessage Lib "user32" (lpMsg As Msg) As Long
-    Private Declare PtrSafe Function WindowFromAccessibleObject Lib "oleacc" (ByVal pacc As IAccessible, phwnd As LongPtr) As Long
-    Private Declare PtrSafe Function IsWindow Lib "user32" (ByVal hwnd As LongPtr) As Long
-    Private Declare PtrSafe Sub DragAcceptFiles Lib "shell32.dll" (ByVal hwnd As LongPtr, ByVal fAccept As Long)
-    Private Declare PtrSafe Sub DragFinish Lib "shell32.dll" (ByVal HDROP As LongPtr)
-    Private Declare PtrSafe Function DragQueryFile Lib "shell32.dll" Alias "DragQueryFileA" (ByVal HDROP As LongPtr, ByVal UINT As Long, ByVal lpStr As String, ByVal ch As Long) As Long
-    Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As LongPtr)
+
+Private Type msg
+    hwnd            As LongPtr
+    message         As Long
+    wParam          As LongPtr
+    lParam          As LongPtr
+    time            As Long
+    pt              As POINTAPI
+End Type
+
+#If Win64 Then
+Private Declare PtrSafe Function WindowFromPoint Lib "user32" (ByVal POINT As LongPtr) As LongPtr
+#Else
+Private Declare PtrSafe Function WindowFromPoint Lib "user32" (ByVal xPoint As Long, ByVal yPoint As Long) As LongPtr
+#End If
+
+Private Declare PtrSafe Function GetMessage Lib "user32" Alias "GetMessageA" (lpMsg As msg, ByVal hwnd As LongPtr, ByVal wMsgFilterMin As Long, ByVal wMsgFilterMax As Long) As Long
+Private Declare PtrSafe Function DispatchMessage Lib "user32" Alias "DispatchMessageA" (lpMsg As msg) As LongPtr
+Private Declare PtrSafe Function TranslateMessage Lib "user32" (lpMsg As msg) As Long
+Private Declare PtrSafe Function WindowFromAccessibleObject Lib "oleacc" (ByVal pacc As IAccessible, phwnd As LongPtr) As Long
+Private Declare PtrSafe Function IsWindow Lib "user32" (ByVal hwnd As LongPtr) As Long
+Private Declare PtrSafe Sub DragAcceptFiles Lib "shell32.dll" (ByVal hwnd As LongPtr, ByVal fAccept As Long)
+Private Declare PtrSafe Sub DragFinish Lib "shell32.dll" (ByVal HDROP As LongPtr)
+Private Declare PtrSafe Function DragQueryFile Lib "shell32.dll" Alias "DragQueryFileA" (ByVal HDROP As LongPtr, ByVal UINT As Long, ByVal lpStr As String, ByVal ch As Long) As Long
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As LongPtr)
 
 #Else
-    
-    Private Type Msg
-        hwnd            As Long
-        message         As Long
-        wParam          As Long
-        lParam          As Long
-        time            As Long
-        pt              As POINTAPI
-    End Type
-    
-    Private Declare Function WindowFromPoint Lib "user32" (ByVal xPoint As Long, ByVal yPoint As Long) As Long
-    Private Declare Function GetMessage Lib "user32" Alias "GetMessageA" (lpMsg As MSG, ByVal hwnd As Long, ByVal wMsgFilterMin As Long, ByVal wMsgFilterMax As Long) As Long
-    Private Declare Function DispatchMessage Lib "user32" Alias "DispatchMessageA" (lpMsg As MSG) As Long
-    Private Declare Function TranslateMessage Lib "user32" (lpMsg As MSG) As Long
-    Private Declare Function WindowFromAccessibleObject Lib "oleacc" (ByVal pacc As IAccessible, phwnd As Long) As Long
-    Private Declare Function IsWindow Lib "user32" (ByVal hwnd As Long) As Long
-    Private Declare Sub DragAcceptFiles Lib "shell32.dll" (ByVal hwnd As Long, ByVal fAccept As Long)
-    Private Declare Sub DragFinish Lib "shell32.dll" (ByVal HDROP As Long)
-    Private Declare Function DragQueryFile Lib "shell32.dll" Alias "DragQueryFileA" (ByVal HDROP As Long, ByVal UINT As Long, ByVal lpStr As String, ByVal ch As Long) As Long
-    Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
+
+Private Type msg
+    hwnd            As Long
+    message         As Long
+    wParam          As Long
+    lParam          As Long
+    time            As Long
+    pt              As POINTAPI
+End Type
+
+Private Declare Function WindowFromPoint Lib "user32" (ByVal xPoint As Long, ByVal yPoint As Long) As Long
+Private Declare Function GetMessage Lib "user32" Alias "GetMessageA" (lpMsg As MSG, ByVal hwnd As Long, ByVal wMsgFilterMin As Long, ByVal wMsgFilterMax As Long) As Long
+Private Declare Function DispatchMessage Lib "user32" Alias "DispatchMessageA" (lpMsg As MSG) As Long
+Private Declare Function TranslateMessage Lib "user32" (lpMsg As MSG) As Long
+Private Declare Function WindowFromAccessibleObject Lib "oleacc" (ByVal pacc As IAccessible, phwnd As Long) As Long
+Private Declare Function IsWindow Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Sub DragAcceptFiles Lib "shell32.dll" (ByVal hwnd As Long, ByVal fAccept As Long)
+Private Declare Sub DragFinish Lib "shell32.dll" (ByVal HDROP As Long)
+Private Declare Function DragQueryFile Lib "shell32.dll" Alias "DragQueryFileA" (ByVal HDROP As Long, ByVal UINT As Long, ByVal lpStr As String, ByVal ch As Long) As Long
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 #End If
 
 
 Public Function Init(ByRef TargetListBox As MSForms.ListBox) As aListBox
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Set oListBox = TargetListBox
     Set oForm = oListBox.Parent
     Set Init = Me
-    
-'    Me.AutofitColumns  '@TODO where to put this? needed for TargetColumn, in case they were not manually set
 End Function
 
 Public Function Parent()
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Set Parent = oForm
 End Function
 Sub RememberList()
-    oList = oListBox.List
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    oList = oListBox.list
 End Sub
 
 
 
 Private Sub Emitter_Click(control As Object)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS EventListenerEmitter
+    '@INCLUDE CLASS aListBox
     If control.Name Like "lblHeader-*" Then
-        Dim col As Long
+        Dim col     As Long
         col = Split(control.Name, "-")(1)
         Me.SortOnColumn col - 1
     End If
 End Sub
 Private Sub Emitter_Keyup(control As Object, KeyCode As MSForms.ReturnInteger, Shift As Integer)
+    '@AssignedModule aListBox
+    '@INCLUDE PROCEDURE ArrayAllocated
+    '@INCLUDE PROCEDURE ArrayFilter2D
+    '@INCLUDE CLASS EventListenerEmitter
+    '@INCLUDE CLASS aListBox
     If Not ArrayAllocated(oList) Then RememberList
     If control.Name = "txtFilter" Then
-        If Len(control.text) = 0 Then
-            oListBox.List = oList
-        ElseIf Len(control.text) > previousFilterLength Then
-            oListBox.List = ArrayFilter2D(oListBox.List, control.text, oForm.Controls("cbxFilter").text)
-        ElseIf Len(control.text) < previousFilterLength Then
-            oListBox.List = ArrayFilter2D(oList, control.text, oForm.Controls("cbxFilter").text)
+        If Len(control.TEXT) = 0 Then
+            oListBox.list = oList
+        ElseIf Len(control.TEXT) > previousFilterLength Then
+            oListBox.list = ArrayFilter2D(oListBox.list, control.TEXT, oForm.Controls("cbxFilter").TEXT)
+        ElseIf Len(control.TEXT) < previousFilterLength Then
+            oListBox.list = ArrayFilter2D(oList, control.TEXT, oForm.Controls("cbxFilter").TEXT)
         End If
-        previousFilterLength = Len(control.text)
+        previousFilterLength = Len(control.TEXT)
     End If
-        
+
     If control.Name = "cbxFilter" Then
-        oForm.Controls("txtFilter").text = ""
+        oForm.Controls("txtFilter").TEXT = ""
         previousFilterLength = 0
     End If
 End Sub
 
 
 Public Sub ListenToDragDrop(Optional ToLbx As MSForms.ListBox)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Set DragSource = oListBox
     If Not ToLbx Is Nothing Then
         Set DragTarget = ToLbx
@@ -178,19 +192,22 @@ End Sub
 
 
 Private Sub DragSource_Change()
-    Dim AltPressed As Boolean:     AltPressed = CBool(GetKeyState(&H12) And &H8000)
-    Dim CtrlPressed As Boolean:    CtrlPressed = CBool(GetKeyState(&H11) And &H8000)
-    Dim ShiftPressed As Boolean:   ShiftPressed = CBool(GetKeyState(&HA0) And &HFF80)
-    
+    '@AssignedModule aListBox
+    '@INCLUDE PROCEDURE ArrayAllocated
+    '@INCLUDE CLASS aListBox
+    Dim AltPressed  As Boolean: AltPressed = CBool(GetKeyState(&H12) And &H8000)
+    Dim CtrlPressed As Boolean: CtrlPressed = CBool(GetKeyState(&H11) And &H8000)
+    Dim ShiftPressed As Boolean: ShiftPressed = CBool(GetKeyState(&HA0) And &HFF80)
+
     If AltPressed Then Exit Sub
-    
+
     If Not isUpdatingSelection _
-    And ArrayAllocated(ItemsSelected) _
-    And Not CtrlPressed _
-    And Not ShiftPressed Then
+            And ArrayAllocated(ItemsSelected) _
+            And Not CtrlPressed _
+            And Not ShiftPressed Then
         isUpdatingSelection = True
         With DragSource
-            Dim i As Long
+            Dim i   As Long
             For i = 0 To .ListCount - 1
                 If ItemsSelected(i) <> .Selected(i) Then
                     .Selected(i) = ItemsSelected(i)
@@ -201,18 +218,21 @@ Private Sub DragSource_Change()
     End If
 End Sub
 Private Sub DragSource_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    Dim AltPressed As Boolean:     AltPressed = CBool(GetKeyState(&H12) And &H8000)
-    Dim CtrlPressed As Boolean:    CtrlPressed = CBool(GetKeyState(&H11) And &H8000)
-    Dim ShiftPressed As Boolean:   ShiftPressed = CBool(GetKeyState(&HA0) And &HFF80)
-    
+    '@AssignedModule aListBox
+    '@INCLUDE PROCEDURE ArrayAllocated
+    '@INCLUDE CLASS aListBox
+    Dim AltPressed  As Boolean: AltPressed = CBool(GetKeyState(&H12) And &H8000)
+    Dim CtrlPressed As Boolean: CtrlPressed = CBool(GetKeyState(&H11) And &H8000)
+    Dim ShiftPressed As Boolean: ShiftPressed = CBool(GetKeyState(&HA0) And &HFF80)
+
     If AltPressed Then Exit Sub
-    
+
     If Not CtrlPressed And Not ShiftPressed And ArrayAllocated(ItemsSelected) Then
-        Dim index As Long: index = Int(Y * 0.85 / DragSource.Font.Size)
+        Dim index   As Long: index = Int(Y * 0.85 / DragSource.Font.Size)
         If index > UBound(ItemsSelected) Then Exit Sub
         ItemsSelected(index) = True
         With DragSource
-            Dim i As Long
+            Dim i   As Long
             For i = 0 To .ListCount - 1
                 ItemsSelected(i) = .Selected(i)
             Next i
@@ -221,9 +241,11 @@ Private Sub DragSource_MouseDown(ByVal Button As Integer, ByVal Shift As Integer
 
 End Sub
 Private Sub DragSource_MouseUp(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     With DragSource
         ReDim ItemsSelected(0 To .ListCount - 1) As Boolean
-        Dim i As Long
+        Dim i       As Long
         For i = 0 To .ListCount - 1
             ItemsSelected(i) = .Selected(i)
         Next i
@@ -231,10 +253,15 @@ Private Sub DragSource_MouseUp(ByVal Button As Integer, ByVal Shift As Integer, 
 End Sub
 
 Private Sub DragTarget_BeforeDragOver(ByVal Cancel As MSForms.ReturnBoolean, ByVal Data As MSForms.DataObject, ByVal X As Single, ByVal Y As Single, ByVal DragState As MSForms.fmDragState, ByVal Effect As MSForms.ReturnEffect, ByVal Shift As Integer)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Effect = fmDropEffectMove
     Cancel = True
 End Sub
 Private Sub DragTarget_BeforeDropOrPaste(ByVal Cancel As MSForms.ReturnBoolean, ByVal Action As MSForms.fmAction, ByVal Data As MSForms.DataObject, ByVal X As Single, ByVal Y As Single, ByVal Effect As MSForms.ReturnEffect, ByVal Shift As Integer)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    '@INCLUDE DECLARATION Action
     With DragTarget
         to_lb_index = Int(Y * 0.85 / .Font.Size)
         If to_lb_index >= .ListCount Then to_lb_index = .ListCount
@@ -242,47 +269,49 @@ Private Sub DragTarget_BeforeDropOrPaste(ByVal Cancel As MSForms.ReturnBoolean, 
         Effect = fmDropEffectMove
         Dim difIndexes As Long
         Dim indexesCounter As Long
-        For indexesCounter = dragindexes.count To 1 Step -1
+        For indexesCounter = dragindexes.Count To 1 Step -1
             DragSource.RemoveItem dragindexes(indexesCounter)
             If dragindexes(indexesCounter) < to_lb_index Then to_lb_index = to_lb_index - 1
         Next
-        
-        For indexesCounter = 1 To dragindexes.count 'To 1 Step -1
+
+        For indexesCounter = 1 To dragindexes.Count    'To 1 Step -1
             If DragTarget.ListCount = 0 Then
                 .AddItem
             Else
-                .AddItem , to_lb_index 'Data.GetText, to_lb_index
+                .AddItem , to_lb_index    'Data.GetText, to_lb_index
             End If
-            Dim i As Long
-           
+            Dim i   As Long
+
             Dim cellTxt As String
             For i = 1 To UBound(dragArray, 2)
                 cellTxt = IIf( _
-                            IsNull(dragArray(indexesCounter, i)), _
-                                "", _
-                                dragArray(indexesCounter, i))
-                DragTarget.List(to_lb_index, i - 1) = cellTxt
+                        IsNull(dragArray(indexesCounter, i)), _
+                        "", _
+                        dragArray(indexesCounter, i))
+                DragTarget.list(to_lb_index, i - 1) = cellTxt
             Next
             to_lb_index = to_lb_index + 1
         Next
     End With
-    
+
     ClearSelection
     DoEvents
     oForm.Repaint
 End Sub
 Private Sub DragSource_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    Dim obj As DataObject
-    Dim drageff As Long
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim obj         As DataObject
+    Dim drageff     As Long
     If Button = 1 Then
         Set obj = New DataObject
-'        obj.SetText DragSource.text
+        '        obj.SetText DragSource.text
 
         from_lb_index = DragSource.ListIndex
-        
+
         Set dragindexes = selectedIndexes  'test
         dragArray = SelectedRowsArray
-    
+
         drageff = obj.StartDrag
         Set obj = Nothing
     End If
@@ -292,11 +321,15 @@ End Sub
 
 
 Public Sub ListenToExtendedSelection()
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Set ExtendedSelectionEvents = oListBox
 End Sub
 Private Sub ExtendedSelectionEvents_Change()
-'author: Petr Radimersky
-    Dim i As Long
+    'author: Petr Radimersky
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim i           As Long
     If CBool(GetKeyState(&HA0) And &HFF80) Then
         With ExtendedSelectionEvents
             For i = 0 To .ListCount - 1
@@ -308,7 +341,9 @@ Private Sub ExtendedSelectionEvents_Change()
     End If
 End Sub
 Private Sub ExtendedSelectionEvents_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    Dim i As Long
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim i           As Long
     If CBool(GetKeyState(&HA0) And &HFF80) Then
         With ExtendedSelectionEvents
             ReDim ItemsSelected(0 To .ListCount - 1) As Boolean
@@ -319,7 +354,9 @@ Private Sub ExtendedSelectionEvents_MouseDown(ByVal Button As Integer, ByVal Shi
     End If
 End Sub
 Private Sub ExtendedSelectionEvents_MouseUp(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    Dim i As Long
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim i           As Long
     If CBool(GetKeyState(&HA0) And &HFF80) Then
         With ExtendedSelectionEvents
             For i = 0 To .ListCount - 1
@@ -332,65 +369,77 @@ End Sub
 
 
 Public Sub ListenToDoubleClick()
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Set DoubleClickEvents = oListBox
 End Sub
 
 Private Sub DoubleClickEvents_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     isDoubleClick = True
 End Sub
 
 Public Sub DoubleClickEvents_MouseUp(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     If Not isDoubleClick Then Exit Sub
-    MsgBox oListBox.List(oListBox.ListIndex, targetColumn(X, Y) - 1)
+    MsgBox oListBox.list(oListBox.ListIndex, targetColumn(X, Y) - 1)
     isDoubleClick = False
 End Sub
 
 Public Function targetColumn(X, Y)
-        ' Calculate the column index based on the X-coordinate
-        Dim ColumnIndex As Long
-        Dim columnWidth As Long
-        Dim totalWidth As Long
-        Dim totalColumns As Long
-        
-        totalColumns = oListBox.columnCount
-        
-        ' Calculate the total width of all columns
+    ' Calculate the column index based on the X-coordinate
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim ColumnIndex As Long
+    Dim columnWidth As Long
+    Dim totalWidth  As Long
+    Dim totalColumns As Long
+
+    totalColumns = oListBox.columnCount
+
+    ' Calculate the total width of all columns
+    For ColumnIndex = 1 To totalColumns
+        columnWidth = Replace(Split(oListBox.ColumnWidths, ";")(ColumnIndex - 1), " pt", "")
+        totalWidth = totalWidth + columnWidth
+    Next ColumnIndex
+
+    ' Calculate the approximate column index based on the X-coordinate
+    Dim clickedX    As Long
+    clickedX = X
+
+    If clickedX > 0 Then
+        Dim cumulativeWidth As Long
+        Dim lastColumnIndex As Long
+
         For ColumnIndex = 1 To totalColumns
-            columnWidth = Replace(Split(oListBox.columnWidths, ";")(ColumnIndex - 1), " pt", "")
-            totalWidth = totalWidth + columnWidth
+            columnWidth = Replace(Split(oListBox.ColumnWidths, ";")(ColumnIndex - 1), " pt", "")
+            cumulativeWidth = cumulativeWidth + columnWidth
+
+            If clickedX < cumulativeWidth Then
+                ' The mouse click is within this column
+                lastColumnIndex = ColumnIndex
+                Exit For
+            End If
         Next ColumnIndex
-        
-        ' Calculate the approximate column index based on the X-coordinate
-        Dim clickedX As Long
-        clickedX = X
-        
-        If clickedX > 0 Then
-            Dim cumulativeWidth As Long
-            Dim lastColumnIndex As Long
-            
-            For ColumnIndex = 1 To totalColumns
-                columnWidth = Replace(Split(oListBox.columnWidths, ";")(ColumnIndex - 1), " pt", "")
-                cumulativeWidth = cumulativeWidth + columnWidth
-                
-                If clickedX < cumulativeWidth Then
-                    ' The mouse click is within this column
-                    lastColumnIndex = ColumnIndex
-                    Exit For
-                End If
-            Next ColumnIndex
-            
-            ' Display the clicked column index
-            targetColumn = lastColumnIndex
-        End If
+
+        ' Display the clicked column index
+        targetColumn = lastColumnIndex
+    End If
 End Function
 
 
 Public Sub AutofitColumns(ResizeListbox As Boolean)
-    oListBox.Font.Name = "consolas" '<---!
-    Dim lRowCt As Long
-    Dim lColCt As Long
+    '@AssignedModule aListBox
+    '@INCLUDE PROCEDURE Min
+    '@INCLUDE CLASS aListBox
+    '@INCLUDE CLASS aUserform
+    oListBox.Font.Name = "consolas"    '<---!
+    Dim lRowCt      As Long
+    Dim lColCt      As Long
     Dim lLengths()
-    Dim mvTable: mvTable = oListBox.List
+    Dim mvTable: mvTable = oListBox.list
     ReDim lLengths(UBound(mvTable, 2))
     With oListBox
         For lRowCt = LBound(mvTable, 1) To UBound(mvTable, 1)
@@ -399,11 +448,11 @@ Public Sub AutofitColumns(ResizeListbox As Boolean)
             Next
         Next
     End With
-    
-    Dim lCt As Long
-    Dim sWidths As String
-    Dim dTotWidth As Double
-    Dim lblHidden As MSForms.control
+
+    Dim lCt         As Long
+    Dim sWidths     As String
+    Dim dTotWidth   As Double
+    Dim lblHidden   As MSForms.control
     Set lblHidden = oForm.Controls.Add("Forms.commandbutton.1")
     With lblHidden
         .Caption = "Measure size"
@@ -421,50 +470,56 @@ Public Sub AutofitColumns(ResizeListbox As Boolean)
             sWidths = sWidths & ";" & CStr(Int(lblHidden.Width))  '+ 12)
         End If
     Next
-   
+
     'Now set the widths of the columns
-    oListBox.columnWidths = sWidths
-   
+    oListBox.ColumnWidths = sWidths
+
     If Not ResizeListbox Then GoTo TidyUp
-    
+
     'Adjust the dimensions of the listbox itself. You may want to adjust the constants I hard coded here.
-   
+
     'Listbox will always be at least 200 wide
-'    oListBox.Width = Application.Min(Application.Max(200, dTotWidth + 12), oListBox.Width)
+    '    oListBox.Width = Application.Min(Application.Max(200, dTotWidth + 12), oListBox.Width)
     oListBox.Width = Application.Max(TotalColumnsWidth, 200)
     aUserform.Init(oForm).ResizeToFitControls marginRight:=10, marginBottom:=10
     'Listbox will always be at least 48 high.
-'    oListBox.Height = Application.Min(Application.Max((oListBox.ListCount + 1) * 12, 48), oListBox.Height)
+    '    oListBox.Height = Application.Min(Application.Max((oListBox.ListCount + 1) * 12, 48), oListBox.Height)
 TidyUp:
     oForm.Controls.Remove lblHidden.Name
     On Error GoTo 0
 End Sub
 
 Function TotalColumnsWidth()
-    If oListBox.columnWidths = "" Then
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    If oListBox.ColumnWidths = "" Then
         MsgBox "Column widths not set"
         TotalColumnsWidth = oListBox.Width
     End If
-    TotalColumnsWidth = Evaluate(Replace(Join(Split(oListBox.columnWidths, ";"), "+"), "pt", "")) + 10
+    TotalColumnsWidth = Evaluate(Replace(Join(Split(oListBox.ColumnWidths, ";"), "+"), "pt", "")) + 10
 End Function
 
 Sub AddFilter()
-    If oListBox.columnWidths = "" Then
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS EventListenerEmitter
+    '@INCLUDE CLASS aListBox
+    '@INCLUDE DECLARATION Emitter
+    If oListBox.ColumnWidths = "" Then
         MsgBox "Column widths not set"
         Exit Sub
     End If
-    Dim var: var = Split(Replace(oListBox.columnWidths, "pt", ""), ";")
-    Dim txt As MSForms.Textbox
-    Dim i As Long
+    Dim var: var = Split(Replace(oListBox.ColumnWidths, "pt", ""), ";")
+    Dim txt         As MSForms.Textbox
+    Dim i           As Long
     Set txt = oForm.Controls.Add("Forms.Textbox.1")
     txt.Name = "txtFilter"
     txt.Top = oListBox.Top - txt.Height - 2
     txt.Width = 150
-    
+
     Set Emitter = New EventListenerEmitter
     Emitter.AddEventListenerAll oForm
-    
-    Dim cbx As MSForms.ComboBox
+
+    Dim cbx         As MSForms.ComboBox
     Set cbx = oForm.Controls.Add("Forms.ComboBox.1")
     cbx.Name = "cbxFilter"
     cbx.Height = txt.Height
@@ -475,16 +530,18 @@ Sub AddFilter()
         cbx.AddItem i
     Next
     cbx.ListIndex = 0
-    
+
     txt.Left = oListBox.Left + cbx.Width + 6
 End Sub
 
-Public Sub FilterByColumn(This As String, _
-                            Optional ColumnIndexZeroBased As Long = -1, _
-                            Optional CaseSensitive As Boolean = False)
-    Dim i               As Long
-    Dim N               As Long
-    Dim sTemp           As String
+Public Sub FilterByColumn(this As String, _
+        Optional ColumnIndexZeroBased As Long = -1, _
+        Optional CaseSensitive As Boolean = False)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim i           As Long
+    Dim N           As Long
+    Dim sTemp       As String
     If ColumnIndexZeroBased > oListBox.columnCount - 1 Or ColumnIndexZeroBased < 0 Then
         ColumnIndexZeroBased = -1
     End If
@@ -492,12 +549,12 @@ Public Sub FilterByColumn(This As String, _
     If ColumnIndexZeroBased <> -1 Then
         For i = N - 1 To 0 Step -1
             If CaseSensitive = True Then
-                sTemp = oListBox.List(i, ColumnIndexZeroBased)
+                sTemp = oListBox.list(i, ColumnIndexZeroBased)
             Else
-                This = LCase(This)
-                sTemp = LCase(oListBox.List(i, ColumnIndexZeroBased))
+                this = LCase(this)
+                sTemp = LCase(oListBox.list(i, ColumnIndexZeroBased))
             End If
-            If InStr(1, sTemp, This) = 0 Then
+            If InStr(1, sTemp, this) = 0 Then
                 oListBox.RemoveItem (i)
             End If
         Next i
@@ -507,12 +564,12 @@ Public Sub FilterByColumn(This As String, _
         For i = N - 1 To 0 Step -1
             For columnCount = 0 To oListBox.columnCount - 1
                 If CaseSensitive = True Then
-                    sTemp = oListBox.List(i, columnCount)
+                    sTemp = oListBox.list(i, columnCount)
                 Else
-                    This = LCase(This)
-                    sTemp = LCase(oListBox.List(i, columnCount))
+                    this = LCase(this)
+                    sTemp = LCase(oListBox.list(i, columnCount))
                 End If
-                If InStr(1, sTemp, This) > 0 Then
+                If InStr(1, sTemp, this) > 0 Then
                 Else
                     If columnCount = oListBox.columnCount - 1 Then
                         oListBox.RemoveItem (i)
@@ -524,12 +581,15 @@ Public Sub FilterByColumn(This As String, _
 End Sub
 
 
-Function LoadCSV(TargetFile As String, Clear As Boolean)
-    If Clear Then oListBox.Clear
+Function LoadCSV(TargetFile As String, clear As Boolean)
+    '@AssignedModule aListBox
+    '@INCLUDE PROCEDURE TxtRead
+    '@INCLUDE CLASS aListBox
+    If clear Then oListBox.clear
     Dim ArrayOfElements
-    Dim s: s = TxtRead(TargetFile)
+    Dim S: S = TxtRead(TargetFile)
     Dim arr
-    arr = Split(s, vbLf)
+    arr = Split(S, vbLf)
     Dim iCols, iRows
     iRows = UBound(arr) + 1
     iCols = UBound(Split(arr(0), ",")) + 1
@@ -541,16 +601,20 @@ Function LoadCSV(TargetFile As String, Clear As Boolean)
         Next
     Next
     oListBox.columnCount = iCols
-    oListBox.List = ArrayOfElements
+    oListBox.list = ArrayOfElements
 End Function
 
 Sub ToRange(cell As Range)
-    cell.Resize(oListBox.ListCount, oListBox.columnCount) = oListBox.List
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    cell.Resize(oListBox.ListCount, oListBox.columnCount) = oListBox.list
 End Sub
 
 Sub ClearSelection()
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     On Error Resume Next
-    Dim i As Long
+    Dim i           As Long
     For i = 0 To oListBox.ListCount
         oListBox.Selected(i) = False
     Next i
@@ -558,21 +622,24 @@ End Sub
 
 
 Public Sub AcceptFiles(Optional sExpansion As String = "*.xlsm;*.xlsb;*.xlsx", Optional iDeepSubPath As Integer = 999)
-'eg on userform_activate:
-'aListBox.Init(ListBox1).AcceptFiles sExpansion:="*.xlsm;*.xlsb;*.xlsx",iDeepSubPath:=999
-    
-    'you can use .[_GethWnd] with controls which support it
-    Dim ctr As control: Set ctr = oListBox
-    Dim lGethWnd As LongPtr: lGethWnd = ctr.[_GethWnd]
+    'eg on userform_activate:
+    'aListBox.Init(ListBox1).AcceptFiles sExpansion:="*.xlsm;*.xlsb;*.xlsx",iDeepSubPath:=999
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    '@INCLUDE CLASS aUserform
 
-    #If VBA7 Then
-        Dim hwnd As LongPtr, HDROP As LongPtr
-    #Else
-        Dim hwnd As Long, HDROP As Long
-    #End If
+    'you can use .[_GethWnd] with controls which support it
+    Dim ctr         As control: Set ctr = oListBox
+    Dim lGethWnd    As LongPtr: lGethWnd = ctr.[_GethWnd]
+
+#If VBA7 Then
+    Dim hwnd As LongPtr, HDROP As LongPtr
+#Else
+    Dim hwnd As Long, HDROP As Long
+#End If
 
     Const WM_DROPFILES = &H233
-    Dim tMsg As Msg, sFileName As String * 1000
+    Dim tMsg As msg, sFileName As String * 1000
     Dim lFilesCount As Long, i As Long
     hwnd = aUserform.Init(oForm).hwnd
     Call DragAcceptFiles(lGethWnd, True)
@@ -596,6 +663,8 @@ Public Sub AcceptFiles(Optional sExpansion As String = "*.xlsm;*.xlsb;*.xlsx", O
     Loop
 End Sub
 Private Sub getFilesFromPath(ByVal sPathFile As String, ByVal sExpansion As String, ByVal iDeepSubPath As Integer)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Dim sExp        As String
     sExp = sGetExtensionName(sPathFile)
     If sExp = vbNullString Then
@@ -603,10 +672,10 @@ Private Sub getFilesFromPath(ByVal sPathFile As String, ByVal sExpansion As Stri
         Set oCol = GetFiles(sPathFile, iDeepSubPath)
         Dim i       As Integer
         Dim iCount  As Integer
-        iCount = oCol.count
+        iCount = oCol.Count
         Dim sFile   As String
         For i = 1 To iCount
-            sFile = oCol.item(i).Path
+            sFile = oCol.item(i).path
             sExp = sGetExtensionName(sFile)
             Call filterFiles(sFile, sExpansion, sExp)
         Next i
@@ -615,6 +684,8 @@ Private Sub getFilesFromPath(ByVal sPathFile As String, ByVal sExpansion As Stri
     End If
 End Sub
 Private Sub filterFiles(ByVal sPathFile As String, ByVal sExpansion As String, ByVal sExp As String)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     sExp = "*." & sExp
     If sExpansion = vbNullString Or sExpansion = "*.*" Then
     ElseIf Not likeExp(sExpansion, sExp) Then
@@ -623,6 +694,8 @@ Private Sub filterFiles(ByVal sPathFile As String, ByVal sExpansion As String, B
     oListBox.AddItem sPathFile
 End Sub
 Private Function likeExp(ByVal sExpansion As String, ByVal sExp As String) As Boolean
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Dim arr         As Variant
     arr = VBA.Split(sExpansion, ";")
     Dim i           As Long
@@ -636,12 +709,16 @@ Private Function likeExp(ByVal sExpansion As String, ByVal sExp As String) As Bo
     Next i
 End Function
 Private Function sGetExtensionName(ByVal sPathFile As String) As String
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Dim FSO         As Object
     Set FSO = CreateObject("Scripting.FileSystemObject")
     sGetExtensionName = FSO.GetExtensionName(sPathFile)
     Set FSO = Nothing
 End Function
-Private Function GetFiles(ByVal Path As String, ByVal iDeepSubPath As Integer) As Collection
+Private Function GetFiles(ByVal path As String, ByVal iDeepSubPath As Integer) As Collection
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Dim MainFolder  As Object
     Dim iFolder     As Object
     Dim iFile       As Object
@@ -651,19 +728,19 @@ Private Function GetFiles(ByVal Path As String, ByVal iDeepSubPath As Integer) A
     Dim i           As Long
 
     Set FSO = CreateObject("Scripting.FileSystemObject")
-    Set MainFolder = FSO.GetFolder(Path)
+    Set MainFolder = FSO.GetFolder(path)
     If MainFolder Is Nothing Then Exit Function
 
     For Each iFile In MainFolder.Files
         If VBA.InStr(1, iFile.Name, "~") = 0 Then
-            MainColl.Add iFile, iFile.Path
+            MainColl.Add iFile, iFile.path
         End If
     Next
 
     If iDeepSubPath > 0 Then
         For Each iFolder In MainFolder.SubFolders
-            Set iColl = GetFiles(iFolder.Path, iDeepSubPath - 1)
-            For i = 1 To iColl.count
+            Set iColl = GetFiles(iFolder.path, iDeepSubPath - 1)
+            For i = 1 To iColl.Count
                 MainColl.Add iColl(i)
             Next
         Next
@@ -672,6 +749,9 @@ Private Function GetFiles(ByVal Path As String, ByVal iDeepSubPath As Integer) A
 End Function
 
 Public Sub HeightToEntries(ByVal NumberOfEntries As Long)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    '@INCLUDE DECLARATION GetSystemMetrics
     Const SM_CYEDGE = 46&
     With oListBox
         NumberOfEntries = IIf(NumberOfEntries > .ListCount, .ListCount, NumberOfEntries)
@@ -682,25 +762,28 @@ Public Sub HeightToEntries(ByVal NumberOfEntries As Long)
 End Sub
 
 Public Sub LoadVBProjects()
-    oListBox.Clear
+    '@AssignedModule aListBox
+    '@INCLUDE PROCEDURE WorkbookProjectProtected
+    '@INCLUDE CLASS aListBox
+    oListBox.clear
     oListBox.columnCount = 1
-    Dim coll As New Collection
-    Dim WB As Workbook
-    For Each WB In Workbooks
-        If Len(WB.Path) > 0 Then
-            If WorkbookProjectProtected(WB) = False Then
+    Dim coll        As New Collection
+    Dim wb          As Workbook
+    For Each wb In Workbooks
+        If Len(wb.path) > 0 Then
+            If WorkbookProjectProtected(wb) = False Then
                 On Error Resume Next
-                coll.Add WB.Name, WB.Name
+                coll.Add wb.Name, wb.Name
                 On Error GoTo 0
             End If
         End If
     Next
     Rem list addins
-    Dim vbProj As VBProject
-    Dim wbPath As String
+    Dim vbProj      As VBProject
+    Dim wbPath      As String
     For Each vbProj In Application.VBE.VBProjects
         On Error GoTo ErrorHandler
-        wbPath = vbProj.FileName
+        wbPath = vbProj.fileName
         If Right(wbPath, 4) = "xlam" Or Right(wbPath, 3) = "xla" Then
             Dim wbName As String
             wbName = Mid(wbPath, InStrRev(wbPath, "\") + 1)
@@ -713,9 +796,9 @@ Public Sub LoadVBProjects()
 SKIP:
     Next vbProj
 
-    Dim el As Variant
+    Dim el          As Variant
     For Each el In coll
-    oListBox.AddItem el
+        oListBox.AddItem el
     Next
 
     Exit Sub
@@ -723,48 +806,55 @@ ErrorHandler:
     If Err.Number = 76 Then GoTo SKIP
 End Sub
 
-Public Sub SelectItems(This As Variant, Optional ByIndex As Boolean)
-    Dim i As Long
-    Select Case TypeName(This)
-    Case Is = "String", "Long", "Integer"
-        For i = 0 To oListBox.ListCount - 1
-            If oListBox.List(i) = CStr(This) Then
-                oListBox.Selected(i) = True
-                DoEvents
-                If oListBox.multiSelect = fmMultiSelectSingle Then Exit Sub
-            End If
-        Next
-    Case Else
-        Dim el As Variant
-        If ByIndex Then
-            For Each el In This
-                oListBox.Selected(el) = True
+Public Sub SelectItems(this As Variant, Optional ByIndex As Boolean)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim i           As Long
+    Select Case TypeName(this)
+        Case Is = "String", "Long", "Integer"
+            For i = 0 To oListBox.ListCount - 1
+                If oListBox.list(i) = CStr(this) Then
+                    oListBox.Selected(i) = True
+                    DoEvents
+                    If oListBox.multiSelect = fmMultiSelectSingle Then Exit Sub
+                End If
             Next
-        Else
-            For Each el In This
-                For i = 0 To oListBox.ListCount - 1
-                    If oListBox.List(i) = el Then
-                        oListBox.Selected(i) = True
-                        DoEvents
-                    End If
+        Case Else
+            Dim el  As Variant
+            If ByIndex Then
+                For Each el In this
+                    oListBox.Selected(el) = True
                 Next
-            Next
-        End If
+            Else
+                For Each el In this
+                    For i = 0 To oListBox.ListCount - 1
+                        If oListBox.list(i) = el Then
+                            oListBox.Selected(i) = True
+                            DoEvents
+                        End If
+                    Next
+                Next
+            End If
     End Select
 End Sub
 
 Public Sub AddHeader(Optional arrHeaders)
-    If oListBox.columnWidths = "" Then Exit Sub
-    Dim i As Long
-    
+    '@AssignedModule aListBox
+    '@INCLUDE PROCEDURE ArrayDimensions
+    '@INCLUDE CLASS EventListenerEmitter
+    '@INCLUDE CLASS aListBox
+    '@INCLUDE DECLARATION Emitter
+    If oListBox.ColumnWidths = "" Then Exit Sub
+    Dim i           As Long
+
     If IsMissing(arrHeaders) Then
         ReDim arrHeaders(0 To oListBox.columnCount - 1)
         For i = 1 To oListBox.columnCount
             arrHeaders(i - 1) = i
         Next
     End If
-    
-    Dim Header As MSForms.Label
+
+    Dim Header      As MSForms.Label
     For i = 1 To oListBox.columnCount
         Set Header = oForm.Controls.Add("Forms.Label.1")
         If i = 1 Then
@@ -775,7 +865,7 @@ Public Sub AddHeader(Optional arrHeaders)
         Header.Name = "lblHeader-" & i
         Header.SpecialEffect = fmSpecialEffectFlat
         Header.BackColor = RGB(200, 200, 200)
-        Header.Width = Trim(Replace(Split(oListBox.columnWidths, ";")(i - 1), "pt", ""))
+        Header.Width = Trim(Replace(Split(oListBox.ColumnWidths, ";")(i - 1), "pt", ""))
         Header.Height = 12
         Header.Font.Bold = True
         Header.Font.Name = "Segoe UI"
@@ -791,22 +881,26 @@ Public Sub AddHeader(Optional arrHeaders)
     Set Emitter = New EventListenerEmitter
     Emitter.AddEventListenerAll oForm
 
-'    oListBox.ZOrder (1)
-'    Header.ZOrder (0)
+    '    oListBox.ZOrder (1)
+    '    Header.ZOrder (0)
 
 End Sub
 Sub removeHeaders()
-    Dim ctl As MSForms.control
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim ctl         As MSForms.control
     For Each ctl In oForm.Controls
         If ctl.Name Like "lblHeader-*" Then oForm.Controls.Remove ctl.Name
     Next
 End Sub
-Public Function Contains(This As String, _
-                Optional ColumnIndexZeroBased As Long = -1, _
-                Optional CaseSensitive As Boolean = False) As Boolean
-    Dim i      As Long
-    Dim N      As Long
-    Dim sTemp  As String
+Public Function Contains(this As String, _
+        Optional ColumnIndexZeroBased As Long = -1, _
+        Optional CaseSensitive As Boolean = False) As Boolean
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim i           As Long
+    Dim N           As Long
+    Dim sTemp       As String
     If ColumnIndexZeroBased > oListBox.columnCount - 1 Or ColumnIndexZeroBased < 0 Then
         ColumnIndexZeroBased = -1
     End If
@@ -814,12 +908,12 @@ Public Function Contains(This As String, _
     If ColumnIndexZeroBased <> -1 Then
         For i = N - 1 To 0 Step -1
             If CaseSensitive = True Then
-                sTemp = oListBox.List(i, ColumnIndexZeroBased)
+                sTemp = oListBox.list(i, ColumnIndexZeroBased)
             Else
-                This = LCase(This)
-                sTemp = LCase(oListBox.List(i, ColumnIndexZeroBased))
+                this = LCase(this)
+                sTemp = LCase(oListBox.list(i, ColumnIndexZeroBased))
             End If
-            If InStr(1, sTemp, This) > 0 Then
+            If InStr(1, sTemp, this) > 0 Then
                 Contains = True
                 Exit Function
             End If
@@ -830,12 +924,12 @@ Public Function Contains(This As String, _
         For i = N - 1 To 0 Step -1
             For columnCount = 0 To oListBox.columnCount - 1
                 If CaseSensitive = True Then
-                    sTemp = oListBox.List(i, columnCount)
+                    sTemp = oListBox.list(i, columnCount)
                 Else
-                    This = LCase(This)
-                    sTemp = LCase(oListBox.List(i, columnCount))
+                    this = LCase(this)
+                    sTemp = LCase(oListBox.list(i, columnCount))
                 End If
-                If InStr(1, sTemp, This) > 0 Then
+                If InStr(1, sTemp, this) > 0 Then
                     Contains = True
                     Exit Function
                 End If
@@ -845,13 +939,15 @@ Public Function Contains(This As String, _
 End Function
 
 Public Sub SortOnColumn(OnColumn As Long)
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
 
-    Dim vntData As Variant
+    Dim vntData     As Variant
     Dim vntTempItem As Variant
     Dim lngOuterIndex As Long
     Dim lngInnerIndex As Long
     Dim lngSubItemIndex As Long
-    vntData = oListBox.List
+    vntData = oListBox.list
 
     For lngOuterIndex = LBound(vntData, 1) To UBound(vntData, 1) - 1
         For lngInnerIndex = lngOuterIndex + 1 To UBound(vntData, 1)
@@ -866,8 +962,8 @@ Public Sub SortOnColumn(OnColumn As Long)
         Next lngInnerIndex
     Next lngOuterIndex
 
-    oListBox.Clear
-    oListBox.List = vntData
+    oListBox.clear
+    oListBox.list = vntData
 End Sub
 
 'Public Sub SortOnColumn(OnColumn As Long)
@@ -894,8 +990,10 @@ End Sub
 'End Sub
 
 Public Function selectedIndexes() As Collection
-    Dim i As Long
-    Dim coll As New Collection
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim i           As Long
+    Dim coll        As New Collection
     If oListBox.ListCount > 0 Then
         For i = 0 To oListBox.ListCount - 1
             If oListBox.Selected(i) Then coll.Add i
@@ -904,79 +1002,89 @@ Public Function selectedIndexes() As Collection
     Set selectedIndexes = coll
 End Function
 
-Public Function SelectedValues() As Collection 'single column
-    Dim i As Long
-    Dim ListItem As Long
+Public Function SelectedValues() As Collection    'single column
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim i           As Long
+    Dim ListItem    As Long
     Dim selectedCollection As Collection
     Set selectedCollection = New Collection
     Dim listboxCount As Long
 
-        If oListBox.ListCount > 0 Then
-            For i = 0 To oListBox.ListCount - 1
-                If oListBox.Selected(i) Then
-                    selectedCollection.Add oListBox.List(i, oListBox.BoundColumn - 1)
-                End If
-            Next i
-        End If
+    If oListBox.ListCount > 0 Then
+        For i = 0 To oListBox.ListCount - 1
+            If oListBox.Selected(i) Then
+                selectedCollection.Add oListBox.list(i, oListBox.BoundColumn - 1)
+            End If
+        Next i
+    End If
 
     Set SelectedValues = selectedCollection
 End Function
 
 
 Public Function SelectedRowsArray()
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Dim X As Long, Y As Long
-    Dim ListItem As Long
-    
-    Dim indexColl As New Collection
+    Dim ListItem    As Long
+
+    Dim indexColl   As New Collection
     Set indexColl = selectedIndexes
-    If indexColl.count = 0 Then SelectedRowsArray = Array(): Exit Function
-    Dim out() As Variant
-    ReDim out(1 To indexColl.count, 1 To oListBox.columnCount)
-    For X = 1 To indexColl.count
+    If indexColl.Count = 0 Then SelectedRowsArray = Array(): Exit Function
+    Dim out()       As Variant
+    ReDim out(1 To indexColl.Count, 1 To oListBox.columnCount)
+    For X = 1 To indexColl.Count
         For Y = 1 To oListBox.columnCount
-            out(X, Y) = oListBox.List(indexColl(X), Y - 1)
+            out(X, Y) = oListBox.list(indexColl(X), Y - 1)
         Next
     Next
     SelectedRowsArray = out
 End Function
 
 Public Function SelectedRowsText() As String
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     Dim X As Long, Y As Long
-    Dim ListItem As Long
-    Dim out As String
-    Dim indexColl As New Collection
+    Dim ListItem    As Long
+    Dim out         As String
+    Dim indexColl   As New Collection
     Set indexColl = selectedIndexes
-    For X = 1 To indexColl.count
+    For X = 1 To indexColl.Count
         For Y = 0 To oListBox.columnCount - 1
-            out = out & IIf(Y > 0, "|", "") & oListBox.List(indexColl(X), Y)
+            out = out & IIf(Y > 0, "|", "") & oListBox.list(indexColl(X), Y)
         Next
-        If X < indexColl.count Then out = out & vbNewLine
+        If X < indexColl.Count Then out = out & vbNewLine
     Next
     SelectedRowsText = out
 End Function
 
 
 Public Function SelectedCount() As Long
-    Dim i As Long
-    Dim ListItem As Long
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim i           As Long
+    Dim ListItem    As Long
     Dim selectedCollection As Collection
     Set selectedCollection = New Collection
     Dim listboxCount As Long
-    Dim counter As Long
+    Dim counter     As Long
 
-        If oListBox.ListCount > 0 Then
-            For i = 0 To oListBox.ListCount - 1
-                If oListBox.Selected(i) = True Then
-                    counter = counter + 1
-                End If
-            Next i
-        End If
+    If oListBox.ListCount > 0 Then
+        For i = 0 To oListBox.ListCount - 1
+            If oListBox.Selected(i) = True Then
+                counter = counter + 1
+            End If
+        Next i
+    End If
     SelectedCount = counter
 End Function
 
 Public Sub DeselectAll()
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     If oListBox.ListCount <> 0 Then
-        Dim i As Long
+        Dim i       As Long
         For i = 0 To oListBox.ListCount - 1
             oListBox.Selected(i) = False
         Next i
@@ -984,53 +1092,91 @@ Public Sub DeselectAll()
 End Sub
 
 Public Sub SelectAll()
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     If oListBox.ListCount <> 0 Then
-        Dim i As Long
+        Dim i       As Long
         For i = 0 To oListBox.ListCount - 1
             oListBox.Selected(i) = True
         Next i
     End If
 End Sub
 
-Public Sub SelectLike(This As String)
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 24-10-2023 20:05    Alex                (aListBox.cls > SelectLike)
+
+Public Sub SelectLike(this As String, casteSensitive As Boolean, Optional targetColumn = 1)
+'@LastModified 2310242005
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
     DeselectAll
-    If This = "" Then Exit Sub
-    Dim i As Long
+    If targetColumn < 1 Or targetColumn > oListBox.columnCount Then Stop
+    If this = "" Then Exit Sub
+    If oListBox.ListCount = 0 Then Exit Sub
+    Dim val1
+    Dim i           As Long
     For i = 0 To oListBox.ListCount - 1
-        If UCase(oListBox.List(i, 1)) Like "*" & UCase(This) & "*" Then
+        val1 = oListBox.list(i, targetColumn - 1)
+        If casteSensitive Then val1 = UCase(val1): this = UCase(this)
+        If val1 Like this Then
             oListBox.Selected(i) = True
         End If
     Next i
 End Sub
 
-Public Sub SortAZ()
-    Dim j As Long
-    Dim i As Long
-    Dim Temp As Variant
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 24-10-2023 20:05    Alex                (aListBox.cls > DeselectLike)
+
+Public Sub DeselectLike(this As String, casteSensitive As Boolean, Optional targetColumn = 1)
+'@LastModified 2310242005
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    DeselectAll
+    If targetColumn < 1 Or targetColumn > oListBox.columnCount Then Stop
+    If this = "" Then Exit Sub
+    If oListBox.ListCount = 0 Then Exit Sub
+    Dim val1
+    Dim i           As Long
+    For i = 0 To oListBox.ListCount - 1
+        val1 = oListBox.list(i, targetColumn - 1)
+        If casteSensitive Then val1 = UCase(val1): this = UCase(this)
+        If UCase(oListBox.list(i, targetColumn)) Like UCase(this) Then
+            oListBox.Selected(i) = False
+        End If
+    Next i
+End Sub
+Public Sub SortAZ()    '1D
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim j           As Long
+    Dim i           As Long
+    Dim Temp        As Variant
     With oListBox
         For j = 0 To .ListCount - 2
             For i = 0 To .ListCount - 2
-                If LCase(.List(i)) > LCase(.List(i + 1)) Then
-                    Temp = .List(i)
-                    .List(i) = .List(i + 1)
-                    .List(i + 1) = Temp
+                If LCase(.list(i)) > LCase(.list(i + 1)) Then
+                    Temp = .list(i)
+                    .list(i) = .list(i + 1)
+                    .list(i + 1) = Temp
                 End If
             Next i
         Next j
     End With
 End Sub
 
-Public Sub SortZA()
-    Dim j As Long
-    Dim i As Long
-    Dim Temp As Variant
+Public Sub SortZA()    '1D
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim j           As Long
+    Dim i           As Long
+    Dim Temp        As Variant
     With oListBox
         For j = 0 To .ListCount - 2
             For i = 0 To .ListCount - 2
-                If LCase(.List(i)) < LCase(.List(i + 1)) Then
-                    Temp = .List(i)
-                    .List(i) = .List(i + 1)
-                    .List(i + 1) = Temp
+                If LCase(.list(i)) < LCase(.list(i + 1)) Then
+                    Temp = .list(i)
+                    .list(i) = .list(i + 1)
+                    .list(i + 1) = Temp
                 End If
             Next i
         Next j
@@ -1042,17 +1188,45 @@ End Sub
 'End Sub
 
 Public Sub SelectedToRange()
-   Dim rng As Range
+    '@AssignedModule aListBox
+    '@INCLUDE PROCEDURE CollectionsToArray2D
+    '@INCLUDE PROCEDURE GetInputRange
+    '@INCLUDE CLASS aCollection
+    '@INCLUDE CLASS aListBox
+    Dim rng         As Range
     If GetInputRange(rng, "Range picker", "Select range to output listbox' list") = False Then Exit Sub
     Dim var: var = aCollection.CollectionsToArray2D(SelectedValues)
     rng.Resize(UBound(var, 1), oListBox.columnCount) = var
 End Sub
 
 Public Sub RemoveSelected()
-    Dim coll As New Collection: Set coll = selectedIndexes
-    If coll.count = 0 Then Exit Sub
-    Dim i As Long
-    For i = coll.count To 1 Step -1
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim coll        As New Collection: Set coll = selectedIndexes
+    If coll.Count = 0 Then Exit Sub
+    Dim i           As Long
+    For i = coll.Count To 1 Step -1
         oListBox.RemoveItem coll(i)
     Next
+End Sub
+
+Public Sub ShowTheseColumns(targetColumns As Variant)
+    'targetColumns is array of integers, base 1
+    '@AssignedModule aListBox
+    '@INCLUDE CLASS aListBox
+    Dim RetVal()    As Variant
+    ReDim RetVal(1 To oListBox.columnCount)
+    If oListBox.ColumnWidths = "" Then Exit Sub    ' AutofitColumns (False)
+    Dim i As Long, ii As Long
+    For i = 1 To oListBox.columnCount
+        For ii = LBound(targetColumns) To UBound(targetColumns)
+            If i = targetColumns(ii) Then
+                RetVal(i) = Split(Replace(oListBox.ColumnWidths, "pt", ""), ";")(i - 1)
+                GoTo resumeNext
+            End If
+        Next
+        RetVal(i) = 0
+resumeNext:
+    Next
+    oListBox.ColumnWidths = Join(RetVal, ";")
 End Sub

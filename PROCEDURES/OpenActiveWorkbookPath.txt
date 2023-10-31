@@ -1,4 +1,0 @@
-
-Sub OpenActiveWorkbookPath()
-    FollowLink ActiveWorkbook.Path
-End Sub

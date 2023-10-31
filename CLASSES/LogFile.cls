@@ -5,9 +5,11 @@ END
 Attribute VB_Name = "LogFile"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
-Attribute VB_PredeclaredId = False
+Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
+Rem INCLUDE class  ApplicationError
+Rem INCLUDE class  RegistryEditor
+Rem INCLUDE module mLogFile
 
 Option Explicit
 Option Base 1
@@ -32,10 +34,10 @@ Option Base 1
 '   |> --------- CreateLogFile          :: Creates a logfile for output and stores it in the specified [storageDirectory].
 '   |> Get | Let DirectoryPath          :: Returns the directory location of the current logfile.
 '   |> Get | --- FilePath               :: Returns the file path of the current logfile.
-'   |> --------- LogBlankLine           :: Outputs a blank line to the logfile.
+'   |> --------- PrintBlankLine           :: Outputs a blank line to the logfile.
 '   |> Get | --- LogFileName            :: Returns the file name of the current logfile.
 '   |> --------- LogDividingLine        :: Outputs a line to the logfile.
-'   |> --------- Log              :: Outputs strOutputMessage to the logfile.
+'   |> --------- Log                    :: Outputs strOutputMessage to the logfile.
 '   |> Get | --- Name                   :: Returns name of the class.
 '   |> --------- OpenDirectory          :: Opens the directory that the current logfile is stored in.
 '   |> --------- OpenLogFile            :: Opens the current logfile (iff it exists).
@@ -46,19 +48,15 @@ Option Base 1
 '==========================================================================================================================
 ' References
 '==========================================================================================================================
-Dim m_RegEdit       As New RegistryEditor
 Dim m_AppErr        As New ApplicationError
 
 '==========================================================================================================================
 ' Application constants
 '==========================================================================================================================
-Private Const C_BASE_KEY                As Long = &H80000001        ' HKey_Current_User (HKCU)
-Private Const C_KEY_NAME                As String = "Software\Microsoft\Office\Excel\TRUxl"        'registry location used to store values.
-Private Const C_REG_SCRATCH             As String = "DirectoryScratch"
 
-Private Const C_NAME                    As String = "LogFile.cls"
-Private Const C_DEFAULT_LOG_FILE_NAME   As String = "Logger"
-Private Const C_MAX_LEN                 As Integer = 96        ' size/length of header boarders. (MUST BE AN EVEN NUMBER!)
+Private Const C_NAME As String = "LogFile.cls"
+Private Const C_DEFAULT_LOG_FILE_NAME As String = "Logger"
+Private Const C_MAX_LEN As Integer = 96                 ' size/length of header boarders. (MUST BE AN EVEN NUMBER!)
 ' 96 seems to be a good size for wide-screen, else 90 or lower.
 
 Private Enum LogOutputType
@@ -66,105 +64,24 @@ Private Enum LogOutputType
     LogOutput = 2
 End Enum
 
-Public Enum LogFormatType
-    LogTitle
-    LogHeader1
-    LogHeader2
-    LogDefault
-    LogBullet1
-    LogBullet2
-    LogNoFormat
-    LogLineThru
-End Enum
-
 '==========================================================================================================================
 ' Private variables
 '==========================================================================================================================
-Private m_LogFileExists             As Boolean
-Private m_FilePath                  As String
-Private m_DirectoryPath             As String
-Private m_FileName                  As String
-Private m_FileExt                   As String
+Private m_LogFileExists As Boolean
+Private m_FilePath  As String
+Private m_DirectoryPath As String
+Private m_FileName  As String
+Private m_FileExt   As String
 
-'==========================================================================================================================
-' Error constants
-'==========================================================================================================================
-Const C_ERR_OFFSET = 100
-Private Const C_ERR_NO_ERROR            As Long = 0
-Private Const C_ERR_INVALID_FILE        As Long = C_ERR_OFFSET + vbObjectError + 1
-Private Const C_ERR_INVALID_DIRECTORY   As Long = C_ERR_OFFSET + vbObjectError + 2
-Private Const C_ERR_LOG_FILE_DNE        As Long = C_ERR_OFFSET + vbObjectError + 3
-Private Const C_ERR_INVALID_INPUT       As Long = C_ERR_OFFSET + vbObjectError + 4
-Private Const C_ERR_REGISTRY_CLASS      As Long = C_ERR_OFFSET + vbObjectError + 5
-Private Const C_ERR_TYPE_MISMATCH       As Long = C_ERR_OFFSET + vbObjectError + 6
 
-'''
-''' Returns the application error object of the class.
-'''
-Public Property Get AppErr() As ApplicationError
+Const C_LINE_LENGTH As Integer = 110
 
-    Set AppErr = m_AppErr
 
-End Property
-
-'''
-''' Creates a folder according to the specified <path> [fullPath].
-'''
-Private Function CreateFolder(ByVal fullPath As String) As Boolean
-
-    If (fullPath <> vbNullString) Then        'create folder
-    '// Ensure correct input format
-    If (VBA.Right$(fullPath, 1) = "\") Then
-        fullPath = VBA.Left$(fullPath, VBA.Len(fullPath) - 1)
-    End If
-    '// Create folder
-    On Error GoTo ERR_HANDLER
-    MkDir fullPath
-    CreateFolder = True
-    Exit Function
-End If
-
-ERR_HANDLER:
-End Function
-
-'''
-''' This method is just to change the order of the inputs for the CreateLogFile method.
-''' Due to legacy support, the original method could not be directly changed etc.
-'''
-Public Function CreateLogFileByName(Optional ByRef LogFileName As String, Optional storageDirectory As String) As Boolean
-    CreateLogFileByName = CreateLogFile(storageDirectory, LogFileName)
-End Function
-
-'''
-''' Generates a string of singleCharaster(s) of length stringLength.
-''' Used to generate outputs for e.g. header boarders.
-'''
-Private Function GetBufferString(singleCharacter As String, stringLength As Integer) As String
-
-    Dim i       As Long
-
-    m_AppErr.clear
-
-    If (VBA.Len(singleCharacter) = 1) Then
-        For i = 1 To stringLength
-            GetBufferString = GetBufferString & singleCharacter
-        Next i
-    Else        'display application error
-        With m_AppErr
-            .Number = C_ERR_INVALID_INPUT
-            .Source = "GetBufferString(...)"
-            .Description = GetAppErrDescription(.Number)
-            .DisplayMessage
-        End With
-    End If
-
-End Function
 
 '''
 ''' Version string of the current class.
 '''
 Public Property Get version() As String
-
     '==========================================================================================================================
     ' Class changelog here.
     '==========================================================================================================================
@@ -198,7 +115,6 @@ Public Property Get version() As String
     '       "RegDirectoryScratch" was returning Null to 'm_directoryPath',
     '       a string variable, which was preventing the routine from auto-creating
     '       a directory storage location for the logfile outputs.
-    '   |> Modified Let RegDirectoryScratch to force use of trailing slash "\".
     '   |> Fixed formatting problem for titles in the Log method.
     'Version = "3.0 (2017+)"  ' SATOLA, BRIAN J.
     '   |> Updated to use newest registry class (now called RegistryEditor).
@@ -207,61 +123,57 @@ Public Property Get version() As String
     '   |> Reformated comments to new convention (for later automation).
     '   |> Replaced application error properties and methods with a new error object/holder.
     '   |> Renamed GetPaddedString to GetBufferString (which is more descriptive).
-    '   |> Modified the log file header printed in CreateLogFile to use C_MAX_LEN.
     '   |> Removed the 'Version' string from the get Version property (more intuitive this way).
     '   |> Added RemoveRegistrySetting() for testing purposes.
-    version = "3.1 (2018)"        ' SATOLA, BRIAN J.
+    version = "3.1 (2018)"  ' SATOLA, BRIAN J.
     '   |> Automatically define default file name if user does not provide:
     '       C_DEFAULT_LOG_FILE_NAME.
 
 End Property
-
 '''
 ''' Returns a string describing the class.
 '''
 Public Property Get About() As String
-
     About = "ChE Junkie VBA LogFile class module, v" & Me.version & "." & VBA.vbCrLf & VBA.vbCrLf
     About = About & "For additional details see https://chejunkie.com/knowledge-base/the-log-file-class-vba/"
-
 End Property
-
 '''
 ''' Returns the name of the class.
 '''
 Public Property Get Name() As String
-
     Name = C_NAME
-
+End Property
+'''
+''' Returns the application error object of the class.
+'''
+Public Property Get AppErr() As ApplicationError
+    Set AppErr = m_AppErr
 End Property
 
 '''
-''' Returns the file path of the current log file.
+''' Initialize the class
 '''
-Public Property Get FilePath() As String
+Public Sub Init(Optional storageDirectory As String = vbNullString, Optional ByRef LogFileName As String)
+    '//// Class constructor.
+    '--------------------------------------------------------------------------------------------------------------------------
+    Debug.Print "|> Initializing:= " & C_NAME
+    m_AppErr.Initialize C_NAME
+    m_DirectoryPath = IniReadKey(ThisWorkbook.path & "\Lib\config\config.ini", "LogFile.cls", "FilePath")
+    If Not FileFolderExists(m_DirectoryPath) Then    'key DNE, or invalid path.
+        If Not FileFolderExists(ThisWorkbook.path & "\Lib\Log\") Then
+            CreateFolder ThisWorkbook.path & "\Lib\Log\"
+        End If
+        m_DirectoryPath = ThisWorkbook.path & "\Lib\Log\"
+    End If
+    m_FileName = vbNullString
+    m_FilePath = vbNullString
+    m_FileExt = ".txt"
+    CreateLogFile storageDirectory, LogFileName
+End Sub
 
-    FilePath = m_FilePath
-
-End Property
-
-'''
-''' Returns the text description of the application error number.
-'''
-Private Function GetAppErrDescription(errNumber As Long) As String
-
-    Select Case errNumber
-    Case C_ERR_NO_ERROR:                GetAppErrDescription = vbNullString
-    Case C_ERR_INVALID_FILE:            GetAppErrDescription = "Invalid file."
-    Case C_ERR_INVALID_DIRECTORY:       GetAppErrDescription = "Invalid directory."
-    Case C_ERR_LOG_FILE_DNE:            GetAppErrDescription = "Logfile DNE."
-    Case C_ERR_INVALID_INPUT:           GetAppErrDescription = "Invalid input."
-    Case C_ERR_REGISTRY_CLASS:          GetAppErrDescription = m_RegEdit.AppErr.Description
-    Case C_ERR_TYPE_MISMATCH:           GetAppErrDescription = "Type mismatch."
-    Case Else
-        GetAppErrDescription = "Undefined error."
-    End Select
-
-End Function
+Private Sub Class_Initialize()
+    Init
+End Sub
 
 '''
 ''' Creates a log file for output and stores it in the specified [storageDirectory].
@@ -279,84 +191,239 @@ Public Function CreateLogFile(Optional storageDirectory As String = vbNullString
     m_LogFileExists = False
     m_AppErr.clear
 
-    If ((storageDirectory = vbNullString) And (m_DirectoryPath <> vbNullString)) Then        ' use existing directory definition.
-    storageDirectory = m_DirectoryPath        ' e.g. class initializes to registry pointer.
-End If
+    If ((storageDirectory = vbNullString) And (m_DirectoryPath <> vbNullString)) Then    ' use existing directory definition.
+        storageDirectory = m_DirectoryPath    ' e.g. class initializes to registry pointer.
+    End If
 
-If ((storageDirectory <> vbNullString) And FileFolderExists(storageDirectory)) Then        ' valid input definition.
-m_DirectoryPath = storageDirectory
-If (LogFileName <> "") Then
-    m_FileName = LogFileName
-Else
-    LogFileName = C_DEFAULT_LOG_FILE_NAME
-    m_FileName = LogFileName
-End If
-m_FilePath = m_DirectoryPath & m_FileName & m_FileExt
-Else        ' display application error
-    With m_AppErr
-        .Number = C_ERR_INVALID_DIRECTORY
-        .Description = GetAppErrDescription(m_AppErr.Number)
-        .Source = "CreateLogFile(...)"
-        .DisplayMessage
-    End With
-    Exit Function
-End If
+    If ((storageDirectory <> vbNullString) And FileFolderExists(storageDirectory)) Then    ' valid input definition.
+        m_DirectoryPath = storageDirectory
+        If (LogFileName <> "") Then
+            m_FileName = LogFileName
+        Else
+            LogFileName = C_DEFAULT_LOG_FILE_NAME
+            m_FileName = LogFileName
+        End If
+        m_FilePath = m_DirectoryPath & m_FileName & m_FileExt
+    Else    ' display application error
+        With m_AppErr
+            .Number = C_ERR_INVALID_DIRECTORY
+            .Source = "CreateLogFile(...)"
+            .DisplayMessage
+        End With
+        Exit Function
+    End If
 
-'==========================================================================================================================
-' Define LogFileName
-'==========================================================================================================================
+    '==========================================================================================================================
+    ' Define LogFileName
+    '==========================================================================================================================
 
-'// Ensure unique name (use integer suffix until found)
-Do Until (FileFolderExists(m_FilePath) = False)
-    i = i + 1
-    sfx = " (" & i & ")"
-    m_FilePath = m_DirectoryPath & m_FileName & sfx & m_FileExt
-Loop
-m_FileName = m_FileName & sfx
+    '// Ensure unique name (use integer suffix until found)
+'    Do Until (FileFolderExists(m_FilePath) = False)
+'        i = i + 1
+'        sfx = " (" & i & ")"
+'        m_FilePath = m_DirectoryPath & m_FileName & sfx & m_FileExt
+'    Loop
+    m_FileName = m_FileName & sfx
 
-m_LogFileExists = True
+    m_LogFileExists = True
 
-'//========================================================================================================================
-'// Print Logfile Header
-'//========================================================================================================================
+    '//========================================================================================================================
+    '// Print Logfile Header
+    '//========================================================================================================================
 
-'// Function WriteToFile(ByVal strLogMessage As String, ByVal iTypeOutput As EOutputType) As Boolean
-Call WriteToFile("LogFile       :    " & m_FileName, LogAppend)
-Call WriteToFile("Created       :    " & VBA.Now, LogAppend)
-Call WriteToFile(GetBufferString("_", C_MAX_LEN), LogAppend)
-Call WriteToFile("", LogAppend)
+    '// Function WriteToFile(ByVal strLogMessage As String, ByVal iTypeOutput As EOutputType) As Boolean
+    Call WriteToFile("LogFile       :    " & m_FileName, LogAppend)
+    Call WriteToFile("Created       :    " & VBA.Now, LogAppend)
+    Call WriteToFile(GetBufferString("_", C_MAX_LEN), LogAppend)
+    Call WriteToFile("", LogAppend)
 
-CreateLogFile = True
+    CreateLogFile = True
 
 End Function
+'''
+''' Creates a folder according to the specified <path> [fullPath].
+'''
+Private Function CreateFolder(ByVal fullPath As String) As Boolean
 
+    If (fullPath <> vbNullString) Then    'create folder
+        '// Ensure correct input format
+        If (VBA.Right$(fullPath, 1) = "\") Then
+            fullPath = VBA.Left$(fullPath, VBA.Len(fullPath) - 1)
+        End If
+        '// Create folder
+        On Error GoTo ERR_HANDLER
+        MkDir fullPath
+        CreateFolder = True
+        Exit Function
+    End If
+
+ERR_HANDLER:
+End Function
+'''
+''' This method is just to change the order of the inputs for the CreateLogFile method.
+''' Due to legacy support, the original method could not be directly changed etc.
+'''
+Public Function CreateLogFileByName(Optional ByRef LogFileName As String, Optional storageDirectory As String) As Boolean
+    CreateLogFileByName = CreateLogFile(storageDirectory, LogFileName)
+End Function
+'''
+''' Returns the file path of the current log file.
+'''
+Public Property Get FilePath() As String
+    FilePath = m_FilePath
+End Property
+'''
+''' Returns the file name of the current log file.
+'''
+Public Property Get fileName() As String
+    fileName = m_FileName
+End Property
+'''
+''' Returns the directory location for the current log file.
+'''
+Public Property Get DirectoryPath() As String
+    DirectoryPath = m_DirectoryPath
+End Property
+'''
+''' Sets the directory location in which the log file is saved.
+'''
+Private Property Let DirectoryPath(path As String)
+    m_AppErr.clear
+    If (VBA.Right(VBA.Trim(path), 1) <> "\") Then
+        path = VBA.Trim(path) & "\"
+    End If
+    '// Check existence
+    If (VBA.Dir(path, vbDirectory) = ".") Then
+        m_DirectoryPath = path
+    Else    ' display application error
+        With m_AppErr
+            .Number = C_ERR_INVALID_DIRECTORY
+            .Source = "'Let' DirectoryPath"
+            .DisplayMessage
+        End With
+    End If
+End Property
 '''
 ''' Function returns TRUE if the specified file or folder exists, FALSE if not.
 '''
 Private Function FileFolderExists(fullPath As String) As Boolean
-
     On Error Resume Next
-
     If Not (Dir(fullPath, vbDirectory) = vbNullString) And (fullPath <> vbNullString) Then
         FileFolderExists = True
     End If
-
 End Function
+'''
+''' Opens the file/folder by the specified <path>.
+'''
+Private Sub OpenFileFolder(fullPath As String)
+    m_AppErr.clear
+    On Error Resume Next
+    Excel.ActiveWorkbook.FollowHyperlink Address:=fullPath, NewWindow:=True
+    Select Case Err.Number
+        Case 0, -2147467260    '(-2147467260) results when someone hits cancel on Excel prompt.
+            Exit Sub
+        Case Else
+            On Error Resume Next
+            With m_AppErr
+                If (VBA.InStr(VBA.Mid(fullPath, VBA.Len(fullPath) - VBA.Len(m_FileExt) - 1, VBA.Len(m_FileExt)), ".") <> 0) Then
+                    .Number = C_ERR_INVALID_FILE
+                Else
+                    .Number = C_ERR_INVALID_DIRECTORY
+                End If
+                .Source = "OpenFileFolder(...)"
+            End With
+    End Select
+End Sub
+'''
+''' Opens the directory location of the current Log File.
+'''
+Public Sub OpenDirectory()
+    OpenFileFolder (DirectoryPath)
+End Sub
+'''
+''' Opens the current log file (if it exists).
+'''
+Public Sub OpenLogFile()
+    OpenFileFolder (m_FilePath)
+End Sub
 
+
+
+
+
+
+
+
+
+'''
+''' Generates a string of singleCharaster(s) of length stringLength.
+''' Used to generate outputs for e.g. header boarders.
+'''
+Private Function GetBufferString(singleCharacter As String, stringLength As Integer) As String
+    Dim i           As Long
+    m_AppErr.clear
+    If (VBA.Len(singleCharacter) = 1) Then
+        For i = 1 To stringLength
+            GetBufferString = GetBufferString & singleCharacter
+        Next i
+    Else    'display application error
+        With m_AppErr
+            .Number = C_ERR_INVALID_INPUT
+            .Source = "GetBufferString(...)"
+            .DisplayMessage
+        End With
+    End If
+End Function
+'''
+'''
+'''
+Public Sub Log(ByVal stringToLog As Variant)
+    Dim strg As String
+    If IsArray(stringToLog) Then
+        strg = Join(stringToLog, vbNewLine)
+    Else
+        strg = stringToLog
+    End If
+    Call WriteToFile(CStr(stringToLog), LogAppend)
+        
+'        Case Else    ' display error message
+'            With m_AppErr
+'                .Number = C_ERR_INVALID_INPUT
+'                .Source = "Log(...)"
+'                .Description = GetAppErrDescription(.Number)
+'                .DisplayMessage
+'            End With
+'            Exit Sub
+End Sub
+'''
+'''
+'''
+Sub PrintLineThrough(ByVal stringToLog As Variant)
+    Dim strg As String
+    Dim nlen(2) As Integer
+    nlen(1) = C_MAX_LEN - VBA.Len(VBA.Now & ": ")
+    If (VBA.Len(stringToLog) <= nlen(1)) Then
+        strg = VBA.Replace(stringToLog, " ", "-")
+        strg = "---" & strg
+        nlen(2) = nlen(1) - VBA.Len(stringToLog) - 3
+        Dim ilen As Long
+        For ilen = 1 To nlen(2)
+            strg = strg & "-"
+        Next ilen
+        stringToLog = VBA.Now & ": " & strg
+    End If
+    Call WriteToFile(CStr(stringToLog), LogAppend)
+End Sub
 '''
 ''' Outputs a blank line to the log file.
 '''
-Public Sub LogBlankLine()
-
+Public Sub PrintBlankLine()
     Call WriteToFile("", LogAppend)
-
 End Sub
-
 '''
 ''' Outputs a line to the Log file: solid (default) or dashed.
 '''
 Public Sub LogDividingLine(Optional includeBlankLineAfter As Boolean = True, Optional useDashLine As Boolean = False)
-
     If includeBlankLineAfter Then
         If Not useDashLine Then
             Call WriteToFile(GetBufferString("_", C_MAX_LEN) & VBA.vbCrLf, LogAppend)
@@ -368,344 +435,293 @@ Public Sub LogDividingLine(Optional includeBlankLineAfter As Boolean = True, Opt
     Else
         Call WriteToFile(GetBufferString("-", C_MAX_LEN), LogAppend)
     End If
-
 End Sub
-
-'''
-''' Opens the file/folder by the specified <path>.
-'''
-Private Sub OpenFileFolder(fullPath As String)
-
-    m_AppErr.clear
-
-    On Error Resume Next
-    Excel.ActiveWorkbook.FollowHyperlink Address:=fullPath, NewWindow:=True
-    Select Case Err.Number
-    Case 0, -2147467260        '(-2147467260) results when someone hits cancel on Excel prompt.
-        Exit Sub
-    Case Else
-        On Error Resume Next
-        With m_AppErr
-            If (VBA.InStr(VBA.Mid(fullPath, VBA.Len(fullPath) - VBA.Len(m_FileExt) - 1, VBA.Len(m_FileExt)), ".") <> 0) Then
-                .Number = C_ERR_INVALID_FILE
-            Else
-                .Number = C_ERR_INVALID_DIRECTORY
-            End If
-            .Source = "OpenFileFolder(...)"
-            .Description = GetAppErrDescription(.Number)
-        End With
-    End Select
-
-End Sub
-
-'''
-''' Opens the directory location of the current Log File.
-'''
-Public Sub OpenDirectory()
-
-    OpenFileFolder (DirectoryPath)
-
-End Sub
-
-'''
-''' Opens the current log file (if it exists).
-'''
-Public Sub OpenLogFile()
-
-    OpenFileFolder (m_FilePath)
-
-End Sub
-
-Private Sub Class_Initialize()
-    '//// Class constructor.
-    '--------------------------------------------------------------------------------------------------------------------------
-    Debug.Print "|> Initializing:= " & C_NAME
-
-    m_AppErr.Initialize C_NAME
-
-    ' Create Registry key if it DNE, or if it does not point to an existing folder.
-    On Error Resume Next
-    m_DirectoryPath = Me.RegDirectoryScratch
-    On Error GoTo 0
-    If Not FileFolderExists(m_DirectoryPath) Then        'key DNE, or invalid path.
-    If Not FileFolderExists(ThisWorkbook.Path & "\scr\") Then
-        CreateFolder ThisWorkbook.Path & "\scr\"
-    End If
-    m_DirectoryPath = ThisWorkbook.Path & "\scr\"
-    Me.RegDirectoryScratch = m_DirectoryPath
-End If
-
-m_FileName = vbNullString
-m_FilePath = vbNullString
-m_FileExt = ".txt"
-
-End Sub
-
-'''
-''' Returns the default directory save location (scratch folder).
-''' Returns NULL if an error occured.
-'''
-Property Get RegDirectoryScratch() As Variant
-
-    Dim var           As Variant
-
-    m_AppErr.clear
-
-    '// Retrieve and check value.
-    var = m_RegEdit.RegistryGetValue(C_BASE_KEY, C_KEY_NAME, C_REG_SCRATCH)
-    If Not VBA.IsNull(var) Then
-        RegDirectoryScratch = VBA.CStr(var)
-    Else
-        RegDirectoryScratch = Null
-        With m_AppErr
-            .Source = "'Get' RegDirecotryScratch"
-            .Number = C_ERR_REGISTRY_CLASS
-            .Description = m_RegEdit.AppErr.Description
-        End With
-    End If
-End Property
-
-'''
-''' Sets the directory path for the default save location (scratch folder).
-'''
-Public Property Let RegDirectoryScratch(strDirectoryPath As Variant)
-
-    m_AppErr.clear
-
-    '// Force trailing slash
-    If (VBA.Right(VBA.Trim(strDirectoryPath), 1) <> "\") Then
-        strDirectoryPath = VBA.Trim(strDirectoryPath) & "\"
-    End If
-
-    '// Check and set value.
-    If (strDirectoryPath = vbNullString) Then
-        GoTo ErrHandler
-    ElseIf FileFolderExists(VBA.CStr(strDirectoryPath)) Then
-        If m_RegEdit.RegistryUpdateValue(C_BASE_KEY, C_KEY_NAME, C_REG_SCRATCH, VBA.CStr(strDirectoryPath), createKeyIfNotExist:=True) Then
-            Exit Property
-        Else
-            m_AppErr.Number = C_ERR_REGISTRY_CLASS
-        End If
-    Else
-        m_AppErr.Number = C_ERR_INVALID_DIRECTORY
-    End If
-
-ErrHandler:
-    With m_AppErr
-        If (.Number = 0) Then .Number = C_ERR_TYPE_MISMATCH
-        .Source = "'Let' RegDirectoryScratch"
-        .Description = GetAppErrDescription(.Number)
-    End With
-End Property
-
-'''
-''' Returns the file name of the current log file.
-'''
-Public Property Get FileName() As String
-
-    FileName = m_FileName
-
-End Property
-
-'''
-''' Returns the directory location for the current log file.
-'''
-Public Property Get DirectoryPath() As String
-
-    DirectoryPath = m_DirectoryPath
-
-End Property
-
-'''
-''' Sets the directory location in which the log file is saved.
-'''
-Private Property Let DirectoryPath(Path As String)
-
-    m_AppErr.clear
-
-    If (VBA.Right(VBA.Trim(Path), 1) <> "\") Then
-        Path = VBA.Trim(Path) & "\"
-    End If
-
-    '// Check existence
-    If (VBA.Dir(Path, vbDirectory) = ".") Then
-        m_DirectoryPath = Path
-    Else        ' display application error
-        With m_AppErr
-            .Number = C_ERR_INVALID_DIRECTORY
-            .Description = GetAppErrDescription(.Number)
-            .Source = "'Let' DirectoryPath"
-            .DisplayMessage
-        End With
-    End If
-
-End Property
-
-'''
-''' For testing purposes.
-''' The LogFile class will automatically create a default registry path if none is detected i.e. workbook.path/scr/
-''' This method alows me to Remove the defined registry path, to verify that it is correctly created by the class.
-'''
-Public Sub RemoveRegistrySetting()
-
-    m_AppErr.clear
-
-    If Not m_RegEdit.RegistryDeleteValue(C_BASE_KEY, C_KEY_NAME, C_REG_SCRATCH) Then        ' display error message
-    With m_AppErr
-        .Number = C_ERR_REGISTRY_CLASS
-        .Source = "RemoveRegistrySetting"
-        .Description = GetAppErrDescription(.Number)
-        .DisplayMessage
-    End With
-End If
-
-End Sub
-
 '''
 ''' Logs the stringToLog to the defined log file.
 ''' Formats the output according to LogFormatType.
 '''
-Public Sub Log(ByVal stringToLog As String, Optional FormatType As LogFormatType = LogFormatType.LogDefault, Optional blankLineBeforeHeader As Boolean = True)
-
-    Dim strg                As String
-    Dim pads(2)             As String
-    Dim nlen(2)             As Integer
-    Dim ilen                As Long
-
-    '//========================================================================================================================
-    '// Optional Message Formatting
-    '//========================================================================================================================
-
+Sub LogTitle(ByVal stringToLog As Variant)
     m_AppErr.clear
-
-    Select Case FormatType
-
-        '//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        '////               ///////////////////////////////////////////////////////////////////////////////////////////////
-        '////   LOG TITLE   ///////////////////////////////////////////////////////////////////////////////////////////////
-        '////               ///////////////////////////////////////////////////////////////////////////////////////////////
-        '//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Case LogFormatType.LogTitle
-
-        '// Preformatting
-        '   [1] Padding for "stringToLog line.
-        '   [2] Padding for spacer line.
-        nlen(1) = C_MAX_LEN - (VBA.Len(stringToLog) + 12)
-        For ilen = 1 To nlen(1)
-            pads(1) = pads(1) & "/"
-        Next ilen
-        pads(1) = "    " & pads(1)
-
-        nlen(2) = VBA.Len(stringToLog)
-        For ilen = 1 To nlen(2)
-            pads(2) = pads(2) & " "
-        Next ilen
-
-        '// Title definition.
-        If blankLineBeforeHeader Then
-            strg = VBA.vbCrLf & VBA.vbCrLf
-        End If
-        strg = strg & GetBufferString("/", C_MAX_LEN) & VBA.vbCrLf
-        strg = strg & "////    " & pads(2) & pads(1) & VBA.vbCrLf
+    Dim strg As String
+    Dim pads(2) As String
+    Dim nlen(2) As Integer
+    Dim ilen As Long
+    Dim i   As Long
+    '// Preformatting
+    '   [1] Padding for "stringToLog line.
+    '   [2] Padding for spacer line.
+    Dim ll  As Long
+    If IsArray(stringToLog) Then
+        Dim element
+        For Each element In stringToLog
+            If Len(CStr(element)) > ll Then ll = Len(CStr(element))
+        Next
+    Else
+        ll = Len(stringToLog)
+    End If
+    nlen(1) = C_MAX_LEN - (ll + 12)
+    For ilen = 1 To nlen(1)
+        pads(1) = pads(1) & "/"
+    Next ilen
+    pads(1) = "    " & pads(1)
+    nlen(2) = ll
+    For ilen = 1 To nlen(2)
+        pads(2) = pads(2) & " "
+    Next ilen
+    '// Title definition.
+    strg = VBA.vbCrLf & VBA.vbCrLf
+    strg = strg & VBA.String(C_MAX_LEN, "/") & VBA.vbCrLf
+    strg = strg & "////    " & pads(2) & pads(1) & VBA.vbCrLf
+    If IsArray(stringToLog) Then
+        For i = LBound(stringToLog) To UBound(stringToLog)
+            strg = strg & "////    " & stringToLog(i) & Space(ll - Len(stringToLog(i))) & pads(1) & VBA.vbCrLf
+        Next
+    Else
         strg = strg & "////    " & stringToLog & pads(1) & VBA.vbCrLf
-        strg = strg & "////    " & pads(2) & pads(1) & VBA.vbCrLf
-        strg = strg & GetBufferString("/", C_MAX_LEN) & VBA.vbCrLf
-        stringToLog = strg
-
-        '==================================================================================================================
-        'LOG HEADER NO. 1
-        '==================================================================================================================
-    Case LogFormatType.LogHeader1
-
-        '// Preformatting
-        If blankLineBeforeHeader Then
-            strg = VBA.vbCrLf
-        End If
-        '// Header definition
-        strg = strg & GetBufferString("=", C_MAX_LEN) & VBA.vbCrLf
-        strg = strg & stringToLog & VBA.vbCrLf
-        strg = strg & GetBufferString("=", C_MAX_LEN) & VBA.vbCrLf
-        stringToLog = strg
-
-        '------------------------------------------------------------------------------------------------------------------
-        'LOG HEADER NO. 2
-        '------------------------------------------------------------------------------------------------------------------
-    Case LogFormatType.LogHeader2
-
-        '// Preformatting
-        If blankLineBeforeHeader Then
-            strg = VBA.vbCrLf
-        End If
-        '// Header definition
-        strg = strg & GetBufferString("-", C_MAX_LEN) & VBA.vbCrLf
-        strg = strg & stringToLog & VBA.vbCrLf
-        strg = strg & GetBufferString("-", C_MAX_LEN) & VBA.vbCrLf
-        stringToLog = strg
-
-        '__________________________________________________________________________________________________________________
-        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    Case LogFormatType.LogDefault:          stringToLog = VBA.Now & ": " & stringToLog
-    Case LogFormatType.LogBullet1:          stringToLog = VBA.Now & ": |> " & stringToLog
-    Case LogFormatType.LogBullet2:          stringToLog = VBA.Now & ": |--> " & stringToLog
-    Case LogFormatType.LogNoFormat
-
-    Case LogFormatType.LogLineThru
-        nlen(1) = C_MAX_LEN - VBA.Len(VBA.Now & ": ")
-        If (VBA.Len(stringToLog) <= nlen(1)) Then
-            strg = VBA.Replace(stringToLog, " ", "-")
-            strg = "---" & strg
-            nlen(2) = nlen(1) - VBA.Len(stringToLog) - 3
-            For ilen = 1 To nlen(2)
-                strg = strg & "-"
-            Next ilen
-            stringToLog = VBA.Now & ": " & strg
-        End If
-
-    Case Else        ' display error message
-        With m_AppErr
-            .Number = C_ERR_INVALID_INPUT
-            .Source = "Log(...)"
-            .Description = GetAppErrDescription(.Number)
-            .DisplayMessage
-        End With
-        Exit Sub
-    End Select
-
-    '//========================================================================================================================
-    '// Write Message to Logfile
-    '//========================================================================================================================
-    Call WriteToFile(stringToLog, LogAppend)
-
+    End If
+    strg = strg & "////    " & pads(2) & pads(1) & VBA.vbCrLf
+    strg = strg & VBA.String(C_MAX_LEN, "/") & VBA.vbCrLf
+    stringToLog = strg
+    Call WriteToFile(CStr(stringToLog), LogAppend)
 End Sub
+'''
+'''
+'''
+Sub LogHeader1(ByVal stringToLog As Variant)
+    m_AppErr.clear
+    '==================================================================================================================
+    'LOG HEADER NO. 1
+    '==================================================================================================================
+    Dim strg As String
+    '// Preformatting
+    strg = VBA.vbCrLf
+    '// Header definition
+    strg = strg & GetBufferString("=", C_MAX_LEN) & VBA.vbCrLf
+    'mod
+    If IsArray(stringToLog) Then
+        Dim i As Long
+        For i = LBound(stringToLog) To UBound(stringToLog)
+            strg = strg & stringToLog & VBA.vbCrLf
+        Next
+    Else
+        strg = strg & stringToLog & VBA.vbCrLf
+    End If
+    '/mod
+    strg = strg & GetBufferString("=", C_MAX_LEN) & VBA.vbCrLf
+    stringToLog = strg
+    Call WriteToFile(CStr(stringToLog), LogAppend)
+End Sub
+'''
+'''
+'''
+Sub LogHeader2(ByVal stringToLog As Variant)
+    '--------------------
+    'Header 2
+    '--------------------
+    m_AppErr.clear
+    Dim strg As String
+    '// Preformatting
+    strg = VBA.vbCrLf
+    '// Header definition
+    strg = strg & GetBufferString("-", C_MAX_LEN) & VBA.vbCrLf
+    'mod
+    If IsArray(stringToLog) Then
+        Dim i As Long
+        For i = LBound(stringToLog) To UBound(stringToLog)
+            strg = strg & stringToLog & VBA.vbCrLf
+        Next
+    Else
+        strg = strg & stringToLog & VBA.vbCrLf
+    End If
+    '/mod
+    strg = strg & GetBufferString("-", C_MAX_LEN) & VBA.vbCrLf
+    stringToLog = strg
+    Call WriteToFile(CStr(stringToLog), LogAppend)
+End Sub
+'''
+'''
+'''
+Sub LogBullet(lvl As Long, stringToLog As Variant)
+    If lvl < 1 Then Exit Sub
+    stringToLog = VBA.Now & ": |" & String(2 * (lvl - 1), "-") & "> " & stringToLog
+    Call WriteToFile(CStr(stringToLog), LogAppend)
+End Sub
+'''
+'''
+'''
+Public Sub LogTable(Table As Variant, Optional hasHeader As Boolean = True, Optional padding As Integer = 1)
+    Dim nrow        As Integer
+    Dim ncol        As Integer
+    Dim irow        As Integer
+    Dim jcol        As Integer
+    Dim vals()      As Variant
+    Dim rowStart    As Integer
+    Dim widths()    As Integer
+    Dim cbuff       As String
+    Dim line        As String
+    Dim edge        As String
 
+    Dim Output      As String
+
+    nrow = UBound(Table, 1)
+    ncol = UBound(Table, 2)
+    ReDim vals(1 To ncol * 2)
+    ReDim widths(1 To ncol)
+    cbuff = String(200, " ")
+
+    ' Define column widths
+    For jcol = LBound(Table, 2) To ncol
+        For irow = LBound(Table, 1) To nrow
+            If (Len(Table(irow, jcol)) > widths(jcol)) Then
+                widths(jcol) = Len(Table(irow, jcol))
+            End If
+        Next irow
+    Next jcol
+
+    ' Print top edge and header
+    edge = ".-" & Left(String(Len(cbuff), "-"), widths(1) + padding) & "-"
+    For jcol = (LBound(Table, 2) + 1) To ncol - 1
+        edge = edge & "-" & Left(String(Len(cbuff), "-"), widths(jcol) + padding) & "-"
+    Next jcol
+    edge = edge & "-" & Left(String(Len(cbuff), "-"), widths(jcol) + padding) & "."
+    Output = Output & IIf(Output <> "", vbNewLine, "") & edge
+    If hasHeader Then
+        line = "| " & Left(Table(LBound(Table, 1), 1) & cbuff, widths(1) + padding) & "|"
+        For jcol = (LBound(Table, 2) + 1) To ncol
+            line = line & " " & Left(Table(LBound(Table, 1), jcol) & cbuff, widths(jcol) + padding) & "|"
+        Next jcol
+        Output = Output & IIf(Output <> "", vbNewLine, "") & line
+        Output = Output & IIf(Output <> "", vbNewLine, "") & edge
+
+        rowStart = LBound(Table, 1) + 1
+    Else
+        rowStart = LBound(Table, 1)
+    End If
+
+    ' Print data
+    For irow = rowStart To nrow
+        line = "| " & Left(Table(irow, 1) & cbuff, widths(1) + padding) & "|"
+        For jcol = (LBound(Table, 2) + 1) To ncol
+            line = line & " " & Left(Table(irow, jcol) & cbuff, widths(jcol) + padding) & "|"
+        Next jcol
+        Output = Output & IIf(Output <> "", vbNewLine, "") & line
+    Next irow
+
+    Output = Output & IIf(Output <> "", vbNewLine, "") & edge
+    Call WriteToFile(CStr(Output), LogAppend)
+    Exit Sub
+ErrHandler:
+    Debug.Print VBA.vbCrLf & "** PROBLEM OCCURED ** PRETTY PRINT TABLE **"
+    Debug.Print Strings.String(C_LINE_LENGTH, "_")
+End Sub
 '''
 ''' Writes "message" to the current log file.
 '''
-Private Sub WriteToFile(Message As String, OutputType As LogOutputType)
-
+Private Sub WriteToFile(message As String, outputType As LogOutputType)
     Dim lu          As Integer
-
     On Error Resume Next
     If m_LogFileExists Then
-
         lu = VBA.FreeFile
-
-        Select Case OutputType
-        Case LogAppend:         Open m_FilePath For Append As #lu
-        Case LogOutput:         Open m_FilePath For Output As #lu
+        Select Case outputType
+            Case LogAppend: Open m_FilePath For Append As #lu
+            Case LogOutput: Open m_FilePath For Output As #lu
         End Select
-
-        Print #lu, Message
+        Print #lu, message
         Close #lu
-
-    Else        ' display application error number
+    Else    ' display application error number
         With m_AppErr
             .Number = C_ERR_LOG_FILE_DNE
-            .Description = GetAppErrDescription(.Number)
             .Source = "WriteToFile(...)"
             .DisplayMessage
         End With
     End If
-
 End Sub
+
+
+
+
+
+'
+''* @TODO Created: 21-08-2023 14:55 Author: Anastasiou Alex
+''* @TODO switch to ini method
+''''
+'''' Returns the default directory save location (scratch folder).
+'''' Returns NULL if an error occured.
+''''
+'Property Get RegDirectoryScratch() As Variant
+'
+'    Dim var         As Variant
+'
+'    m_AppErr.clear
+'
+'    '// Retrieve and check value.
+'    var = m_RegEdit.RegistryGetValue(C_BASE_KEY, C_KEY_NAME, C_REG_SCRATCH)
+'    If Not VBA.IsNull(var) Then
+'        RegDirectoryScratch = VBA.CStr(var)
+'    Else
+'        RegDirectoryScratch = Null
+'        With m_AppErr
+'            .Source = "'Get' RegDirecotryScratch"
+'            .Number = C_ERR_REGISTRY_CLASS
+'            .Description = m_RegEdit.AppErr.Description
+'        End With
+'    End If
+'End Property
+'
+''''
+'''' Sets the directory path for the default save location (scratch folder).
+''''
+'Public Property Let RegDirectoryScratch(strDirectoryPath As Variant)
+'
+'    m_AppErr.clear
+'
+'    '// Force trailing slash
+'    If (VBA.Right(VBA.Trim(strDirectoryPath), 1) <> "\") Then
+'        strDirectoryPath = VBA.Trim(strDirectoryPath) & "\"
+'    End If
+'
+'    '// Check and set value.
+'    If (strDirectoryPath = vbNullString) Then
+'        GoTo ErrHandler
+'    ElseIf FileFolderExists(VBA.CStr(strDirectoryPath)) Then
+'        If m_RegEdit.RegistryUpdateValue(C_BASE_KEY, C_KEY_NAME, C_REG_SCRATCH, VBA.CStr(strDirectoryPath), createKeyIfNotExist:=True) Then
+'            Exit Property
+'        Else
+'            m_AppErr.Number = C_ERR_REGISTRY_CLASS
+'        End If
+'    Else
+'        m_AppErr.Number = C_ERR_INVALID_DIRECTORY
+'    End If
+'
+'ErrHandler:
+'    With m_AppErr
+'        If (.Number = 0) Then .Number = C_ERR_TYPE_MISMATCH
+'        .Source = "'Let' RegDirectoryScratch"
+'        .Description = GetAppErrDescription(.Number)
+'    End With
+'End Property
+''''
+'''' For testing purposes.
+'''' The LogFile class will automatically create a default registry path if none is detected i.e. workbook.path/scr/
+'''' This method alows me to remove the defined registry path, to verify that it is correctly created by the class.
+''''
+'Public Sub RemoveRegistrySetting()
+'
+'    m_AppErr.clear
+'
+'    If Not m_RegEdit.RegistryDeleteValue(C_BASE_KEY, C_KEY_NAME, C_REG_SCRATCH) Then    ' display error message
+'        With m_AppErr
+'            .Number = C_ERR_REGISTRY_CLASS
+'            .Source = "RemoveRegistrySetting"
+'            .Description = GetAppErrDescription(.Number)
+'            .DisplayMessage
+'        End With
+'    End If
+'
+'End Sub
+
+
+
+
+
 

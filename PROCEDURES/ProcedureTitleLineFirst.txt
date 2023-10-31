@@ -1,8 +1,0 @@
-
-Public Function ProcedureTitleLineFirst( _
-                                       Module As VBComponent, _
-                                       Procedure As String) As Long
-'@BlogPosted
-'@AssignedModule F_Vbe_Procedures
-    ProcedureTitleLineFirst = Module.codeModule.ProcBodyLine(Procedure, vbext_pk_Proc)
-End Function

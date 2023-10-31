@@ -11,9 +11,9 @@ Option Explicit
 Private mbCreateBackup As Boolean
 Private mvSourceFile As Variant
 Private msSheet2Change As String
-Private msSheetId As String
+Private msSheetId   As String
 Private msSheetFileName As String
-Private mbAddedZip As Boolean
+Private mbAddedZip  As Boolean
 Private mvXMLFolderRoot As Variant
 Private mvxmlfolder As Variant
 Public Enum XMLFolder
@@ -25,9 +25,11 @@ Public Enum XMLFolder
 End Enum
 
 Public Sub ExtractRibbonX(sFullFile As String, sSaveFile As String)
+    '@AssignedModule clsEditOpenXML
+    '@INCLUDE CLASS clsEditOpenXML
     Dim cEditOpenXML As clsEditOpenXML
-    Dim sXML As String
-    Dim oxmldoc As MSXML2.DOMDocument
+    Dim sXML        As String
+    Dim oxmldoc     As MSXML2.DOMDocument
     Set cEditOpenXML = New clsEditOpenXML
     With cEditOpenXML
         .CreateBackup = False
@@ -50,6 +52,8 @@ Public Sub ExtractRibbonX(sFullFile As String, sSaveFile As String)
 End Sub
 
 Public Sub WriteRibbonXML2File(sFile As String, sXML As String)
+    '@AssignedModule clsEditOpenXML
+    '@INCLUDE CLASS clsEditOpenXML
     Dim cEditOpenXML As clsEditOpenXML
 
     Set cEditOpenXML = New clsEditOpenXML
@@ -68,7 +72,9 @@ Public Sub WriteRibbonXML2File(sFile As String, sXML As String)
 End Sub
 
 Public Function GetXMLFromFile(sFileName As String, sXMLFolder As XMLFolder) As String
-    Dim oxmldoc As MSXML2.DOMDocument
+    '@AssignedModule clsEditOpenXML
+    '@INCLUDE CLASS clsEditOpenXML
+    Dim oxmldoc     As MSXML2.DOMDocument
     If Len(XMLFolder(sXMLFolder)) = 0 Then
         GetXMLFromFile = ""
     Else
@@ -80,7 +86,10 @@ Public Function GetXMLFromFile(sFileName As String, sXMLFolder As XMLFolder) As 
 End Function
 
 Public Sub WriteXML2File(sXML As String, sFileName As String, sXMLFolder As XMLFolder)
-    Dim oxmldoc As MSXML2.DOMDocument
+    '@AssignedModule clsEditOpenXML
+    '@INCLUDE PROCEDURE FolderExists
+    '@INCLUDE CLASS clsEditOpenXML
+    Dim oxmldoc     As MSXML2.DOMDocument
     Set oxmldoc = New MSXML2.DOMDocument
     If sXMLFolder = XMLFolder_customUI Then
         If Not FolderExists(XMLFolder(XMLFolder_customUI)) Then
@@ -95,9 +104,11 @@ Public Sub WriteXML2File(sXML As String, sFileName As String, sXMLFolder As XMLF
 End Sub
 
 Public Sub AddCustomUIToRels()
-    Dim oxmldoc As MSXML2.DOMDocument
+    '@AssignedModule clsEditOpenXML
+    '@INCLUDE CLASS clsEditOpenXML
+    Dim oxmldoc     As MSXML2.DOMDocument
     Dim oXMLElement As MSXML2.IXMLDOMNode
-    Dim oXMLAttrib As MSXML2.IXMLDOMAttribute
+    Dim oXMLAttrib  As MSXML2.IXMLDOMAttribute
     Dim oNamedNodeMap As MSXML2.IXMLDOMNamedNodeMap
     Dim oXMLRelsList As MSXML2.IXMLDOMNodeList
     Set oxmldoc = New MSXML2.DOMDocument
@@ -122,10 +133,12 @@ Public Sub AddCustomUIToRels()
 End Sub
 
 Private Function GetSheetIdFromSheetName(sSheetName) As String
-    Dim oxmldoc As MSXML2.DOMDocument
-    Dim oxmlNode As MSXML2.IXMLDOMNode
+    '@AssignedModule clsEditOpenXML
+    '@INCLUDE CLASS clsEditOpenXML
+    Dim oxmldoc     As MSXML2.DOMDocument
+    Dim oxmlNode    As MSXML2.IXMLDOMNode
     Dim oXMLChildNode As MSXML2.IXMLDOMNode
-    Dim oXMLTemp As MSXML2.IXMLDOMNode
+    Dim oXMLTemp    As MSXML2.IXMLDOMNode
     If XMLFolder(XMLFolder_xl) <> "" And Sheet2Change <> "" Then
         Set oxmldoc = New MSXML2.DOMDocument
         oxmldoc.Load XMLFolder(XMLFolder_xl) & "workbook.xml"
@@ -145,8 +158,10 @@ Private Function GetSheetIdFromSheetName(sSheetName) As String
 End Function
 
 Public Function GetSheetFileNameFromId(sSheetId As String) As String
-    Dim oxmldoc As MSXML2.DOMDocument
-    Dim oxmlNode As MSXML2.IXMLDOMNode
+    '@AssignedModule clsEditOpenXML
+    '@INCLUDE CLASS clsEditOpenXML
+    Dim oxmldoc     As MSXML2.DOMDocument
+    Dim oxmlNode    As MSXML2.IXMLDOMNode
     Dim oXMLChildNode As MSXML2.IXMLDOMNode
     If XMLFolder(XMLFolder_xl) <> "" And Sheet2Change <> "" Then
         Set oxmldoc = New MSXML2.DOMDocument
@@ -163,8 +178,10 @@ Public Function GetSheetFileNameFromId(sSheetId As String) As String
 End Function
 
 Private Function GetSheetNameFromId(sId As String) As String
-    Dim oxmldoc As MSXML2.DOMDocument
-    Dim oxmlNode As MSXML2.IXMLDOMNode
+    '@AssignedModule clsEditOpenXML
+    '@INCLUDE CLASS clsEditOpenXML
+    Dim oxmldoc     As MSXML2.DOMDocument
+    Dim oxmlNode    As MSXML2.IXMLDOMNode
     Dim oXMLChildNode As MSXML2.IXMLDOMNode
     Dim oXMLChildChildNode As MSXML2.IXMLDOMNode
     If mvxmlfolder(XMLFolder_xl) <> "" Then
@@ -187,41 +204,46 @@ Private Function GetSheetNameFromId(sId As String) As String
 End Function
 
 Public Sub ZipAllFilesInFolder()
-    Dim oShellApp As Object
-    Dim sDate As String
-    Dim sDefPath As String
+    '@AssignedModule clsEditOpenXML
+    '@INCLUDE CLASS clsEditOpenXML
+    Dim oShellApp   As Object
+    Dim sDate       As String
+    Dim sDefPath    As String
     Dim vFileNameZip As Variant
-    Dim FSO As Object
-    Dim lFileCt As Long
+    Dim FSO         As Object
+    Dim lFileCt     As Long
     Set FSO = CreateObject("scripting.filesystemobject")
     sDate = Format(Now, " dd-mmm-yy h-mm-ss")
     vFileNameZip = SourceFile & sDate & ".zip"
     NewZip vFileNameZip
     Set oShellApp = CreateObject("Shell.Application")
-    lFileCt = oShellApp.Namespace(FolderName & "Unzipped " & FileName & Application.PathSeparator).Items.count
-    oShellApp.Namespace(vFileNameZip).CopyHere oShellApp.Namespace(FolderName & "Unzipped " & FileName & Application.PathSeparator).Items
+    lFileCt = oShellApp.Namespace(FolderName & "Unzipped " & fileName & Application.PathSeparator).items.Count
+    oShellApp.Namespace(vFileNameZip).CopyHere oShellApp.Namespace(FolderName & "Unzipped " & fileName & Application.PathSeparator).items
     On Error Resume Next
-    Do Until oShellApp.Namespace(vFileNameZip).Items.count = lFileCt
+    Do Until oShellApp.Namespace(vFileNameZip).items.Count = lFileCt
         Application.Wait (Now + TimeValue("0:00:01"))
     Loop
     DoEvents
     Kill SourceFile
     Name vFileNameZip As SourceFile
     On Error Resume Next
-    FSO.DeleteFolder FolderName & "Unzipped " & FileName, True
+    FSO.DeleteFolder FolderName & "Unzipped " & fileName, True
     On Error GoTo 0
     Set oShellApp = Nothing
 End Sub
 
 Public Sub UnzipFile()
-    Dim FSO As Object
-    Dim oShellApp As Object
+    '@AssignedModule clsEditOpenXML
+    '@INCLUDE PROCEDURE FolderExists
+    '@INCLUDE CLASS clsEditOpenXML
+    Dim FSO         As Object
+    Dim oShellApp   As Object
     Set FSO = CreateObject("scripting.filesystemobject")
     XMLFolderRoot = FolderName
     If Right(XMLFolderRoot, 1) <> Application.PathSeparator Then
-        XMLFolderRoot = XMLFolderRoot & "\UnZipped " & FileName & Application.PathSeparator
+        XMLFolderRoot = XMLFolderRoot & "\UnZipped " & fileName & Application.PathSeparator
     Else
-        XMLFolderRoot = XMLFolderRoot & "UnZipped " & FileName & Application.PathSeparator
+        XMLFolderRoot = XMLFolderRoot & "UnZipped " & fileName & Application.PathSeparator
     End If
     On Error Resume Next
     FSO.DeleteFolder XMLFolderRoot & "*", True
@@ -230,7 +252,7 @@ Public Sub UnzipFile()
         MkDir XMLFolderRoot
     End If
     Set oShellApp = CreateObject("Shell.Application")
-    oShellApp.Namespace(XMLFolderRoot).CopyHere oShellApp.Namespace(SourceFile).Items
+    oShellApp.Namespace(XMLFolderRoot).CopyHere oShellApp.Namespace(SourceFile).items
     On Error Resume Next
     FSO.DeleteFolder Environ("Temp") & "\Temporary Directory*", True
     Set oShellApp = Nothing
@@ -239,6 +261,8 @@ Public Sub UnzipFile()
 End Sub
 
 Sub NewZip(sPath)
+    '@AssignedModule clsEditOpenXML
+    '@INCLUDE CLASS clsEditOpenXML
     If Len(Dir(sPath)) > 0 Then Kill sPath
     Open sPath For Output As #1
     Print #1, Chr$(80) & Chr$(75) & Chr$(5) & Chr$(6) & String(18, 0)
@@ -280,24 +304,24 @@ Public Property Get FolderName() As Variant
     FolderName = Mid(SourceFile, 1, InStrRev(SourceFile, Application.PathSeparator))
 End Property
 
-Public Property Get FileName() As Variant
+Public Property Get fileName() As Variant
     If SourceFile <> "" Then
-        FileName = Mid(SourceFile, InStrRev(SourceFile, Application.PathSeparator) + 1, Len(SourceFile))
+        fileName = Mid(SourceFile, InStrRev(SourceFile, Application.PathSeparator) + 1, Len(SourceFile))
     End If
 End Property
 
 Public Property Get XMLFolder(sXMLFolder As XMLFolder) As String
     Select Case sXMLFolder
-    Case Is = XMLFolder_root
-        XMLFolder = mvXMLFolderRoot
-    Case Is = XMLFolder_customUI
-        XMLFolder = mvXMLFolderRoot & "customUI" & Application.PathSeparator
-    Case Is = XMLFolder_docProps
-        XMLFolder = mvXMLFolderRoot & "docProps" & Application.PathSeparator
-    Case Is = XMLFolder_rels
-        XMLFolder = mvXMLFolderRoot & "_rels" & Application.PathSeparator
-    Case Is = XMLFolder_xl
-        XMLFolder = mvXMLFolderRoot & "xl" & Application.PathSeparator
+        Case Is = XMLFolder_root
+            XMLFolder = mvXMLFolderRoot
+        Case Is = XMLFolder_customUI
+            XMLFolder = mvXMLFolderRoot & "customUI" & Application.PathSeparator
+        Case Is = XMLFolder_docProps
+            XMLFolder = mvXMLFolderRoot & "docProps" & Application.PathSeparator
+        Case Is = XMLFolder_rels
+            XMLFolder = mvXMLFolderRoot & "_rels" & Application.PathSeparator
+        Case Is = XMLFolder_xl
+            XMLFolder = mvXMLFolderRoot & "xl" & Application.PathSeparator
     End Select
 End Property
 
@@ -338,7 +362,7 @@ Private Property Let AddedZip(ByVal bAddedZip As Boolean)
 End Property
 
 Private Sub Class_Terminate()
-    Dim FSO As Object
+    Dim FSO         As Object
     If AddedZip Then
         Name SourceFile As Left(SourceFile, Len(SourceFile) - 4)
     End If

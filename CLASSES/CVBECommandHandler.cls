@@ -5,16 +5,20 @@ END
 Attribute VB_Name = "CVBECommandHandler"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
-Attribute VB_PredeclaredId = False
+Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Public WithEvents EvtHandler As VBIDE.CommandBarEvents
 Attribute EvtHandler.VB_VarHelpID = -1
 
-Public Sub EvtHandler_Click(ByVal CommandBarControl As Object, _
-                            Handled As Boolean, CancelDefault As Boolean)
+Public Sub EvtHandler_Click( _
+                           ByVal CommandBarControl As Object, _
+                           handled As Boolean, _
+                           CancelDefault As Boolean)
+    '@AssignedModule CVBECommandHandler
+    '@INCLUDE CLASS CVBECommandHandler
     On Error Resume Next
     Application.Run CommandBarControl.OnAction
-    Handled = True
+    handled = True
     CancelDefault = True
 End Sub
 

@@ -1,9 +1,0 @@
-Function ArrayElementsPrepend( _
-                     ByVal inputArray As Variant, _
-                     this As String)
-    Dim i As Long
-    For i = LBound(inputArray) To UBound(inputArray)
-        inputArray(i) = this & inputArray(i)
-    Next
-    ArrayElementsPrepend = inputArray
-End Function

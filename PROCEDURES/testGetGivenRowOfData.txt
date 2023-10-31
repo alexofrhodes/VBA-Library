@@ -1,4 +1,0 @@
-
-Sub testGetGivenRowOfData()
-    dp GetGivenRowOfData(Selection.Value, Array(2, 3), Array(2, 3))
-End Sub

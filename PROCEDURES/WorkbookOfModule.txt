@@ -1,7 +1,0 @@
-
-Function WorkbookOfModule(vbComp As VBComponent) As Workbook
-'@BlogPosted
-'@AssignedModule F_VBE
-'@INCLUDE PROCEDURE WorkbookOfProject
-    Set WorkbookOfModule = WorkbookOfProject(vbComp.Collection.parent)
-End Function

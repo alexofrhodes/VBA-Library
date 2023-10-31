@@ -1,4 +1,0 @@
-
-Public Function FormulaToVBA(CellWithFormula As Range)
-    FormulaToVBA = Chr(34) & Replace(CellWithFormula.Formula, Chr(34), Chr(34) & Chr(34)) & Chr(34)
-End Function

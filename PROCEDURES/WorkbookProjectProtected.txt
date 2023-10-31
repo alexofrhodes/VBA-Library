@@ -1,5 +1,0 @@
-
-Function WorkbookProjectProtected(ByVal TargetWorkbook As Workbook) As Boolean
-'@BlogPosted
-        WorkbookProjectProtected = (TargetWorkbook.VBProject.Protection = 1)
-End Function

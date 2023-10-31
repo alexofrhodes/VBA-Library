@@ -40,51 +40,63 @@ Option Base 1
 '==========================================================================================================================
 ' Application constants
 '==========================================================================================================================
-Private Const C_NAME                As String = "ApplicationError.cls"
-Private Const C_ERR_NO_ERROR        As Long = 0
+Private Const C_NAME As String = "ApplicationError.cls"
+Const C_ERR_OFFSET = 100
+'==========================================================================================================================
+' Error enum
+'==========================================================================================================================
+Public Enum ERR_ENUM
+    C_ERR_NO_ERROR = 0
+    C_ERR_INVALID_FILE = C_ERR_OFFSET + vbObjectError + 1
+    C_ERR_INVALID_DIRECTORY = C_ERR_OFFSET + vbObjectError + 2
+    C_ERR_LOG_FILE_DNE = C_ERR_OFFSET + vbObjectError + 3
+    C_ERR_INVALID_INPUT = C_ERR_OFFSET + vbObjectError + 4
+    C_ERR_TYPE_MISMATCH = C_ERR_OFFSET + vbObjectError + 5
+End Enum
 '==========================================================================================================================
 ' Private variables
 '==========================================================================================================================
-Private m_ErrNumber                 As Long
-Private m_ErrNumberDLL              As Long
-Private m_ErrSource                 As String
-Private m_ErrDescription            As String
-Private m_ErrDescriptionDLL         As String
-Private m_ParentName                As String
-Private m_HasError                  As Boolean
+Private m_ErrNumber As Long
+Private m_ErrNumberDLL As Long
+Private m_ErrSource As String
+Private m_ErrDescription As String
+Private m_ErrDescriptionDLL As String
+Private m_ParentName As String
+Private m_HasError  As Boolean
 '==========================================================================================================================
 ' API Constants
 '==========================================================================================================================
 ' GetSystemErrorMessageText
 ' |> www.cpearson.com/Excel/FormatMessage.aspx
-Private Const FORMAT_MESSAGE_ALLOCATE_BUFFER    As Long = &H100
-Private Const FORMAT_MESSAGE_ARGUMENT_ARRAY     As Long = &H2000
-Private Const FORMAT_MESSAGE_FROM_HMODULE       As Long = &H800
-Private Const FORMAT_MESSAGE_FROM_STRING        As Long = &H400
-Private Const FORMAT_MESSAGE_FROM_SYSTEM        As Long = &H1000
-Private Const FORMAT_MESSAGE_MAX_WIDTH_MASK     As Long = &HFF
-Private Const FORMAT_MESSAGE_IGNORE_INSERTS     As Long = &H200
-Private Const FORMAT_MESSAGE_TEXT_LEN           As Long = &HA0        ' from VC++ ERRORS.H file
+Private Const FORMAT_MESSAGE_ALLOCATE_BUFFER As Long = &H100
+Private Const FORMAT_MESSAGE_ARGUMENT_ARRAY As Long = &H2000
+Private Const FORMAT_MESSAGE_FROM_HMODULE As Long = &H800
+Private Const FORMAT_MESSAGE_FROM_STRING As Long = &H400
+Private Const FORMAT_MESSAGE_FROM_SYSTEM As Long = &H1000
+Private Const FORMAT_MESSAGE_MAX_WIDTH_MASK As Long = &HFF
+Private Const FORMAT_MESSAGE_IGNORE_INSERTS As Long = &H200
+Private Const FORMAT_MESSAGE_TEXT_LEN As Long = &HA0                  ' from VC++ ERRORS.H file
+
 '==========================================================================================================================
 ' API Declarations
 '==========================================================================================================================
 ' GetSystemErrorMessageText
 ' |> www.cpearson.com/Excel/FormatMessage.aspx
 Private Declare PtrSafe Function FormatMessage Lib "kernel32" _
-Alias "FormatMessageA" ( _
-ByVal dwFlags As Long, _
-ByVal lpSource As Any, _
-ByVal dwMessageId As Long, _
-ByVal dwLanguageId As Long, _
-ByVal lpBuffer As String, _
-ByVal nSize As Long, _
-ByRef Arguments As Long) As Long
+        Alias "FormatMessageA" ( _
+        ByVal dwFlags As Long, _
+        ByVal lpSource As Any, _
+        ByVal dwMessageId As Long, _
+        ByVal dwLanguageId As Long, _
+        ByVal lpBuffer As String, _
+        ByVal nSize As Long, _
+        ByRef Arguments As Long) As Long
 ' ToggleTrustAccess
 ' |> https://wellsr.com/vba/2017/excel/macro-to-enable-trust-access-to-the-VBA-project-object-model/
 #If VBA7 Then
-    Private Declare PtrSafe Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+Private Declare PtrSafe Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 #Else
-    Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 #End If
 
 '''
@@ -134,23 +146,23 @@ End Property
 '''
 Public Sub DisplayMessage(Optional displayTitle As String, Optional appendMessage As String, Optional msgBoxStyle As VbMsgBoxStyle = vbExclamation)
     If (displayTitle = "") Then        ' define display title
-    displayTitle = "--ERROR!--"
-    '--If (m_ErrNumber <> C_ERR_NO_ERROR) And (m_ParentName <> "") Then ' parent error title.
-    '--    displayTitle = "--ERROR!-- " & m_ParentName
-    '--ElseIf (m_ErrNumber <> C_ERR_NO_ERROR) Then ' error object title
-    '--    displayTitle = "--ERROR!-- " & C_NAME
-    '--ElseIf (m_ParentName <> "") Then ' parent
-    '--    displayTitle = m_ParentName
-    '--Else ' error object for everything else
-    '--    displayTitle = C_NAME
-    '--End If
-End If
-'// Display message to user.
-If (appendMessage <> vbNullString) Then        ' append message to error information
-MsgBox GetDescription & VBA.vbCrLf & VBA.vbCrLf & appendMessage, Title:=displayTitle, Buttons:=msgBoxStyle
-Else
-    MsgBox GetDescription, Title:=displayTitle, Buttons:=msgBoxStyle
-End If
+        displayTitle = "--ERROR!--"
+        '--If (m_ErrNumber <> C_ERR_NO_ERROR) And (m_ParentName <> "") Then ' parent error title.
+        '--    displayTitle = "--ERROR!-- " & m_ParentName
+        '--ElseIf (m_ErrNumber <> C_ERR_NO_ERROR) Then ' error object title
+        '--    displayTitle = "--ERROR!-- " & C_NAME
+        '--ElseIf (m_ParentName <> "") Then ' parent
+        '--    displayTitle = m_ParentName
+        '--Else ' error object for everything else
+        '--    displayTitle = C_NAME
+        '--End If
+    End If
+    '// Display message to user.
+    If (appendMessage <> vbNullString) Then    ' append message to error information
+        MsgBox GetDescription & VBA.vbCrLf & VBA.vbCrLf & appendMessage, Title:=displayTitle, Buttons:=msgBoxStyle
+    Else
+        MsgBox GetDescription, Title:=displayTitle, Buttons:=msgBoxStyle
+    End If
 End Sub
 
 '
@@ -163,20 +175,20 @@ Private Function GetDescription() As String
     End If
     If (m_ErrSource <> "") Then
         GetDescription = GetDescription & _
-        "|> Source: " & m_ErrSource & VBA.vbCrLf & _
-        "|> Number: " & m_ErrNumber & VBA.vbCrLf & _
-        "|> " & m_ErrDescription
+                "|> Source: " & m_ErrSource & VBA.vbCrLf & _
+                "|> Number: " & m_ErrNumber & VBA.vbCrLf & _
+                "|> " & m_ErrDescription
     Else
         GetDescription = GetDescription & _
-        "|> Number: " & m_ErrNumber & VBA.vbCrLf & _
-        "|> " & m_ErrDescription
+                "|> Number: " & m_ErrNumber & VBA.vbCrLf & _
+                "|> " & m_ErrDescription
     End If
     '// Append DLL error information.
     If (m_ErrDescriptionDLL <> "") Then
         GetDescription = GetDescription & VBA.vbCrLf & VBA.vbCrLf & _
-        String(50, "-") & VBA.vbCrLf & _
-        "|> DLL error number: " & m_ErrNumberDLL & VBA.vbCrLf & _
-        "|> " & m_ErrDescription
+                String(50, "-") & VBA.vbCrLf & _
+                "|> DLL error number: " & m_ErrNumberDLL & VBA.vbCrLf & _
+                "|> " & m_ErrDescription
     End If
 End Function
 
@@ -250,10 +262,10 @@ End Property
 '''
 Private Function GetSystemErrorMessageText(errNumber As Long) As String
     '@INCLUDE Init
-    Dim ErrorText               As String
-    Dim textLen                 As Long
-    Dim FormatMessageResult     As Long
-    Dim langID                  As Long
+    Dim ErrorText   As String
+    Dim textLen     As Long
+    Dim FormatMessageResult As Long
+    Dim langID      As Long
     ''''''''''''''''''''''''''''''''
     ' Initialize the variables
     ''''''''''''''''''''''''''''''''
@@ -265,14 +277,14 @@ Private Function GetSystemErrorMessageText(errNumber As Long) As String
     ' associated with errNumber.
     ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     FormatMessageResult = FormatMessage( _
-    dwFlags:=FORMAT_MESSAGE_FROM_SYSTEM Or _
-    FORMAT_MESSAGE_IGNORE_INSERTS, _
-    lpSource:=0&, _
-    dwMessageId:=errNumber, _
-    dwLanguageId:=langID, _
-    lpBuffer:=ErrorText, _
-    nSize:=textLen, _
-    Arguments:=0&)
+            dwFlags:=FORMAT_MESSAGE_FROM_SYSTEM Or _
+            FORMAT_MESSAGE_IGNORE_INSERTS, _
+            lpSource:=0&, _
+            dwMessageId:=errNumber, _
+            dwLanguageId:=langID, _
+            lpBuffer:=ErrorText, _
+            nSize:=textLen, _
+            Arguments:=0&)
     If FormatMessageResult = 0& Then
         ''''''''''''''''''''''''''''''''''''''''''''''''''
         ' An error occured. Display the error number, but
@@ -281,12 +293,12 @@ Private Function GetSystemErrorMessageText(errNumber As Long) As String
         ' getting us into a loop.
         ''''''''''''''''''''''''''''''''''''''''''''''''''
         MsgBox "An error occurred with the FormatMessage" & _
-        " API function call." & vbCrLf & _
-        "Error: " & CStr(Err.LastDllError) & _
-        " VBA.Hex(" & VBA.Hex(Err.LastDllError) & ")."
+                " API function call." & vbCrLf & _
+                "Error: " & CStr(Err.LastDllError) & _
+                " VBA.Hex(" & VBA.Hex(Err.LastDllError) & ")."
         GetSystemErrorMessageText = "An internal system error occurred with the" & vbCrLf & _
-        "FormatMessage API function: " & CStr(Err.LastDllError) & ". No futher information" & vbCrLf & _
-        "is available."
+                "FormatMessage API function: " & CStr(Err.LastDllError) & ". No futher information" & vbCrLf & _
+                "is available."
         Exit Function
     End If
     ''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -318,6 +330,7 @@ Property Let Number(lng As Long)
     If (lng <> C_ERR_NO_ERROR) Then
         m_ErrNumber = lng
         m_HasError = True
+        Description = GetAppErrDescription(lng)
     End If
 End Property
 
@@ -367,4 +380,19 @@ End Property
 Private Sub Class_Initialize()
     Debug.Print "|* Initializing Class:= " & C_NAME
 End Sub
+'''
+''' Returns the text description of the application error number.
+'''
+Public Function GetAppErrDescription(errNumber As Long) As String
 
+    Select Case errNumber
+        Case C_ERR_NO_ERROR: GetAppErrDescription = vbNullString
+        Case C_ERR_INVALID_FILE: GetAppErrDescription = "Invalid file."
+        Case C_ERR_INVALID_DIRECTORY: GetAppErrDescription = "Invalid directory."
+        Case C_ERR_LOG_FILE_DNE: GetAppErrDescription = "Logfile DNE."
+        Case C_ERR_INVALID_INPUT: GetAppErrDescription = "Invalid input."
+        Case C_ERR_TYPE_MISMATCH: GetAppErrDescription = "Type mismatch."
+        Case Else
+            GetAppErrDescription = "Undefined error."
+    End Select
+End Function

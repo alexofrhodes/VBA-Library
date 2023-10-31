@@ -1,7 +1,0 @@
-
-'pattern for word match:
-'"\b" & "MatchThis" & "[.(\b]"
-
-Function getRegexUrls(inputString As String)
-    getRegexUrls = RegexAllMatches(inputString, REGEX_URLS)
-End Function

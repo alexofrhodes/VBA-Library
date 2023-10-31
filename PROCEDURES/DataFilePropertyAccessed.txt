@@ -1,7 +1,0 @@
-
-Function DataFilePropertyAccessed(FilePath) As Date
-    Dim fs, F
-    Set fs = CreateObject("Scripting.FileSystemObject")
-    Set F = fs.GetFile(FilePath)
-    DataFilePropertyAccessed = F.DateLastAccessed
-End Function

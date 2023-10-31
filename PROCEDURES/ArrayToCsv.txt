@@ -1,7 +1,0 @@
-
-Sub ArrayToCsv(TargetFile As String, arr As Variant)
-    Dim Ar As New BetterArray
-    Ar.Items = arr
-    Ar.ToCSVFile TargetFile
-End Sub
-

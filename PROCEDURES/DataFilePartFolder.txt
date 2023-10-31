@@ -1,4 +1,0 @@
-
-Function DataFilePartFolder(fileNameWithExtension, Optional IncludeSlash As Boolean) As String
-    DataFilePartFolder = Left(fileNameWithExtension, InStrRev(fileNameWithExtension, "\") - 1 - IncludeSlash)
-End Function

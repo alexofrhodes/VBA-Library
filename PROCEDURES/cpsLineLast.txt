@@ -1,8 +1,0 @@
-
-Public Function cpsLineLast() As Long
-'@BlogPosted
-'@AssignedModule F_Vbe_Selection
-    Dim startLine As Long, StartColumn As Long, endLine As Long, EndColumn As Long
-    Application.VBE.ActiveCodePane.GetSelection startLine, StartColumn, endLine, EndColumn
-    cpsLineLast = endLine
-End Function

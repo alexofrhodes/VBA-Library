@@ -22,13 +22,12 @@ Attribute VB_Exposed = False
 '* Created    : 04-05-2023 12:18    Alex
 '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-
 Option Explicit
 
-Private oProcedure As String
-Private oWorkbook As Workbook
-Private oModule As VBComponent
-Private oProcKind As vbext_ProcKind
+Private oProcedure  As String
+Private oWorkbook   As Workbook
+Private oModule     As VBComponent
+Private oProcKind   As vbext_ProcKind
 
 Private coll_LinkedProcedures As Collection
 Private coll_LinkedProceduresDeep As Collection
@@ -41,57 +40,176 @@ Public Enum Code_Part
     Header_Code
 End Enum
 
-Public Enum Line_Index
-    Procedure_First
-    Procedure_Last
-    Procedure_Count
-    Body_First
-    Body_First_AfterComments
-    Body_Last
-    Body_Count
-    Declaration_First
-    Declaration_Last
-    Declaration_Count
-    Header_First
-    Header_Last
-    Header_Count
-End Enum
-
 Public Enum Property_Type
     Modified
     Ignore
     Parent_Assigned
 End Enum
 
-Private Sub Class_Initialize()
-'    ProjetFoldersCreate
+Public Sub InjectTemplate()
+    InjectToBodyBottom _
+        NewProcedureTemplate( _
+            ReturnsObject:=False, _
+            addErrorHandling:=True), _
+        SkipIfExists:=True
+    InjectModification
+'    Debug.Print "You may want to use the following after writing the procedure's code:"
+'    Debug.Print String(50, "-")
+'    Debug.Print "aprocedure.active.InjectObjectsRelease"
+'    Debug.Print "aProcedure.Active.InjectLinkedLists"
+End Sub
+
+Public Sub InjectTemplateObject()
+    InjectToBodyBottom _
+        NewProcedureTemplate( _
+            ReturnsObject:=True, _
+            addErrorHandling:=True), _
+        SkipIfExists:=True
+    InjectModification
+'    Debug.Print "You may want to use the following after writing the procedure's code:"
+'    Debug.Print String(50, "-")
+'    Debug.Print "aprocedure.active.InjectObjectsRelease"
+End Sub
+
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 29-08-2023 12:07    Alex                (z_zTest.bas > NewProcedure) initial release
+
+Private Function NewProcedureTemplate(ReturnsObject As Boolean, addErrorHandling As Boolean) As String
+'@LastModified 2308291207
+'@INCLUDE CLASS aProcedure
+'@INCLUDE CLASS aModule
+'@INCLUDE CLASS LogFile
+'@INCLUDE CLASS CallStack
+
+'
+    If ActiveProcedure = "" Then Exit Function
+    Dim am As New aModule:      Set am = am.Active
+    Dim ap As New aProcedure:   Set ap = aProcedure.Active
+    If Trim(Join(Split(ap.Code_Body))) <> vbNullString Then Exit Function
+    Const C_Tab = vbTab
+    Dim isFunction As Boolean:  isFunction = (ap.KindAsString = "Function" Or ap.KindAsString = "Get")
+    
+    Dim q As String: q = """"
+    If Not am.HeaderContains("C_MODULE_NAME") Then oModule.CodeModule.AddFromString "Private Const C_MODULE_NAME = " & q & am.Name & q
+    Dim S As String, msg As String
+
+    S = Join( _
+            Array( _
+                "'=== Constants ===", _
+                C_Tab & "Const C_PROCEDURE_NAME = " & q & ap.Name & q, _
+                vbLf, _
+                "'=== Variables ===", _
+                ""), _
+            vbLf)
+    If isFunction Then S = Join(Array(S, C_Tab & "Dim Output As " & ap.returnType), vbLf)
+    
+    S = Join( _
+            Array( _
+                S, _
+                "'=== Initialize ==="), _
+            vbLf)
+    
+    msg = q & Now & vbTab & "Start:" & vbTab & q & " & " & "C_PROCEDURE_NAME"
+    S = Join( _
+            Array( _
+                S, _
+                C_Tab & "debug.print " & msg, _
+                C_Tab & "LogFile.log " & msg), _
+            vbLf)
+    
+    Dim Args As String: Args = ap.Arguments
+    
+    S = Join( _
+            Array( _
+                S, _
+                C_Tab & "CallStack.Push C_MODULE_NAME, C_PROCEDURE_NAME" & IIf(Args <> "", ", " & ap.Arguments, ""), _
+                IIf(addErrorHandling, C_Tab & "On error goto ErrorHandler", ""), _
+                vbLf, _
+                "'=== Code ===", _
+                vbLf, _
+                "'=== Terminate ===", _
+                "NormalExit:"), _
+            vbLf)
+
+    If isFunction Then S = Join(Array(S, C_Tab & "" & IIf(ReturnsObject, "Set ", "") & ap.Name & " = output", vbLf), vbLf)
+    
+    msg = VBA.Replace(msg, "Start", "End", , 1, vbTextCompare)
+    S = Join( _
+            Array( _
+                S, _
+                C_Tab & "debug.print " & msg, _
+                C_Tab & "LogFile.log " & msg, _
+                C_Tab & "CallStack.Pop", _
+                "'Bellow you may want to call aprocedure.active.InjectObjectsReleaseHere", _
+                "'=== Clean Up ===", _
+                "", _
+                C_Tab & "Exit " & ap.KindAsString, _
+                ""), _
+            vbLf)
+    If addErrorHandling Then
+        S = Join( _
+                Array( _
+                    S, _
+                    "ErrorHandler:", _
+                    C_Tab & "CallStack.PrintErrorInfo", _
+                    C_Tab & "CallStack.LogErrorInfo", _
+                    C_Tab & "ERR.CLEAR", _
+                    C_Tab & "ERR.Raise 999,C_PROCEDURE_NAME,CALLSTACK.ErrorInfo"), _
+                vbLf)
+    End If
+    NewProcedureTemplate = S
+    
+
+'note'
+''''''
+'    MsgBox "The following error has occurred" & vbCrLf & vbCrLf & _
+'            "Error Number: " & Err.Number & vbCrLf & _
+'            "Error Source: TxtOverwrite" & vbCrLf & _
+'            "Error Description: " & Err.Description, vbCritical, "An Error has Occurred!"
+End Function
+
+Public Sub Activate()
+    oModule.Activate
+    Dim startPos    As Long: startPos = InStr(1, oModule.CodeModule.Lines(Me.Line_Declaration_First, 1), Me.Name, vbTextCompare)
+    oModule.CodeModule.CodePane.SetSelection Line_Declaration_First, _
+                                             startPos, _
+                                             Line_Declaration_First, _
+                                             startPos + Len(Me.Name)
 End Sub
 
 Public Function Init( _
-                    Optional TargetWorkbook As Workbook, _
-                    Optional Module As VBComponent, _
-                    Optional Procedure As String, _
-                    Optional ProcKind As vbext_ProcKind) As aProcedure
-    If Not AssignCPSvariables(TargetWorkbook, Module, Procedure) Then End
+        Optional TargetWorkbook As Workbook, _
+        Optional module As VBComponent, _
+        Optional Procedure As String, _
+        Optional ProcKind As vbext_ProcKind) As aProcedure
+    '@AssignedModule aProcedure
+    '@INCLUDE PROCEDURE AssignCPSvariables
+    '@INCLUDE CLASS aProcedure
+    If Not AssignCPSvariables(TargetWorkbook, module, Procedure) Then End
     oProcedure = Procedure
     Set oWorkbook = TargetWorkbook
-    Set oModule = Module
+    Set oModule = module
     oProcKind = ProcKind
     Set Init = Me
     Set coll_LinkedProceduresDeep = Nothing
 End Function
 
 Public Function Active() As aProcedure
-    Dim Module As VBComponent: Set Module = ActiveModule
-    Dim Procedure As String
-    Dim i As Long
-    Dim ProcKind As vbext_ProcKind
-    Dim lineNum As Long: lineNum = aCodeModule.Init(Module).RowFirst
+    '@AssignedModule aProcedure
+    '@INCLUDE PROCEDURE ActiveModule
+    '@INCLUDE PROCEDURE ActiveCodepaneWorkbook
+    '@INCLUDE CLASS aCodeModule
+    '@INCLUDE CLASS aProcedure
+    Dim module      As VBComponent: Set module = ActiveModule
+    Dim Procedure   As String
+    Dim i           As Long
+    Dim ProcKind    As vbext_ProcKind
+    Dim lineNum     As Long: lineNum = aCodeModule.Init(module).RowFirst
     For i = 0 To 4
         ProcKind = i
-        Procedure = Module.CodeModule.ProcOfLine(lineNum, ProcKind)
+        Procedure = module.CodeModule.ProcOfLine(lineNum, ProcKind)
         If Procedure <> vbNullString Then
-            Init ActiveCodepaneWorkbook, Module, Procedure, ProcKind
+            Init ActiveCodepaneWorkbook, module, Procedure, ProcKind
             Set Active = Me
             Exit For
         End If
@@ -99,142 +217,164 @@ Public Function Active() As aProcedure
 End Function
 
 Public Sub Copy( _
-                TargetWorkbook As Workbook, _
-                Overwrite As Boolean)
-    Dim Module As VBComponent
-    Dim s As String
-    Dim Procedure As Variant
-    Dim AP As aProcedure
+        TargetWorkbook As Workbook, _
+        Overwrite As Boolean)
+    '@AssignedModule aProcedure
+    '@INCLUDE PROCEDURE LinkedProceduresDeep
+    '@INCLUDE PROCEDURE ModuleAddOrSet
+    '@INCLUDE PROCEDURE ModuleOfProcedure
+    '@INCLUDE PROCEDURE ProcedureExists
+    '@INCLUDE PROCEDURE ProcedureReplace
+    '@INCLUDE CLASS aProcedure
+    Dim module      As VBComponent
+    Dim S           As String
+    Dim Procedure   As Variant
+    Dim ap          As aProcedure
     For Each Procedure In LinkedProceduresDeep
-        Set AP = New aProcedure
-        AP.Init oWorkbook, , CStr(Procedure)
-        s = AP.Code_All
+        Set ap = New aProcedure
+        ap.Init oWorkbook, , CStr(Procedure)
+        S = ap.Code_All
         If Not ProcedureExists(TargetWorkbook, CStr(Procedure)) Then
-            Set Module = ModuleAddOrSet(TargetWorkbook, "vbArcImports", vbext_ct_StdModule)
-            Module.CodeModule.AddFromString s
+            Set module = ModuleAddOrSet(TargetWorkbook, "vbArcImports", vbext_ct_StdModule)
+            module.CodeModule.AddFromString S
         Else
-            Set Module = ModuleOfProcedure(TargetWorkbook, CStr(Procedure))
-            If Overwrite = True Then ProcedureReplace Module, CStr(Procedure), s
+            Set module = ModuleOfProcedure(TargetWorkbook, CStr(Procedure))
+            If Overwrite = True Then ProcedureReplace module, CStr(Procedure), S
         End If
     Next
 End Sub
 
 Public Function Contains( _
-                        This As String, _
-                        WholeWord As Boolean, _
-                        MatchCase As Boolean, _
-                        PatternSearch As Boolean) As String
+        this As String, _
+        WholeWord As Boolean, _
+        MatchCase As Boolean, _
+        PatternSearch As Boolean) As String
+    '@AssignedModule aProcedure
+    '@INCLUDE CLASS aProcedure
 
     Contains = oModule.CodeModule.Find( _
-                                        This, _
-                                        1, _
-                                        LineIndex(Procedure_First), _
-                                        LineIndex(Procedure_Last), _
-                                        10000, _
-                                        WholeWord, _
-                                        MatchCase, _
-                                        PatternSearch)
+            this, _
+            1, _
+            Line_First, _
+            Line_Last, _
+            10000, _
+            WholeWord, _
+            MatchCase, _
+            PatternSearch)
 End Function
 
 Public Function Contains_InHeader( _
-                                This As String, _
-                                WholeWord As Boolean, _
-                                MatchCase As Boolean, _
-                                PatternSearch As Boolean) As String
+        this As String, _
+        WholeWord As Boolean, _
+        MatchCase As Boolean, _
+        PatternSearch As Boolean) As String
+    '@AssignedModule aProcedure
+    '@INCLUDE CLASS aProcedure
 
     Contains_InHeader = oModule.CodeModule.Find( _
-                                        This, _
-                                        1, _
-                                        LineIndex(Header_First), _
-                                        LineIndex(Header_Last), _
-                                        10000, _
-                                        WholeWord, _
-                                        MatchCase, _
-                                        PatternSearch)
+            this, _
+            1, _
+            Line_Header_First, _
+            Line_Header_Last, _
+            10000, _
+            WholeWord, _
+            MatchCase, _
+            PatternSearch)
 End Function
 
 Public Function Contains_InBody( _
-                                This As String, _
-                                WholeWord As Boolean, _
-                                MatchCase As Boolean, _
-                                PatternSearch As Boolean) As String
+        this As String, _
+        WholeWord As Boolean, _
+        MatchCase As Boolean, _
+        PatternSearch As Boolean) As String
+    '@AssignedModule aProcedure
+    '@INCLUDE CLASS aProcedure
 
     Contains_InBody = oModule.CodeModule.Find( _
-                                        This, _
-                                        1, _
-                                        LineIndex(Body_First), _
-                                        LineIndex(Body_Last), _
-                                        10000, _
-                                        WholeWord, _
-                                        MatchCase, _
-                                        PatternSearch)
+            this, _
+            1, _
+            Line_Body_First, _
+            Line_Body_Last, _
+            10000, _
+            WholeWord, _
+            MatchCase, _
+            PatternSearch)
 End Function
 
 Public Function Scope() As String
-    Dim sTitle As String
-        sTitle = Code_Declaration_Clean
+    '@AssignedModule aProcedure
+    '@INCLUDE CLASS aProcedure
+    Dim sTitle      As String
+    sTitle = Code_Declaration_Clean
     If UCase(sTitle) Like UCase("*" & "Public " & "*" & oProcedure & "*") Then
         Scope = "Public"
     ElseIf UCase(sTitle) Like UCase("*" & "Private " & "*" & oProcedure & "*") Then
         Scope = "Private"
     Else
         Select Case Parent.Type
-        Case vbext_ct_StdModule, vbext_ct_ClassModule
-            Scope = "Public"
-        Case Else
-            Scope = "Private"
+            Case vbext_ct_StdModule, vbext_ct_ClassModule
+                Scope = "Public"
+            Case Else
+                Scope = "Private"
         End Select
     End If
 End Function
 
 Private Sub AssignLineStartEnd(CodePart As Code_Part, ByRef LineStart As Long, ByRef LineEnd As Long)
+    '@AssignedModule aProcedure
+    '@INCLUDE CLASS aProcedure
     Select Case CodePart
-    Case Code_Part.All_Code
-        LineStart = LineIndex(Procedure_First)
-        LineEnd = LineIndex(Procedure_Last)
-    Case Code_Part.Body_Code
-        LineStart = LineIndex(Body_First)
-        LineEnd = LineIndex(Body_Last)
-    Case Code_Part.Header_Code
-        LineStart = LineIndex(Header_First)
-        LineEnd = LineIndex(Header_Last)
+        Case Code_Part.All_Code
+            LineStart = Line_First
+            LineEnd = Line_Last
+        Case Code_Part.Body_Code
+            LineStart = Line_Body_First
+            LineEnd = Line_Body_Last
+        Case Code_Part.Header_Code
+            LineStart = Line_Header_First
+            LineEnd = Line_Header_Last
     End Select
 End Sub
 
 Public Sub CommentsToOwnLine()
-    Dim s As String:    s = CommentsMoveToOwnLine(Code_All)
-    Dim i As Long:      i = LineIndex(Procedure_First)
+    '@AssignedModule aProcedure
+    '@INCLUDE PROCEDURE CommentsMoveToOwnLine
+    '@INCLUDE CLASS aProcedure
+    Dim S           As String: S = CommentsMoveToOwnLine(Code_All)
+    Dim i           As Long: i = Line_First
     Delete
-    oModule.CodeModule.InsertLines i, s
+    oModule.CodeModule.InsertLines i, S
 End Sub
 
 Public Function Property(PropertyType As Property_Type) As Variant
+    '@AssignedModule aProcedure
+    '@INCLUDE CLASS aProcedure
     Select Case PropertyType
-    
-        Case Property_Type.Modified:           Property = PropertyGet(Modified)
-        Case Property_Type.Parent_Assigned:    Property = PropertyGet(Parent_Assigned)
-        
+
+        Case Property_Type.Modified: Property = PropertyGet(Modified)
+        Case Property_Type.Parent_Assigned: Property = PropertyGet(Parent_Assigned)
+
     End Select
 End Function
 
 Public Property Get ArgumentCount() As Long
-    Dim s As String: s = Code_Declaration_Clean
-    If s Like "*" & oProcedure & "()*" Then Exit Property
-    ArgumentCount = UBound(Split(s, ",")) + 1
+    Dim S           As String: S = Code_Declaration_Clean
+    If S Like "*" & oProcedure & "()*" Then Exit Property
+    ArgumentCount = UBound(Split(S, ",")) + 1
 End Property
 
 Public Property Get Name() As String
     Name = oProcedure
 End Property
 
-Public Property Get ReturnType() As String
-    ReturnType = "Invalid"
-    If KindAsString <> "Function" Then Exit Property
-    Dim Title As String: Title = Code_Declaration_Clean
+Public Property Get returnType() As String
+    returnType = "Invalid"
+    If Not (KindAsString = "Function" Or KindAsString = "Get") Then Exit Property
+    Dim Title       As String: Title = Code_Declaration_Clean
     If Title Like "*) As *" Then
-        ReturnType = Split(Title, ") As ")(1)
+        returnType = Mid(Title, InStrRev(Title, ") As ") + Len(") As ")) ' Split(Title, ") As ")(1)
     Else
-        ReturnType = "Unspecified"
+        returnType = "Variant"
     End If
 End Property
 
@@ -243,36 +383,36 @@ Public Property Get Parent() As VBComponent
 End Property
 
 Public Property Get ParentAssigned() As VBComponent
-    Dim moduleName As String: moduleName = Property(Parent_Assigned)
-    If moduleName = "" Then Exit Property
-    Set ParentAssigned = ModuleAddOrSet(oWorkbook, moduleName, vbext_ct_StdModule)
-'End Property
+    Dim ModuleName  As String: ModuleName = Property(Parent_Assigned)
+    If ModuleName = "" Then Exit Property
+    Set ParentAssigned = ModuleAddOrSet(oWorkbook, ModuleName, vbext_ct_StdModule)
+    'End Property
 
-'Public Property Set ParentAssigned(Module As VBComponent)
-'
-'    Set oModule = Module
+    'Public Property Set ParentAssigned(Module As VBComponent)
+    '
+    '    Set oModule = Module
 End Property
 
 Public Property Get KindAsLong() As Long
-    Dim s As String: s = Code_Declaration_Clean
+    Dim S           As String: S = Code_Declaration_Clean
     Select Case True
-        Case InStr(1, s, "Get " & oProcedure) > 0:  KindAsLong = vbext_pk_Get '3
-        Case InStr(1, s, "Let " & oProcedure) > 0:  KindAsLong = vbext_pk_Let '1
-        Case InStr(1, s, "Set " & oProcedure) > 0:  KindAsLong = vbext_pk_Set '2
-        Case Else:                                  KindAsLong = vbext_pk_Proc '0
+        Case InStr(1, S, "Get " & oProcedure) > 0: KindAsLong = vbext_pk_Get    '3
+        Case InStr(1, S, "Let " & oProcedure) > 0: KindAsLong = vbext_pk_Let    '1
+        Case InStr(1, S, "Set " & oProcedure) > 0: KindAsLong = vbext_pk_Set    '2
+        Case Else: KindAsLong = vbext_pk_Proc    '0
     End Select
 End Property
 
 Public Property Get KindAsString() As String
-    Dim s As String: s = Code_Declaration_Clean
+    Dim S           As String: S = Code_Declaration_Clean
     Select Case True
-        Case InStr(1, s, "Get " & oProcedure) > 0:  KindAsString = "Get"
-        Case InStr(1, s, "Let " & oProcedure) > 0:  KindAsString = "Let"
-        Case InStr(1, s, "Set " & oProcedure) > 0:  KindAsString = "Set"
+        Case InStr(1, S, "Get " & oProcedure) > 0: KindAsString = "Get"
+        Case InStr(1, S, "Let " & oProcedure) > 0: KindAsString = "Let"
+        Case InStr(1, S, "Set " & oProcedure) > 0: KindAsString = "Set"
         Case Else
-            If InStr(1, s, "Function " & oProcedure) > 0 Then
+            If InStr(1, S, "Function " & oProcedure) > 0 Then
                 KindAsString = "Function"
-            ElseIf InStr(1, s, "Sub " & oProcedure) > 0 Then
+            ElseIf InStr(1, S, "Sub " & oProcedure) > 0 Then
                 KindAsString = "Sub"
             End If
     End Select
@@ -280,42 +420,42 @@ End Property
 
 
 Private Sub Class_Terminate()
-   ReSetVariables
+    ReSetVariables
 End Sub
 
 Private Sub ReSetVariables()
     Set oWorkbook = Nothing
     Set oModule = Nothing
-        oProcedure = ""
+    oProcedure = ""
 End Sub
 
-Public Function LineIndex(idx As Line_Index) As Long
-    Select Case idx
-        Case Line_Index.Procedure_First:            LineIndex = LineFirst
-        Case Line_Index.Procedure_Last:             LineIndex = LineLast
-        Case Line_Index.Procedure_Count:            LineIndex = LineCount
-        Case Line_Index.Declaration_First:          LineIndex = DeclarationLineFirst
-        Case Line_Index.Declaration_Last:           LineIndex = DeclarationLineLast
-        Case Line_Index.Declaration_Count:          LineIndex = DeclarationLineCount
-        Case Line_Index.Body_First:                 LineIndex = BodyLineFirst
-        Case Line_Index.Body_First_AfterComments:   LineIndex = BodyLineFirstAfterComments
-        Case Line_Index.Body_Last:                  LineIndex = BodyLineLast
-        Case Line_Index.Body_Count:                 LineIndex = BodyLineCount
-        Case Line_Index.Header_First:               LineIndex = HeaderLineFirst
-        Case Line_Index.Header_Last:                LineIndex = HeaderLineLast
-        Case Line_Index.Header_Count:               LineIndex = HeaderLineCount
-                
-    End Select
-End Function
+'Public Function lineIndex(idx As Line_Index) As Long
+'    Select Case idx
+'        Case Line_Index.Procedure_First: lineIndex = Line_First
+'        Case Line_Index.Procedure_Last: lineIndex = Line_Last
+'        Case Line_Index.Procedure_Count: lineIndex = Line_Count
+'        Case Line_Index.Declaration_First: lineIndex = Line_Declaration_First
+'        Case Line_Index.Declaration_Last: lineIndex = Line_Declaration_Last
+'        Case Line_Index.Declaration_Count: lineIndex = Line_Declaration_Count
+'        Case Line_Index.Body_First: lineIndex = Line_Body_First
+'        Case Line_Index.Body_First_AfterComments: lineIndex = Line_Body_FirstAfterComments
+'        Case Line_Index.Body_Last: lineIndex = Line_Body_Last
+'        Case Line_Index.Body_Count: lineIndex = Line_Body_Count
+'        Case Line_Index.Header_First: lineIndex = Line_Header_First
+'        Case Line_Index.Header_Last: lineIndex = Line_Header_Last
+'        Case Line_Index.Header_Count: lineIndex = Line_Header_Count
+'
+'    End Select
+'End Function
 
-Public Function LineLike(This As String, CodePart As Code_Part) As Long
+Public Function LineLike(this As String, CodePart As Code_Part) As Long
     Dim LineStart As Long, LineEnd As Long
     AssignLineStartEnd CodePart, LineStart, LineEnd
-    Dim targetLine As String
-    Dim i As Long
+    Dim targetLine  As String
+    Dim i           As Long
     For i = LineStart To LineEnd
         targetLine = Trim(oModule.CodeModule.Lines(i, 1))
-        If UCase(targetLine) Like UCase(This) Then
+        If UCase(targetLine) Like UCase(this) Then
             LineLike = i
             Exit Function
         End If
@@ -323,112 +463,110 @@ Public Function LineLike(This As String, CodePart As Code_Part) As Long
 End Function
 
 Public Sub EnsureBlankLineBeforeProcedure()
-    Dim Line As Long: Line = DeclarationLineFirst
-    If Line = 1 Then oModule.CodeModule.InsertLines 1, "": Exit Sub
-    Dim check As String
+    Dim line        As Long: line = Line_Declaration_First
+    If line = 1 Then oModule.CodeModule.InsertLines 1, "": Exit Sub
+    Dim check       As String
     On Error Resume Next
-    check = oModule.CodeModule.ProcOfLine(Line - 1, oProcKind)
+    check = oModule.CodeModule.ProcOfLine(line - 1, oProcKind)
     On Error GoTo 0
-    If check <> Name Then oModule.CodeModule.InsertLines Line, ""
+    If check <> Name Then oModule.CodeModule.InsertLines line, ""
 End Sub
 
-Public Function HeaderLineFirst() As Long
+Public Function Line_Header_First() As Long
     EnsureBlankLineBeforeProcedure
-    HeaderLineFirst = LineFirst
+    Line_Header_First = Line_First
 End Function
 
-Public Function HeaderLineLast() As Long
+Public Function Line_Header_Last() As Long
     EnsureBlankLineBeforeProcedure
-    HeaderLineLast = DeclarationLineFirst - 1
+    Line_Header_Last = Line_Declaration_First - 1
 End Function
 
-Public Function HeaderLineCount()
-    HeaderLineCount = HeaderLineLast - HeaderLineFirst + 1
+Public Function Line_Header_Count()
+    Line_Header_Count = Line_Header_Last - Line_Header_First + 1
 End Function
 
-Public Function LineFirst() As Long
-    '@todo Fix
-    LineFirst = oModule.CodeModule.procStartLine(oProcedure, oProcKind) 'findProcedureKind(omodule,oprocedure)
-    If LineFirst = 0 Then Debug.Print "error in firstline (wrong procKind)": End
+Public Function Line_First() As Long
+    '@todo
+    Line_First = oModule.CodeModule.procStartLine(oProcedure, oProcKind)    'findProcedureKind(omodule,oprocedure)
+    If Line_First = 0 Then Debug.Print "error in firstline (wrong procKind)": End
 End Function
 
-Public Function LineCount() As Long
-    LineCount = oModule.CodeModule.ProcCountLines(oProcedure, oProcKind)
+Public Function Line_Count() As Long
+    Line_Count = oModule.CodeModule.ProcCountLines(oProcedure, oProcKind)
 End Function
 
-Public Function LineLast() As Long
-    LineLast = LineFirst + LineCount - 1
+Public Function Line_Last() As Long
+    Line_Last = Line_First + Line_Count - 1
 End Function
 
-Public Function BodyLineFirst() As Long
-    BodyLineFirst = DeclarationLineFirst + DeclarationLineCount
+Public Function Line_Body_First() As Long
+    Line_Body_First = Line_Declaration_First + Line_Declaration_Count
 End Function
 
-Public Function BodyLineFirstAfterComments() As Long
-    Dim i As Long
-    Dim s As String
-    For i = LineIndex(Body_First) To LineIndex(Body_Last)
-        s = Trim(oModule.CodeModule.Lines(i, 1))
-        If s = vbNullString Then
+Public Function Line_Body_FirstAfterComments() As Long
+    Dim i           As Long
+    Dim S           As String
+    For i = Line_Body_First To Line_Body_Last
+        S = Trim(oModule.CodeModule.Lines(i, 1))
+        If S = vbNullString Then
             Exit For
-        ElseIf Left(s, 1) = "'" Then
-        ElseIf Left(s, 3) = "Rem" Then
+        ElseIf Left(S, 1) = "'" Then
+        ElseIf Left(S, 3) = "Rem" Then
         ElseIf Right(Trim(oModule.CodeModule.Lines(i - 1, 1)), 1) = "_" Then
-        ElseIf Right(s, 1) = "_" Then
+        ElseIf Right(S, 1) = "_" Then
         Else
             Exit For
         End If
     Next
-    BodyLineFirstAfterComments = i
+    Line_Body_FirstAfterComments = i
 End Function
 
-Public Function BodyLineLast() As Long
-    BodyLineLast = LineLast - 1
+Public Function Line_Body_Last() As Long
+    Line_Body_Last = Line_Last - 1
 End Function
 
-Public Function BodyLineCount() As Long
-    BodyLineCount = BodyLineLast - BodyLineFirst + 1
+Public Function Line_Body_Count() As Long
+    Line_Body_Count = Line_Body_Last - Line_Body_First + 1
 End Function
 
-Public Function DeclarationLineFirst() As Long
-
-    DeclarationLineFirst = oModule.CodeModule.ProcBodyLine(oProcedure, oProcKind)
+Public Function Line_Declaration_First() As Long
+    Line_Declaration_First = oModule.CodeModule.ProcBodyLine(oProcedure, oProcKind)
 End Function
 
-
-Public Function DeclarationLineLast() As Long
-    DeclarationLineLast = DeclarationLineFirst + DeclarationLineCount - 1
+Public Function Line_Declaration_Last() As Long
+    Line_Declaration_Last = Line_Declaration_First + Line_Declaration_Count - 1
 End Function
 
-Public Function DeclarationLineCount() As Long
-    Dim targetLine As Long: targetLine = DeclarationLineFirst
-    Dim counter As Long: counter = 1
-    Dim s As String: s = oModule.CodeModule.Lines(targetLine, counter)
-    Do While Right(s, 1) = "_"
+Public Function Line_Declaration_Count() As Long
+    Dim targetLine  As Long: targetLine = Line_Declaration_First
+    Dim counter     As Long: counter = 1
+    Dim S           As String: S = oModule.CodeModule.Lines(targetLine, counter)
+    Do While Right(S, 1) = "_"
         counter = counter + 1
-        s = oModule.CodeModule.Lines(targetLine, counter)
+        S = oModule.CodeModule.Lines(targetLine, counter)
     Loop
-    DeclarationLineCount = counter
+    Line_Declaration_Count = counter
 End Function
 
 Public Function Code_All()
-    Code_All = oModule.CodeModule.Lines(LineFirst, LineCount)
+    Code_All = oModule.CodeModule.Lines(Line_First, Line_Count)
 End Function
 Public Function Code_Body()
-    Code_Body = oModule.CodeModule.Lines(BodyLineFirst, BodyLineCount)
+    Code_Body = oModule.CodeModule.Lines(Line_Body_First, Line_Body_Count)
 End Function
 Public Function Code_Header()
-    Code_Header = oModule.CodeModule.Lines(HeaderLineFirst, HeaderLineCount)
+    Code_Header = oModule.CodeModule.Lines(Line_Header_First, Line_Header_Count)
 End Function
 Public Function Code_Declaration()
-    Code_Declaration = oModule.CodeModule.Lines(DeclarationLineFirst, DeclarationLineCount)
+    Code_Declaration = oModule.CodeModule.Lines(Line_Declaration_First, Line_Declaration_Count)
 End Function
 Public Function Code_Declaration_Clean()
-        If InStr(1, Code_Declaration, "_") = 0 Then
-            Code_Declaration_Clean = Trim(Code_Declaration)
-        Else
-            Code_Declaration_Clean = VBA.Replace(Join(ArrayRemoveEmptyElements(ArrayTrim(Split(Code_Declaration, "_" & vbNewLine))), " "), "( ", "(")
-        End If
+    If InStr(1, Code_Declaration, "_") = 0 Then
+        Code_Declaration_Clean = Trim(Code_Declaration)
+    Else
+        Code_Declaration_Clean = VBA.Replace(Join(ArrayRemoveEmptyElements(ArrayTrim(Split(Code_Declaration, "_" & vbNewLine))), " "), "( ", "(")
+    End If
 End Function
 
 Public Function collLinkedProceduresDeep() As Collection
@@ -446,15 +584,15 @@ Public Function collLinkedProcedures() As Collection
 End Function
 
 Public Function LinkedProcedures() As Collection
-'@TODO befor Procedues was a collection of strings, now objects. Use aWorkbook...ProceduresArray???
-    Dim Procedures As Collection
+    '@TODO befor Procedues was a collection of strings, now objects. Use aWorkbook...ProceduresArray???
+    Dim Procedures  As Collection
     Set Procedures = aWorkbook.Init(oWorkbook).ProceduresNames(True, False, False, False)
-    Dim s As String: s = Code_All
-    Dim coll As New Collection
-    Dim Procedure As Variant
+    Dim S           As String: S = Code_All
+    Dim coll        As New Collection
+    Dim Procedure   As Variant
     For Each Procedure In Procedures
         If UCase(CStr(Procedure)) <> UCase(CStr(oProcedure)) Then
-            If RegexTest(s, "\W" & CStr(Procedure) & "[.(\W]") = True Then
+            If RegexTest(S, "\W" & CStr(Procedure) & "[.(\W]") = True Then
                 coll.Add Procedure, CStr(Procedure)
             End If
         End If
@@ -462,76 +600,73 @@ Public Function LinkedProcedures() As Collection
     Set LinkedProcedures = coll
 End Function
 
-'* Modified   : Date and Time       Author              Description
-'* Updated    : 20-07-2023 10:45    Alex                code fix
-
 Public Function LinkedProceduresDeep() As Collection
-'@LastModified 2307201045
-    Dim AllProcedures As Collection:       Set AllProcedures = aWorkbook.Init(oWorkbook).ProceduresNames(True, False, False, False)
-    Dim Processed As Collection:           Set Processed = New Collection
-    Dim CalledProcedures As Collection:    Set CalledProcedures = New Collection
+    '@LastModified 2307201045
+    Dim AllProcedures As Collection: Set AllProcedures = aWorkbook.Init(oWorkbook).ProceduresNames(True, False, False, False)
+    Dim Processed   As Collection: Set Processed = New Collection
+    Dim CalledProcedures As Collection: Set CalledProcedures = New Collection
 
-    Dim Procedure As Variant
-    Dim Module As VBComponent
+    Dim Procedure   As Variant
+    Dim module      As VBComponent
 
     Processed.Add CStr(oProcedure), CStr(oProcedure)
     CalledProcedures.Add CStr(oProcedure), CStr(oProcedure)
     On Error Resume Next
     For Each Procedure In LinkedProcedures
-    CalledProcedures.Add CStr(Procedure), CStr(Procedure)
+        CalledProcedures.Add CStr(Procedure), CStr(Procedure)
     Next
     On Error GoTo 0
-    
-    Dim AP As aProcedure
+
+    Dim ap          As aProcedure
     Dim CalledProceduresCount As Long
-        CalledProceduresCount = CalledProcedures.count
+    CalledProceduresCount = CalledProcedures.Count
     Dim element
 repeat:
     For Each element In CalledProcedures
         If Not aCollection.Init(Processed).Contains(, CStr(element)) Then
             On Error Resume Next
-            Set AP = New aProcedure
-            For Each Procedure In AP.Init(oWorkbook, , CStr(element)).LinkedProcedures
-            CalledProcedures.Add CStr(Procedure), CStr(Procedure)
+            Set ap = New aProcedure
+            For Each Procedure In ap.Init(oWorkbook, , CStr(element)).LinkedProcedures
+                CalledProcedures.Add CStr(Procedure), CStr(Procedure)
             Next
             On Error GoTo 0
             Processed.Add CStr(element), CStr(element)
         End If
     Next
-    If CalledProcedures.count > CalledProceduresCount Then
-        CalledProceduresCount = CalledProcedures.count
+    If CalledProcedures.Count > CalledProceduresCount Then
+        CalledProceduresCount = CalledProcedures.Count
         GoTo repeat
     End If
 
-    Set LinkedProceduresDeep = aCollection.Init(CalledProcedures).Sort.Items
+    Set LinkedProceduresDeep = aCollection.Init(CalledProcedures).Sort.items
 End Function
 
 Sub UnfoldDeclaration()
-    Dim Result As String: Result = Code_Declaration_Clean & vbLf & Code_Body & vbLf & oModule.CodeModule.Lines(LineIndex(Procedure_Last), 1)
-    Replace Result
+    Dim result      As String: result = Code_Declaration_Clean & vbLf & Code_Body & vbLf & oModule.CodeModule.Lines(Line_Last, 1)
+    Replace result
 End Sub
 Sub FoldDeclaration()
-    Dim startLine As Long
-    Dim LastLine As Long
+    Dim startLine   As Long
+    Dim LastLine    As Long
     Dim FirstColumn As Long
-    Dim LastColumn As Long
+    Dim LastColumn  As Long
 
     If ArgumentCount = 0 Then Exit Sub
-    Dim cp As aCodeModule
+    Dim cp          As aCodeModule
     Set cp = aCodeModule.Init(oModule)
-    
-    startLine = LineIndex(Declaration_First)
+
+    startLine = Line_Declaration_First
     FirstColumn = InStr(1, oModule.CodeModule.Lines(startLine, 1), "(")
-    LastLine = LineIndex(Declaration_Last)
-'    Do While InStr(1, oModule.CodeModule.Lines(LastLine, 1), ")") = 0
-'        LastLine = LastLine - 1
-'    Loop
+    LastLine = Line_Declaration_Last
+    '    Do While InStr(1, oModule.CodeModule.Lines(LastLine, 1), ")") = 0
+    '        LastLine = LastLine - 1
+    '    Loop
     LastColumn = InStr(1, oModule.CodeModule.Lines(LastLine, 1), ")") + 1
     If LastColumn = 0 Then Exit Sub
-    
+
     cp.SetSelection startLine, FirstColumn, LastLine, LastColumn
     cp.FoldLine
-    cp.SetSelection startLine, FirstColumn, LineIndex(Declaration_Last), 10000
+    cp.SetSelection startLine, FirstColumn, Line_Declaration_Last, 10000
 End Sub
 
 Public Sub Export()
@@ -542,32 +677,32 @@ Public Sub Export()
 End Sub
 
 Private Sub LinkedExport(Procedure As String)
-    Dim Module As VBComponent
-    Set Module = ModuleOfProcedure(oWorkbook, Procedure)
-    Dim c As New aProcedure
-    c.Init oWorkbook, Module, Procedure
-    Dim proclastmod     As String:        proclastmod = c.Property(Modified)
+    Dim module      As VBComponent
+    Set module = ModuleOfProcedure(oWorkbook, Procedure)
+    Dim c           As New aProcedure
+    c.Init oWorkbook, module, Procedure
+    Dim proclastmod As String: proclastmod = c.Property(Modified)
     If proclastmod = vbNullString Then
         c.InjectLinkedLists
         c.PropertySet Modified, Format(Now, "yymmddhhnn")
         proclastmod = c.Property(Modified)
     End If
-    Dim s               As String:      s = c.Code_All
-    Dim FileFullName    As String:      FileFullName = LOCAL_LIBRARY_PROCEDURES & Procedure & ".txt"
-    
+    Dim S           As String: S = c.Code_All
+    Dim FileFullName As String: FileFullName = LOCAL_LIBRARY_PROCEDURES & Procedure & ".txt"
+
     If FileExists(FileFullName) Then
         Dim filelastmod
-            filelastmod = StringLastModified(TxtRead(FileFullName))
+        filelastmod = StringLastModified(TxtRead(FileFullName))
         If proclastmod > filelastmod Then
             Debug.Print "OVERWROTE " & Procedure
-            TxtOverwrite FileFullName, s
+            TxtOverwrite FileFullName, S
         Else
             Debug.Print "Skipping " & Procedure & " because:"
             Debug.Print vbTab & "StringLastModified(TxtRead(FileFullName)) >= Property(Modified)"
         End If
     Else
         Debug.Print "NEW " & Procedure
-        TxtOverwrite FileFullName, s
+        TxtOverwrite FileFullName, S
     End If
     Dim element
     For Each element In c.LinkedUserforms
@@ -586,16 +721,16 @@ Sub ExportDeclaration(DeclarationName As String)
     Dim TargetWorksheet As Worksheet
     Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
 
-    Dim codeName As String
-    Dim codeText As String
-    Dim cell As Range
+    Dim codeName    As String
+    Dim codeText    As String
+    Dim cell        As Range
     On Error Resume Next
     Set cell = TargetWorksheet.Columns(3).Find(DeclarationName, LookAt:=xlWhole)
     On Error GoTo 0
     If cell Is Nothing Then Exit Sub
 
     codeName = DeclarationName
-    codeText = cell.OFFSET(0, 1).text
+    codeText = cell.offset(0, 1).TEXT
     TxtOverwrite LOCAL_LIBRARY_DECLARATIONS & DeclarationName & ".txt", codeText
 
 End Sub
@@ -608,49 +743,49 @@ Public Sub InjectLinkedLists()
 End Sub
 
 Public Sub Indent()
-    Dim s As String
-    Dim nIndent As Long
-    Dim i As Long
-    For i = LineIndex(Procedure_First) To LineIndex(Procedure_Last)
-        s = LTrim$(oModule.CodeModule.Lines(i, 1))
-        If Trim(s) <> "" Then
-            If IsBlockEnd(s) Then nIndent = nIndent - 1
+    Dim S           As String
+    Dim nIndent     As Long
+    Dim i           As Long
+    For i = Line_First To Line_Last
+        S = LTrim$(oModule.CodeModule.Lines(i, 1))
+        If Trim(S) <> "" Then
+            If IsBlockEnd(S) Then nIndent = nIndent - 1
             If nIndent < 0 Then nIndent = 0
-            s = Space$(nIndent * 4) & s
-            oModule.CodeModule.ReplaceLine i, s
-            If IsBlockStart(LTrim$(s)) Then nIndent = nIndent + 1
+            S = Space$(nIndent * 4) & S
+            oModule.CodeModule.ReplaceLine i, S
+            If IsBlockStart(LTrim$(S)) Then nIndent = nIndent + 1
         End If
     Next
 End Sub
 
 Public Sub NumbersAdd()
-    Dim counter As Long: counter = 1
+    Dim counter     As Long: counter = 1
     Dim LineStart As Long, LineEnd As Long
     AssignLineStartEnd Body_Code, LineStart, LineEnd
-    Dim s As String
-    Dim i As Long
+    Dim S           As String
+    Dim i           As Long
     For i = LineStart To LineEnd
-        s = oModule.CodeModule.Lines(i, 1)
-        If IsLineNumberAble(s) _
-        And Right(Trim(oModule.CodeModule.Lines(i - 1, 1)), 1) <> "_" Then
-            oModule.CodeModule.ReplaceLine i, counter & ":" & s
+        S = oModule.CodeModule.Lines(i, 1)
+        If IsLineNumberAble(S) _
+                And Right(Trim(oModule.CodeModule.Lines(i - 1, 1)), 1) <> "_" Then
+            oModule.CodeModule.ReplaceLine i, counter & ":" & S
             counter = counter + 1
         End If
     Next i
 End Sub
 
 Public Sub NumbersRemove()
-    Dim counter As Long: counter = 1
+    Dim counter     As Long: counter = 1
     Dim LineStart As Long, LineEnd As Long
     AssignLineStartEnd Body_Code, LineStart, LineEnd
-    Dim s As String
-    Dim i As Long
+    Dim S           As String
+    Dim i           As Long
     For i = LineStart To LineEnd
-        s = oModule.CodeModule.Lines(i, 1)
-        If IsNumeric(Left(Trim(s), 1)) Then
+        S = oModule.CodeModule.Lines(i, 1)
+        If IsNumeric(Left(Trim(S), 1)) Then
             oModule.CodeModule.ReplaceLine i, _
-                Mid(s, InStr(s, ":") + 1)
-                'Space(InStr(s, ":"))
+                    Mid(S, InStr(S, ":") + 1)
+            'Space(InStr(s, ":"))
         End If
     Next i
 End Sub
@@ -658,7 +793,7 @@ End Sub
 Public Sub RemoveEmptyLines()
     Dim LineStart As Long, LineEnd As Long
     AssignLineStartEnd Body_Code, LineStart, LineEnd
-    Dim i As Long
+    Dim i           As Long
     For i = LineEnd To LineStart Step -1
         If Len(Trim(oModule.CodeModule.Lines(i, 1))) = 0 Then
             oModule.CodeModule.DeleteLines i, 1
@@ -667,69 +802,77 @@ Public Sub RemoveEmptyLines()
 End Sub
 
 Public Sub CommentsRemove(RemoveRem As Boolean, CodePart As Code_Part)
-    Replace StringCommentsRemove(Code_All, RemoveRem)
+    Replace StringCommentsRemove(CodePart, RemoveRem)
 
-'    Dim N               As Long
-'    Dim lineText        As String
-'    Dim QUOTES          As Long
-'    Dim Q               As Long
-'    Dim StartPos        As Long
-'    Dim L As Long
-'    Dim LineStart As Long, LineEnd As Long
-'    AssignLineStartEnd CodePart, LineStart, LineEnd
-'    Dim j As Long
-'    For j = LineEnd To LineStart Step -1
-'        lineText = LTrim(oModule.CodeModule.Lines(j, 1))
-'        If Not RemoveRem Then If lineText Like "Rem *" Then GoTo SKIP
-'        StartPos = 1
-'Retry:
-'        N = InStr(StartPos, lineText, "'")
-'        Q = InStr(StartPos, lineText, """")
-'        QUOTES = 0
-'        If Q < N Then
-'            For L = 1 To N
-'                If Mid(lineText, L, 1) = """" Then
-'                    QUOTES = QUOTES + 1
-'                End If
-'            Next L
-'        End If
-'        If QUOTES = Application.WorksheetFunction.Odd(QUOTES) Then
-'            StartPos = N + 1
-'            GoTo Retry:
-'        Else
-'            Select Case N
-'                Case Is = 0
-'
-'                Case Is = 1
-'                    oModule.CodeModule.DeleteLines j, 1
-'                Case Is > 1
-'                    oModule.CodeModule.ReplaceLine j, Left(oModule.CodeModule.Lines(j, 1), N - 1)
-'            End Select
-'        End If
-'SKIP:
-'    Next j
+    '    Dim N               As Long
+    '    Dim lineText        As String
+    '    Dim QUOTES          As Long
+    '    Dim Q               As Long
+    '    Dim StartPos        As Long
+    '    Dim L As Long
+    '    Dim LineStart As Long, LineEnd As Long
+    '    AssignLineStartEnd CodePart, LineStart, LineEnd
+    '    Dim j As Long
+    '    For j = LineEnd To LineStart Step -1
+    '        lineText = LTrim(oModule.CodeModule.Lines(j, 1))
+    '        If Not RemoveRem Then If lineText Like "Rem *" Then GoTo SKIP
+    '        StartPos = 1
+    'Retry:
+    '        N = InStr(StartPos, lineText, "'")
+    '        Q = InStr(StartPos, lineText, """")
+    '        QUOTES = 0
+    '        If Q < N Then
+    '            For L = 1 To N
+    '                If Mid(lineText, L, 1) = """" Then
+    '                    QUOTES = QUOTES + 1
+    '                End If
+    '            Next L
+    '        End If
+    '        If QUOTES = Application.WorksheetFunction.Odd(QUOTES) Then
+    '            StartPos = N + 1
+    '            GoTo Retry:
+    '        Else
+    '            Select Case N
+    '                Case Is = 0
+    '
+    '                Case Is = 1
+    '                    oModule.CodeModule.DeleteLines j, 1
+    '                Case Is > 1
+    '                    oModule.CodeModule.ReplaceLine j, Left(oModule.CodeModule.Lines(j, 1), N - 1)
+    '            End Select
+    '        End If
+    'SKIP:
+    '    Next j
 End Sub
 
 Public Sub RemoveIncludeLines()
     RemoveLinesLike "'@INCLUDE *"
 End Sub
 
-Public Sub RemoveLinesLike(This As String)
-    Dim s As String
-    Dim i As Long
-    For i = LineIndex(Body_Last) To LineIndex(Body_First) Step -1
-        s = Trim(oModule.CodeModule.Lines(i, 1))
-        If s Like This Then oModule.CodeModule.DeleteLines i
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 22-08-2023 13:56    Alex                (aProcedure.cls > RemoveLinesLike)
+
+Public Sub RemoveLinesLike(this As String)
+'@LastModified 2308221356
+    this = UCase(this)
+    Dim S           As String
+    Dim i           As Long
+    For i = Line_Body_Last To Line_Header_First Step -1
+        S = Trim(oModule.CodeModule.Lines(i, 1))
+        S = UCase(S)
+        If S Like this Then
+            oModule.CodeModule.DeleteLines i
+        End If
     Next
 End Sub
 
 Public Sub InjectLinkedClasses()
     Dim ListOfImports As String
-    Dim s As String: s = Code_All
-    Dim element As Variant
+    Dim S           As String: S = Code_All
+    Dim element     As Variant
     For Each element In LinkedClasses
-        If InStr(1, s, "@INCLUDE CLASS " & element) = 0 _
-        And InStr(1, ListOfImports, "@INCLUDE CLASS " & element) = 0 Then
+        If InStr(1, S, "@INCLUDE CLASS " & element) = 0 _
+                And InStr(1, ListOfImports, "@INCLUDE CLASS " & element) = 0 Then
             If ListOfImports = "" Then
                 ListOfImports = "'@INCLUDE CLASS " & element
             Else
@@ -739,18 +882,18 @@ Public Sub InjectLinkedClasses()
     Next
     If ListOfImports <> "" Then
         oModule.CodeModule.InsertLines _
-            LineIndex(Body_First_AfterComments), ListOfImports
+                Line_Body_FirstAfterComments, ListOfImports
     End If
 End Sub
 
 Public Sub InjectLinkedProcedures()
-    Dim Procedures As Collection
+    Dim Procedures  As Collection
     Set Procedures = collLinkedProcedures
     Dim ListOfImports As String
-    Dim s As String: s = Code_All
-    Dim Procedure As Variant
+    Dim S           As String: S = Code_All
+    Dim Procedure   As Variant
     For Each Procedure In Procedures
-        If InStr(1, s, "@INCLUDE PROCEDURE " & Procedure) = 0 And InStr(1, ListOfImports, "@INCLUDE PROCEDURE " & Procedure) = 0 Then
+        If InStr(1, S, "@INCLUDE PROCEDURE " & Procedure) = 0 And InStr(1, ListOfImports, "@INCLUDE PROCEDURE " & Procedure) = 0 Then
             If ListOfImports = "" Then
                 ListOfImports = "'@INCLUDE PROCEDURE " & Procedure
             Else
@@ -759,16 +902,16 @@ Public Sub InjectLinkedProcedures()
         End If
     Next
     If ListOfImports <> "" Then
-        oModule.CodeModule.InsertLines LineIndex(Body_First_AfterComments), ListOfImports
+        oModule.CodeModule.InsertLines Line_Body_FirstAfterComments, ListOfImports
     End If
 End Sub
 
 Public Sub InjectLinkedUserforms()
     Dim ListOfImports As String
-    Dim s As String: s = Code_All
-    Dim element As Variant
+    Dim S           As String: S = Code_All
+    Dim element     As Variant
     For Each element In LinkedUserforms
-        If InStr(1, s, "@INCLUDE USERFORM " & element) = 0 And InStr(1, ListOfImports, "@INCLUDE USERFORM " & element) = 0 Then
+        If InStr(1, S, "@INCLUDE USERFORM " & element) = 0 And InStr(1, ListOfImports, "@INCLUDE USERFORM " & element) = 0 Then
             If ListOfImports = "" Then
                 ListOfImports = "'@INCLUDE USERFORM " & element
             Else
@@ -777,17 +920,17 @@ Public Sub InjectLinkedUserforms()
         End If
     Next
     If ListOfImports <> "" Then
-        oModule.CodeModule.InsertLines LineIndex(Body_First_AfterComments), ListOfImports
+        oModule.CodeModule.InsertLines Line_Body_FirstAfterComments, ListOfImports
     End If
 End Sub
 
 Public Sub InjectLinkedDeclarations()
     Dim ListOfImports As String
-    Dim s As String: s = Code_All
-    Dim coll As New Collection
-    Dim element As Variant
+    Dim S           As String: S = Code_All
+    Dim coll        As New Collection
+    Dim element     As Variant
     For Each element In LinkedDeclarations
-        If InStr(1, s, "'@INCLUDE DECLARATION " & element) = 0 Then
+        If InStr(1, S, "'@INCLUDE DECLARATION " & element) = 0 Then
             If ListOfImports = "" Then
                 ListOfImports = "'@INCLUDE DECLARATION " & element
             Else
@@ -796,18 +939,18 @@ Public Sub InjectLinkedDeclarations()
         End If
     Next
     If ListOfImports <> "" Then
-        oModule.CodeModule.InsertLines LineIndex(Body_First_AfterComments), ListOfImports
+        oModule.CodeModule.InsertLines Line_Body_FirstAfterComments, ListOfImports
     End If
 End Sub
 
 Public Function LinkedDeclarations() As Collection
     aWorkbook.Init(oWorkbook).DeclarationsTableCreate
     Dim TargetWorksheet As Worksheet: Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
-    Dim coll As New Collection
-    Dim s As String: s = Code_All
+    Dim coll        As New Collection
+    Dim S           As String: S = Code_All
     Dim element
     For Each element In DeclarationsTableKeywords
-        If RegexTest(s, "\b ?" & CStr(element) & "\b") Then
+        If RegexTest(S, "\b ?" & CStr(element) & "\b") Then
             On Error Resume Next
             coll.Add CStr(element), CStr(element)
             On Error GoTo 0
@@ -819,23 +962,23 @@ End Function
 Function DeclarationsTableKeywords() As Collection
     Dim TargetWorksheet As Worksheet
     Set TargetWorksheet = ThisWorkbook.Sheets("Declarations_Table")
-    Dim Lr As Long: Lr = getLastRow(TargetWorksheet)
-    Dim coll As New Collection
-    Dim cell As Range
+    Dim Lr          As Long: Lr = getLastRow(TargetWorksheet)
+    Dim coll        As New Collection
+    Dim cell        As Range
     For Each cell In TargetWorksheet.Range("C2:C" & Lr)
         On Error Resume Next
-        coll.Add cell.text, cell.text
+        coll.Add cell.TEXT, cell.TEXT
         On Error GoTo 0
     Next
     Set DeclarationsTableKeywords = coll
 End Function
 
 Public Function LinkedUserforms()
-    Dim coll As New Collection
-    Dim s As String: s = Code_All
-    Dim formName
-    For Each formName In aModules.Init(oWorkbook).UserformNames
-        If RegexTest(s, "\W" & formName & "[.(\W]") = True Then coll.Add formName
+    Dim coll        As New Collection
+    Dim S           As String: S = Code_All
+    Dim FormName
+    For Each FormName In aModules.Init(oWorkbook).UserformNames
+        If RegexTest(S, "\W" & FormName & "[.(\W]") = True Then coll.Add FormName
     Next
     Set LinkedUserforms = coll
 End Function
@@ -844,22 +987,22 @@ End Function
 
 
 Public Function LinkedClasses() As Collection
-    Dim coll As New Collection
-    Dim var As Variant
-        var = aModule.Init(oModule).ClassCalls
-    Dim s As String: s = Code_All
-    Dim Keyword As String
-    Dim ClassName As String
-    Dim element As Variant
-    Dim i As Long
+    Dim coll        As New Collection
+    Dim var         As Variant
+    var = aModule.Init(oModule).ClassCalls
+    Dim S           As String: S = Code_All
+    Dim Keyword     As String
+    Dim ClassName   As String
+    Dim element     As Variant
+    Dim i           As Long
     On Error Resume Next
     For i = LBound(var, 1) To UBound(var, 1)
-        If InStr(1, s, var(i, 1)) > 0 Or InStr(1, s, var(i, 2)) > 0 Then
+        If InStr(1, S, var(i, 1)) > 0 Or InStr(1, S, var(i, 2)) > 0 Then
             coll.Add var(i, 1), var(i, 1)
         End If
     Next
     For Each element In aModules.Init(oWorkbook).ClassNames
-        If InStr(1, s, element) > 0 Then
+        If InStr(1, S, element) > 0 Then
             coll.Add element, CStr(element)
         End If
     Next
@@ -869,7 +1012,7 @@ End Function
 
 
 Function LinkedSheets() As Collection
-    Dim SheetNames As New Collection
+    Dim SheetNames  As New Collection
     Dim TargetWorksheet As Worksheet
     For Each TargetWorksheet In oWorkbook.Worksheets
         On Error Resume Next
@@ -878,12 +1021,12 @@ Function LinkedSheets() As Collection
         On Error GoTo 0
     Next
     Dim element
-    Dim s As String: s = Code_All
-    Dim coll As New Collection
+    Dim S           As String: S = Code_All
+    Dim coll        As New Collection
     For Each element In SheetNames
-        If InStr(1, CStr(element), " ") > 0 And InStr(1, s, CStr(element)) > 0 Then
+        If InStr(1, CStr(element), " ") > 0 And InStr(1, S, CStr(element)) > 0 Then
             coll.Add CStr(element)
-        ElseIf RegexTest(s, "\W" & CStr(element) & "[.(\W]") = True Then
+        ElseIf RegexTest(S, "\W" & CStr(element) & "[.(\W]") = True Then
             coll.Add CStr(element), CStr(element)
         End If
     Next
@@ -892,13 +1035,13 @@ End Function
 
 
 Public Sub ExportLinkedCode()
-    Dim Code       As String:   Code = LinkedCode
-    Dim MergedName As String:   MergedName = "Merged_" & oProcedure
-    Dim FileName   As String:   FileName = LOCAL_LIBRARY_PROCEDURES & MergedName & ".txt"
+    Dim Code        As String: Code = LinkedCode
+    Dim MergedName  As String: MergedName = "Merged_" & oProcedure
+    Dim fileName    As String: fileName = LOCAL_LIBRARY_PROCEDURES & MergedName & ".txt"
     Debug.Print "OVERWROTE " & MergedName
-    TxtOverwrite FileName, Code
-    TxtPrependContainedProcedures FileName
-    FollowLink FileName
+    TxtOverwrite fileName, Code
+    TxtPrependContainedProcedures fileName
+    FollowLink fileName
 End Sub
 
 Private Function LinkedCode() As String
@@ -915,31 +1058,31 @@ Public Sub ImportDependencies(Optional Overwrite As Boolean)
 End Sub
 
 Private Sub ImportProcedureDependencies( _
-                                        Procedure As String, _
-                                        Overwrite As Boolean)
+        Procedure As String, _
+        Overwrite As Boolean)
 
-    Dim Module As VBComponent
+    Dim module      As VBComponent
     On Error Resume Next
-    Set Module = ModuleOfProcedure(oWorkbook, Procedure)
-    If Module Is Nothing Then Exit Sub
+    Set module = ModuleOfProcedure(oWorkbook, Procedure)
+    If module Is Nothing Then Exit Sub
     On Error GoTo 0
-    Dim obj As String
-    Dim Code As String
-        Code = aProcedure.Init(oWorkbook, Module, Procedure).Code_All
+    Dim obj         As String
+    Dim Code        As String
+    Code = aProcedure.Init(oWorkbook, module, Procedure).Code_All
     Dim var
-        var = Split(Code, vbNewLine)
-        var = Filter(var, "'@INCLUDE ")
-    Dim TextLine As Variant
+    var = Split(Code, vbNewLine)
+    var = Filter(var, "'@INCLUDE ")
+    Dim TextLine    As Variant
     For Each TextLine In var
         TextLine = UCase(Trim(TextLine))
         If TextLine Like "'@INCLUDE *" Then
             obj = Split(TextLine, " ")(2)
             obj = VBA.Replace(obj, vbNewLine, "")
             Select Case True
-                Case TextLine Like "'@INCLUDE PROCEDURE *":     ImportProcedure obj, Overwrite
-                Case TextLine Like "'@INCLUDE CLASS *":         ImportClass obj, Overwrite
-                Case TextLine Like "'@INCLUDE USERFORM *":      ImportUserform obj, Overwrite
-                Case TextLine Like "'@INCLUDE DECLARATION *":   ImportDeclaration obj
+                Case TextLine Like "'@INCLUDE PROCEDURE *": ImportProcedure obj, Overwrite
+                Case TextLine Like "'@INCLUDE CLASS *": ImportClass obj, Overwrite
+                Case TextLine Like "'@INCLUDE USERFORM *": ImportUserform obj, Overwrite
+                Case TextLine Like "'@INCLUDE DECLARATION *": ImportDeclaration obj
             End Select
         End If
     Next
@@ -950,65 +1093,65 @@ Sub Update()
 End Sub
 
 Public Sub ImportProcedure( _
-                            Procedure As String, _
-                            Overwrite As Boolean)
-'
-    Dim ProcedurePath   As String:  ProcedurePath = LOCAL_LIBRARY_PROCEDURES & Procedure & ".txt"
-    Dim Result As String
+        Procedure As String, _
+        Overwrite As Boolean)
+    '
+    Dim ProcedurePath As String: ProcedurePath = LOCAL_LIBRARY_PROCEDURES & Procedure & ".txt"
+    Dim result      As String
     On Error Resume Next
-    Result = TxtRead(ProcedurePath)
+    result = TxtRead(ProcedurePath)
     On Error GoTo 0
 
-    If Len(Result) = 0 Then
+    If Len(result) = 0 Then
         On Error Resume Next
-        Result = TXTReadFromUrl(GITHUB_LIBRARY_PROCEDURES & Procedure & ".txt")
+        result = TXTReadFromUrl(GITHUB_LIBRARY_PROCEDURES & Procedure & ".txt")
         On Error GoTo 0
-        If Len(Result) > 0 And Not UCase(Result) Like ("*NOT FOUND*") Then
-            TxtOverwrite ProcedurePath, Result
+        If Len(result) > 0 And Not UCase(result) Like ("*NOT FOUND*") Then
+            TxtOverwrite ProcedurePath, result
         Else
             Debug.Print "File " & Procedure & ".txt not found neither localy nor online"
             Exit Sub
         End If
     End If
 
-    Dim filelastmod:    filelastmod = StringLastModified(Result)
+    Dim filelastmod: filelastmod = StringLastModified(result)
     Dim proclastmod
-    
-    Dim Module As VBComponent
+
+    Dim module      As VBComponent
     If ProcedureExists(oWorkbook, Procedure) = True Then
-        Set Module = ModuleOfProcedure(oWorkbook, Procedure)
-        proclastmod = ProcedureLastModified(oWorkbook, Module, Procedure)
+        Set module = ModuleOfProcedure(oWorkbook, Procedure)
+        proclastmod = ProcedureLastModified(oWorkbook, module, Procedure)
         If Overwrite = True Then
             If proclastmod = 0 Or proclastmod < filelastmod Then
-                ProcedureReplace Module, Procedure, TxtRead(ProcedurePath)
+                ProcedureReplace module, Procedure, TxtRead(ProcedurePath)
             End If
         End If
     Else
-'        Dim ModuleName As String
-'            ModuleName = StringProcedureAssignedModule(Result)
-'        If ModuleName = "" Then ModuleName = "vbArcImports"
-'        Set Module = ModuleAddOrSet(oWorkbook, ModuleName, vbext_ct_StdModule)
-    Set Module = ModuleAddOrSet(oWorkbook, "vbArcImports", vbext_ct_StdModule)
-        Module.CodeModule.AddFromFile ProcedurePath
+        '        Dim ModuleName As String
+        '            ModuleName = StringProcedureAssignedModule(Result)
+        '        If ModuleName = "" Then ModuleName = "vbArcImports"
+        '        Set Module = ModuleAddOrSet(oWorkbook, ModuleName, vbext_ct_StdModule)
+        Set module = ModuleAddOrSet(oWorkbook, "vbArcImports", vbext_ct_StdModule)
+        module.CodeModule.AddFromFile ProcedurePath
     End If
 
     ImportProcedureDependencies Procedure, Overwrite
 End Sub
 
 Sub ImportDeclaration(DeclarationName As String)
-    Dim filepath As String
-    filepath = LOCAL_LIBRARY_DECLARATIONS & DeclarationName & ".txt"
-    Dim Result As String
+    Dim FilePath    As String
+    FilePath = LOCAL_LIBRARY_DECLARATIONS & DeclarationName & ".txt"
+    Dim result      As String
     On Error Resume Next
-    Result = TxtRead(filepath)
+    result = TxtRead(FilePath)
     On Error GoTo 0
 
-    If Len(Result) = 0 Then 'CheckPath(filePath) = "I" Then
+    If Len(result) = 0 Then    'CheckPath(filePath) = "I" Then
         On Error Resume Next
-        Result = TXTReadFromUrl(GITHUB_LIBRARY_DECLARATIONS & DeclarationName & ".txt")
+        result = TXTReadFromUrl(GITHUB_LIBRARY_DECLARATIONS & DeclarationName & ".txt")
         On Error GoTo 0
-        If Len(Result) > 0 And Not UCase(Result) Like ("*NOT FOUND*") Then
-            TxtOverwrite filepath, Result
+        If Len(result) > 0 And Not UCase(result) Like ("*NOT FOUND*") Then
+            TxtOverwrite FilePath, result
         Else
             Debug.Print "File " & DeclarationName & ".txt not found localy or online"
             Exit Sub
@@ -1016,27 +1159,27 @@ Sub ImportDeclaration(DeclarationName As String)
     Else
 
     End If
-    If InStr(1, aWorkbook.Init(oWorkbook).Code, Result, vbTextCompare) > 0 Then Exit Sub
-    Dim Module As VBComponent
-    Set Module = ModuleAddOrSet(oWorkbook, "vbArcImports", vbext_ct_StdModule)
-    Module.CodeModule.AddFromString FormatVBA7(Result)
+    If InStr(1, aWorkbook.Init(oWorkbook).Code, result, vbTextCompare) > 0 Then Exit Sub
+    Dim module      As VBComponent
+    Set module = ModuleAddOrSet(oWorkbook, "vbArcImports", vbext_ct_StdModule)
+    module.CodeModule.AddFromString FormatVBA7(result)
 
 End Sub
 
 Sub ImportUserform(UserformName As String, _
-                    Overwrite As Boolean)
+        Overwrite As Boolean)
 
     Dim FilePathFrM As String
-        FilePathFrM = LOCAL_LIBRARY_USERFORMS & UserformName & ".frm"
+    FilePathFrM = LOCAL_LIBRARY_USERFORMS & UserformName & ".frm"
     Dim FilePathFrX As String
-        FilePathFrX = LOCAL_LIBRARY_USERFORMS & UserformName & ".frx"
+    FilePathFrX = LOCAL_LIBRARY_USERFORMS & UserformName & ".frx"
 
     If CheckPath(FilePathFrM) = "I" Then
         On Error Resume Next
         Dim codeFrM As String
-            codeFrM = TXTReadFromUrl(GITHUB_LIBRARY_USERFORMS & UserformName & ".frm")
+        codeFrM = TXTReadFromUrl(GITHUB_LIBRARY_USERFORMS & UserformName & ".frm")
         Dim codeFrX As String
-            codeFrX = TXTReadFromUrl(GITHUB_LIBRARY_USERFORMS & UserformName & ".frx")
+        codeFrX = TXTReadFromUrl(GITHUB_LIBRARY_USERFORMS & UserformName & ".frx")
         On Error GoTo 0
         If Len(codeFrM) > 0 And Len(codeFrX) > 0 Then
             TxtOverwrite FilePathFrM, codeFrM
@@ -1058,17 +1201,17 @@ Sub ImportUserform(UserformName As String, _
 End Sub
 
 Sub ImportClass(ClassName As String, _
-                Overwrite As Boolean)
+        Overwrite As Boolean)
 
-    Dim filepath As String
-    filepath = LOCAL_LIBRARY_CLASSES & ClassName & ".cls"
-    If CheckPath(filepath) = "I" Then
+    Dim FilePath    As String
+    FilePath = LOCAL_LIBRARY_CLASSES & ClassName & ".cls"
+    If CheckPath(FilePath) = "I" Then
         On Error Resume Next
-        Dim Code As String
+        Dim Code    As String
         Code = TXTReadFromUrl(GITHUB_LIBRARY_CLASSES & ClassName & ".cls")
         On Error GoTo 0
         If Len(Code) > 0 And Not UCase(Code) Like ("*NOT FOUND*") Then
-            TxtOverwrite filepath, Code
+            TxtOverwrite FilePath, Code
         Else
             MsgBox "File " & ClassName & ".cls not found neither localy nor online"
             Exit Sub
@@ -1082,77 +1225,77 @@ Sub ImportClass(ClassName As String, _
             Exit Sub
         End If
     End If
-    oWorkbook.VBProject.VBComponents.Import filepath
+    oWorkbook.VBProject.VBComponents.Import FilePath
 End Sub
 
-Public Sub Replace(Result As String)
+Public Sub Replace(result As String)
 
-    Dim startLine As Integer
-    Dim NumLines As Integer
+    Dim startLine   As Integer
+    Dim NumLines    As Integer
     With oModule.CodeModule
         startLine = .procStartLine(oProcedure, oProcKind)
         NumLines = .ProcCountLines(oProcedure, oProcKind)
         .DeleteLines startLine, NumLines
-        .InsertLines startLine, Result
+        .InsertLines startLine, result
     End With
 End Sub
 
 Private Function EnumOptionToString(PropertyType As Property_Type) As String
     Select Case PropertyType
-        Case Property_Type.Modified:          EnumOptionToString = "LastModified"
-        Case Property_Type.Ignore:            EnumOptionToString = "Ignore"
-        Case Property_Type.Parent_Assigned:   EnumOptionToString = "AssignedModule"
-        
+        Case Property_Type.Modified: EnumOptionToString = "LastModified"
+        Case Property_Type.Ignore: EnumOptionToString = "Ignore"
+        Case Property_Type.Parent_Assigned: EnumOptionToString = "AssignedModule"
+
     End Select
 End Function
 
 Private Function PropertyGet(PropertyType As Property_Type) As String
     PropertyGet = vbNullString
-    Dim Line As String: Line = PropertyLine(PropertyType)
-    If Line = 0 Then Exit Function
-    Dim targetLine As String: targetLine = Trim(oModule.CodeModule.Lines(Line, 1))
+    Dim line        As String: line = PropertyLine(PropertyType)
+    If line = 0 Then Exit Function
+    Dim targetLine  As String: targetLine = Trim(oModule.CodeModule.Lines(line, 1))
     PropertyGet = Split(targetLine, " ")(1)
 End Function
 
 Public Function PropertySet(PropertyType As Property_Type, Value As String)
-    Dim Line As Long: Line = PropertyLine(PropertyType)
-    If Line = 0 Then
-        oModule.CodeModule.InsertLines BodyLineFirst, "'@" & EnumOptionToString(PropertyType) & " " & Value
+    Dim line        As Long: line = PropertyLine(PropertyType)
+    If line = 0 Then
+        oModule.CodeModule.InsertLines Line_Body_First, "'@" & EnumOptionToString(PropertyType) & " " & Value
     Else
-        Dim targetLine As String: targetLine = Trim(oModule.CodeModule.Lines(Line, 1))
-        oModule.CodeModule.ReplaceLine Line, Split(targetLine)(0) & " " & Value
+        Dim targetLine As String: targetLine = Trim(oModule.CodeModule.Lines(line, 1))
+        oModule.CodeModule.ReplaceLine line, Split(targetLine)(0) & " " & Value
     End If
 
 End Function
 
 Private Function PropertyLine(PropertyType As Property_Type) As Long
-    Dim This As String: This = EnumOptionToString(PropertyType)
+    Dim this        As String: this = EnumOptionToString(PropertyType)
     Dim targetLine  As String
-    Dim i As Long
-    For i = LineFirst To LineLast
+    Dim i           As Long
+    For i = Line_First To Line_Last
         targetLine = Trim(oModule.CodeModule.Lines(i, 1))
-        If UCase(targetLine) Like UCase("'@" & This & " *") Then
+        If UCase(targetLine) Like UCase("'@" & this & " *") Then
             PropertyLine = i
             Exit Function
         End If
     Next
 End Function
 
-Public Sub InjectObjectsRelease()
+Public Function ObjectsReleaseText() As String
     Dim LineStart As Long, LineEnd As Long
     AssignLineStartEnd Body_Code, LineStart, LineEnd
-    Dim i As Long
-    Dim s As String, This As String, Keyword As String
+    Dim i           As Long
+    Dim S As String, this As String, Keyword As String
     For i = LineStart To LineEnd
-        s = Trim(oModule.CodeModule.Lines(i, 1))
-        If (s Like "Set * = *" Or s Like "Dim*As New*") _
-        And Not s Like "*= Nothing*" Then
-            Keyword = Split(s, " ")(1)
-            This = IIf(This <> "", This & vbNewLine, "") & "Set " & Keyword & " = Nothing"
+        S = Trim(oModule.CodeModule.Lines(i, 1))
+        If (S Like "Set * = *" Or S Like "Dim*As New*") _
+                And Not S Like "*= Nothing*" Then
+            Keyword = Split(S, " ")(1)
+            this = IIf(this <> "", this & vbNewLine, "") & "Set " & Keyword & " = Nothing"
         End If
     Next
-    If This = "" Then Exit Sub
-    Dim var: var = Split(This, vbNewLine)
+    If this = "" Then Exit Function
+    Dim var: var = Split(this, vbNewLine)
     Dim sCode As String: sCode = Code_All
     Dim out, el
     ReDim out(0 To 0)
@@ -1162,34 +1305,43 @@ Public Sub InjectObjectsRelease()
             out(UBound(out)) = el
         End If
     Next
-    This = Join(out, vbNewLine)
-    If This <> "" Then oModule.CodeModule.InsertLines LineIndex(Procedure_Last), This
+    this = Join(out, vbNewLine)
+    ObjectsReleaseText = this
+End Function
+Public Sub InjectObjectsReleaseAtEnd()
+    Dim this As String: this = ObjectsReleaseText
+    If this <> "" Then oModule.CodeModule.InsertLines Line_Last, this
+End Sub
+Public Sub InjectObjectsReleaseHere()
+    aCodeModule.Active.Insert Space(4) & Join(Split(ObjectsReleaseText, vbNewLine), vbNewLine & Space(4))
 End Sub
 
-Public Sub InjectModification()
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 18-08-2023 08:31    Alex                (aProcedure.cls > InjectModification)
+'* Updated    : 26-10-2023 00:32    Alex                (aProcedure.cls > InjectModification : added argument for description)
+
+Public Sub InjectModification(Optional Desc As String = "")
+'@LastModified 2310260032
     PropertySet Modified, Format(Now, "yymmddhhnn")
-    
+
     Const vbTab2 = vbTab & vbTab
     Const vbTab4 = vbTab2 & vbTab2
-    Dim sTime As String: sTime = Format(Now, "dd-mm-yyyy hh:nn")
-    Dim sProc As String: sProc = oProcedure
+    Dim sTime       As String: sTime = Format(Now, "dd-mm-yyyy hh:nn")
+    Dim sProc       As String: sProc = oProcedure
 
-    '* @TODO Created: 01-02-2023 07:46 Author: Anastasiou Alex
-    '* @TODO if name is too long have to recalculate tab length
-
-    Dim sUser As String: sUser = "Alex"
+    Dim sUser       As String: sUser = "Alex"
     If sUser = vbNullString Then sUser = Environ("UserName")
-    Const sUPDATE    As String = "'* Updated    :"
-    Dim sFirstLine As String
-        sFirstLine = "'* Modified   :" & vbTab & "Date and Time" & vbTab2 & _
-                    "Author" & vbTab4 & "Description" & vbCrLf
-    Dim sSecondLine  As String
-        sSecondLine = sUPDATE & vbTab & sTime & vbTab & sUser & vbTab4 & "(" & sProc & ")"
+    Const sUPDATE   As String = "'* Updated    :"
+    Dim sFirstLine  As String
+    sFirstLine = "'* Modified   :" & vbTab & "Date and Time" & vbTab2 & _
+            "Author" & vbTab4 & "Description" & vbCrLf
+    Dim sSecondLine As String
+    sSecondLine = sUPDATE & vbTab & sTime & vbTab & sUser & vbTab4 & "(" & oModule.Name & aModule.Init(oModule).Extension & " > " & sProc & " : " & Desc & ")"
 
     If InStr(1, Code_Header, "'* Created    :") Then
-        Dim lineNo As Long
-        Dim i As Long
-        For i = LineIndex(Header_First) To LineIndex(Header_Last)
+        Dim lineNo  As Long
+        Dim i       As Long
+        For i = Line_Header_First To Line_Header_Last
             If oModule.CodeModule.Lines(i, 1) Like "'* Created    :*" Then
                 lineNo = i
                 Exit For
@@ -1204,7 +1356,7 @@ Public Sub InjectModification()
         Exit Sub
     End If
 
-    Dim nLine As Long:   nLine = LineIndex(Declaration_First)
+    Dim nLine       As Long: nLine = Line_Declaration_First
     If nLine < 4 Then
         sSecondLine = vbLf & sFirstLine & sSecondLine
     ElseIf Not oModule.CodeModule.Lines(nLine - 2, 1) Like sUPDATE & "*" Then
@@ -1218,235 +1370,261 @@ Public Sub InjectModification()
 End Sub
 
 Public Function IndexInModule() As Long
-    Dim Procedures As New Collection
+    Dim Procedures  As New Collection
     Set Procedures = aModule.Init(oModule).ProceduresNames
-    Dim index As Long
-        index = aCollection.Init(Procedures).IndexOf(oProcedure)
+    Dim index       As Long
+    index = aCollection.Init(Procedures).IndexOf(oProcedure)
     IndexInModule = index
 End Function
 
 Public Sub MoveToTop()
-    Dim Procedures As New Collection:   Set Procedures = aModule.Init(oModule).ProceduresNames
-    Dim idx As Long:                    idx = IndexInModule
-    
+    Dim Procedures  As New Collection: Set Procedures = aModule.Init(oModule).ProceduresNames
+    Dim idx         As Long: idx = IndexInModule
+
     If idx = 1 Then Exit Sub
-    
-    Dim s As String:                    s = Code_All
-    Dim TargetProcedure As String:      TargetProcedure = Procedures(1)
-    
+
+    Dim S           As String: S = Code_All
+    Dim TargetProcedure As String: TargetProcedure = Procedures(1)
+
     Delete
-    
+
     With oModule.CodeModule
-        .InsertLines .procStartLine(TargetProcedure, oProcKind), s
+        .InsertLines .procStartLine(TargetProcedure, oProcKind), S
     End With
-    
-    idx = LineIndex(Declaration_First)
+
+    idx = Line_Declaration_First
     Application.VBE.ActiveCodePane.SetSelection idx, 1, idx, 1
 End Sub
 
 Public Sub MoveToBottom()
-    Dim Procedures As New Collection:   Set Procedures = aModule.Init(oModule).ProceduresNames
-    Dim idx As Long:                  idx = IndexInModule
-    
-    If idx = Procedures.count Then Exit Sub
-    
-    Dim s As String:                    s = Code_All
-    Dim TargetProcedure As String:      TargetProcedure = Procedures(Procedures.count)
-        
+    Dim Procedures  As New Collection: Set Procedures = aModule.Init(oModule).ProceduresNames
+    Dim idx         As Long: idx = IndexInModule
+
+    If idx = Procedures.Count Then Exit Sub
+
+    Dim S           As String: S = Code_All
+    Dim TargetProcedure As String: TargetProcedure = Procedures(Procedures.Count)
+
     Delete
-    
+
     With oModule.CodeModule
         .InsertLines .procStartLine(TargetProcedure, oProcKind) + _
-                     .ProcCountLines(TargetProcedure, oProcKind) + 1, _
-                     s
+                .ProcCountLines(TargetProcedure, oProcKind) + 1, _
+                S
     End With
-    
-    idx = LineIndex(Declaration_First)
+
+    idx = Line_Declaration_First
     Application.VBE.ActiveCodePane.SetSelection idx, 1, idx, 1
 End Sub
 
 Public Sub MoveDown()
-    Dim Procedures As New Collection:   Set Procedures = aModule.Init(oModule).ProceduresNames
-    Dim idx As Long:                    idx = IndexInModule
-    
-    If idx = Procedures.count Then Exit Sub
-    
-    Dim s As String:                    s = Code_All
-    Dim TargetProcedure As String:      TargetProcedure = Procedures(idx + 1)
-    
+    Dim Procedures  As New Collection: Set Procedures = aModule.Init(oModule).ProceduresNames
+    Dim idx         As Long: idx = IndexInModule
+
+    If idx = Procedures.Count Then Exit Sub
+
+    Dim S           As String: S = Code_All
+    Dim TargetProcedure As String: TargetProcedure = Procedures(idx + 1)
+
     Delete
-    
+
     With oModule.CodeModule
         .InsertLines .procStartLine(TargetProcedure, oProcKind) + _
-                     .ProcCountLines(TargetProcedure, oProcKind) + 1, _
-                     s
+                .ProcCountLines(TargetProcedure, oProcKind) + 1, _
+                S
     End With
-    
-    idx = LineIndex(Declaration_First)
+
+    idx = Line_Declaration_First
     Application.VBE.ActiveCodePane.SetSelection idx, 1, idx, 1
 
 End Sub
 
 Public Sub MoveUp()
-    Dim Procedures As New Collection:   Set Procedures = aModule.Init(oModule).ProceduresNames
-    Dim idx As Long:                    idx = IndexInModule
-    
+    Dim Procedures  As New Collection: Set Procedures = aModule.Init(oModule).ProceduresNames
+    Dim idx         As Long: idx = IndexInModule
+
     If idx = 1 Then Exit Sub
-    
-    Dim s As String:                    s = Code_All
-    Dim TargetProcedure As String:      TargetProcedure = Procedures(idx - 1)
-    
+
+    Dim S           As String: S = Code_All
+    Dim TargetProcedure As String: TargetProcedure = Procedures(idx - 1)
+
     Delete
-    
+
     With oModule.CodeModule
-        .InsertLines .procStartLine(TargetProcedure, oProcKind), s
+        .InsertLines .procStartLine(TargetProcedure, oProcKind), S
     End With
-    
-    idx = LineIndex(Declaration_First)
+
+    idx = Line_Declaration_First
     Application.VBE.ActiveCodePane.SetSelection idx, 1, idx, 1
 
 End Sub
 
 Public Sub MoveToAssignedModule()
-    Dim Module As VBComponent
-    Set Module = ParentAssigned
-    If Module Is Nothing Or Module.Name = oModule.Name Then Exit Sub
-    MoveToModule Module
+    Dim module      As VBComponent
+    Set module = ParentAssigned
+    If module Is Nothing Or module.Name = oModule.Name Then Exit Sub
+    MoveToModule module
 End Sub
 
-Public Sub MoveToModule(Module As VBComponent)
-    Dim s As String: s = Code_All
+Public Sub MoveToModule(module As VBComponent)
+    Dim S           As String: S = Code_All
     Delete
-    With Module.CodeModule
-        .InsertLines .CountOfLines + 1, vbNewLine & s
+    With module.CodeModule
+        .InsertLines .CountOfLines + 1, vbNewLine & S
     End With
-    Set oModule = Module
+    Set oModule = module
 End Sub
 
 Public Sub Delete()
     TxtOverwrite Environ("TEMP") & "\" & oProcedure & ".txt", Code_All
     Debug.Print "made a backup of " & oProcedure & " in " & Environ("TEMP")
-    oModule.CodeModule.DeleteLines LineIndex(Procedure_First), LineIndex(Procedure_Count)
+    oModule.CodeModule.DeleteLines Line_First, Line_Count
 End Sub
 
 Public Sub TestCreate()
-    Dim arg As String
-    arg = ArgumentStyle
-    Dim Procedures As Collection
+    Dim arg         As String
+    arg = ArgumentStyleFolded
+    Dim Procedures  As Collection
     Set Procedures = aWorkbook.Init(oWorkbook).Procedures(True, False, False, False)
-    
-    Dim s As String: s = vbNewLine
+
+    Dim S           As String: S = vbNewLine
     If Not aCollection.Init(Procedures).Contains(, "test" & oProcedure) Then
         If KindAsString = "Sub" Then
-            s = s & "Sub test" & oProcedure & "()" & vbNewLine
-            s = s & "call " & arg & vbNewLine
-            s = s & "End Sub"
+            S = S & "Sub test" & oProcedure & "()" & vbNewLine
+            S = S & "call " & arg & vbNewLine
+            S = S & "End Sub"
         Else
-            s = s & "Function test" & oProcedure & "()" & vbNewLine
-            s = s & "Something = " & arg & vbNewLine
-            s = s & "End Function"
+            S = S & "Function test" & oProcedure & "()" & vbNewLine
+            S = S & "Something = " & arg & vbNewLine
+            S = S & "End Function"
         End If
     Else
 
     End If
-    oModule.CodeModule.InsertLines LineIndex(Procedure_First), s
+    oModule.CodeModule.InsertLines Line_First, S
     Debug.Print "Created test" & oProcedure & " in " & oModule.Name
 End Sub
 
-Public Function ArgumentStyle() As String
-    If ArgumentCount = 0 Then Exit Function
-    Dim str As Variant, s As String
-    Dim firstPart As String, secondPart As String, output As String
-        str = Code_Declaration_Clean
-    output = oProcedure & "( _"
-    Dim indentation As String
-        indentation = Space(Len(output) - 1)
-        str = Right(str, Len(str) - InStr(1, str, "("))
-        str = Left(str, InStrRev(str, ")") - 1)
+Public Function Arguments() As String
+    Dim str
+    str = Code_Declaration_Clean
+    str = Right(str, Len(str) - InStr(1, str, "("))
+    str = Left(str, InStrRev(str, ")") - 1)
     If InStr(1, str, Chr(34) & "," & Chr(34)) > 0 Then
         str = VBA.Replace(str, Chr(34) & "," & Chr(34), Chr(34) & "|" & Chr(34))
     End If
-        str = Split(str, ",")
+    str = Split(str, ",")
     Dim i As Long
+    Dim Output As String
     For i = LBound(str) To UBound(str)
         str(i) = VBA.Replace(str(i), Chr(34) & "|" & Chr(34), Chr(34) & "," & Chr(34))
+        str(i) = Trim(Split(str(i), " As ")(0))
+        str(i) = VBA.Replace(str(i), "Optional ", "")
+        str(i) = VBA.Replace(str(i), "Astr(i) ", "")
+        str(i) = VBA.Replace(str(i), "ByVal ", "")
+        str(i) = VBA.Replace(str(i), "ByRef ", "")
+        str(i) = VBA.Replace(str(i), "ParamArray ", "")
+        str(i) = VBA.Replace(str(i), "_", "")
+        Output = Output & IIf((i > LBound(str)) And (i <= UBound(str)), ", ", "") & str(i)
+    Next
+    Arguments = Output
+End Function
+
+Public Function ArgumentStyleFolded() As String
+    If ArgumentCount = 0 Then Exit Function
+    Dim str As Variant, S As String
+    Dim firstPart As String, secondPart As String, Output As String
+    str = Code_Declaration_Clean
+    Output = oProcedure & "( _"
+    Dim indentation As String
+    indentation = Space(Len(Output) - 1)
+    str = Right(str, Len(str) - InStr(1, str, "("))
+    str = Left(str, InStrRev(str, ")") - 1)
+    If InStr(1, str, Chr(34) & "," & Chr(34)) > 0 Then
+        str = VBA.Replace(str, Chr(34) & "," & Chr(34), Chr(34) & "|" & Chr(34))
+    End If
+    str = Split(str, ",")
+    Dim i           As Long
+    For i = LBound(str) To UBound(str)
+        str(i) = VBA.Replace(str(i), Chr(34) & "|" & Chr(34), Chr(34) & "," & Chr(34))
+        
     Next
     For i = LBound(str) To UBound(str)
-        s = Trim(str(i))
+        S = Trim(str(i))
 
-        s = VBA.Replace(s, "Optional ", "")
-        s = VBA.Replace(s, "As ", "")
-        s = VBA.Replace(s, "ByVal ", "")
-        s = VBA.Replace(s, "ByRef ", "")
-        s = VBA.Replace(s, "ParamArray ", "")
-        s = VBA.Replace(s, "_", "")
+        S = VBA.Replace(S, "Optional ", "")
+        S = VBA.Replace(S, "As ", "")
+        S = VBA.Replace(S, "ByVal ", "")
+        S = VBA.Replace(S, "ByRef ", "")
+        S = VBA.Replace(S, "ParamArray ", "")
+        S = VBA.Replace(S, "_", "")
 
-        firstPart = Split(s, " ")(0)
-        If InStr(1, s, " ") Then
-            secondPart = Split(s, " ")(1)
+        firstPart = Split(S, " ")(0)
+        If InStr(1, S, " ") Then
+            secondPart = Split(S, " ")(1)
         Else
             secondPart = "Variant"
         End If
-        output = output & vbNewLine & indentation & firstPart & ":= " & "as" & secondPart & IIf(i <> UBound(str), ", _", ")")
+        Output = Output & vbNewLine & indentation & firstPart & ":= " & "as" & secondPart & IIf(i <> UBound(str), ", _", ")")
     Next
 
-    ArgumentStyle = output
+    ArgumentStyleFolded = Output
 End Function
 
 Public Function ArgumentStyleClean() As String
-    Dim var As Variant
-    Dim s As String
-    var = Split(ArgumentStyle, vbNewLine)
+    Dim var         As Variant
+    Dim S           As String
+    var = Split(ArgumentStyleFolded, vbNewLine)
     var = ArrayTrim(var)
     If UBound(var) = -1 Then
-'        ProcedureArgumentStyleClean = Procedure & "()"
+        ArgumentStyleClean = Me.Name & "()"
         Exit Function
     End If
-    s = Join(var, vbNewLine)
-    s = VBA.Replace(s, " _" & vbNewLine, "")
-    ArgumentStyleClean = s
+    S = Join(var, vbNewLine)
+    S = VBA.Replace(S, " _" & vbNewLine, "")
+    ArgumentStyleClean = S
 End Function
 
 Sub PrintDims()
     dp Dims
 End Sub
-    
+
 Public Property Get Dims() As Variant
-    Dim s As Variant:   s = Split(Code_All, vbNewLine)
-    Dim tmp:            ReDim tmp(0 To 0)
-    
-    Dim i As Long
-    For i = LBound(s) To UBound(s)
-        s(i) = Trim(s(i))
-        If s(i) Like "*:*" Then s(i) = Split(s(i), ":")(0)
+    Dim S           As Variant: S = Split(Code_All, vbNewLine)
+    Dim tmp: ReDim tmp(0 To 0)
+
+    Dim i           As Long
+    For i = LBound(S) To UBound(S)
+        S(i) = Trim(S(i))
+        If S(i) Like "*:*" Then S(i) = Split(S(i), ":")(0)
     Next
 
-    s = ArrayFilterLike(s, "Dim *", True)
-    Dim h As String
+    S = ArrayFilterLike(S, "Dim *", True)
+    Dim h           As String
     Dim element
-    For i = LBound(s) To UBound(s)
-        s(i) = Trim(StringCommentsRemove(s(i), False))
-        If s(i) Like "Dim *,* As *" Then
-            For Each element In Split(s(i), ", ")
+    For i = LBound(S) To UBound(S)
+        S(i) = Trim(StringCommentsRemove(S(i), False))
+        If S(i) Like "Dim *,* As *" Then
+            For Each element In Split(S(i), ", ")
                 If InStr(1, element, "Dim ") = 0 Then element = "Dim " & element
                 If InStr(1, element, " As ") = 0 Then element = element & " As "
                 tmp(UBound(tmp)) = element
                 ReDim Preserve tmp(0 To UBound(tmp) + 1)
             Next
         Else
-            For Each element In Split(s(i), ", ")
+            For Each element In Split(S(i), ", ")
                 tmp(UBound(tmp)) = element
                 ReDim Preserve tmp(0 To UBound(tmp) + 1)
             Next
         End If
     Next
 
-    s = ArrayFilterLike(tmp, "Dim *", True)
+    S = ArrayFilterLike(tmp, "Dim *", True)
 
     Dim var
     ReDim var(0 To 1, 0 To 0)
-    For i = LBound(s) To UBound(s)
-        element = s(i)
+    For i = LBound(S) To UBound(S)
+        element = S(i)
         If element Like "Dim * As *" Then
 
             element = Mid(element, 5)
@@ -1455,32 +1633,32 @@ Public Property Get Dims() As Variant
             If Split(element, " As ")(1) Like "New *" Then
                 var(1, UBound(var, 2)) = Split(var(1, UBound(var, 2)), " ")(1)
             End If
-            If i < UBound(s) Then
+            If i < UBound(S) Then
                 ReDim Preserve var(0 To 1, 0 To UBound(var, 2) + 1)
             End If
         ElseIf element Like "Dim *" Then
-        
+
             Select Case Right(element, 1)
-            Case "$": h = "String"
-            Case "%": h = "Integer"
-            Case "&": h = "Long"
-            Case "!": h = "Single"
-            Case "#": h = "Double"
-            Case "@": h = "Currency"
-            Case "^": h = "LongLong"
-            Case Else: h = "Variant"
+                Case "$": h = "String"
+                Case "%": h = "Integer"
+                Case "&": h = "Long"
+                Case "!": h = "Single"
+                Case "#": h = "Double"
+                Case "@": h = "Currency"
+                Case "^": h = "LongLong"
+                Case Else: h = "Variant"
             End Select
             If h = "Variant" Then
                 var(0, UBound(var, 2)) = Mid(element, 5)
             Else
                 var(0, UBound(var, 2)) = Mid(element, 5, Len(element) - 1)
                 Select Case Right(element, 1)
-                Case "$", "%", "&", "!", "#", "@", "^"
-                    var(0, UBound(var, 2)) = Left(var(0, UBound(var, 2)), Len(var(0, UBound(var, 2))) - 1)
+                    Case "$", "%", "&", "!", "#", "@", "^"
+                        var(0, UBound(var, 2)) = Left(var(0, UBound(var, 2)), Len(var(0, UBound(var, 2))) - 1)
                 End Select
             End If
             var(1, UBound(var, 2)) = h
-            If i < UBound(s) Then
+            If i < UBound(S) Then
                 ReDim Preserve var(0 To 1, 0 To UBound(var, 2) + 1)
             End If
         End If
@@ -1491,87 +1669,88 @@ Public Property Get Dims() As Variant
 End Property
 
 Public Sub InjectToHeaderTop( _
-                    This As String, _
-                    SkipIfExists As Boolean)
+        this As String, _
+        SkipIfExists As Boolean)
     If SkipIfExists Then
-        If InStr(1, Code_Body, This) > 0 Then Exit Sub
+        If InStr(1, Code_Body, this) > 0 Then Exit Sub
     End If
-    oModule.CodeModule.InsertLines LineIndex(Procedure_First), _
-                                   IIf(Len(oModule.CodeModule.Lines(LineIndex(Procedure_First), 1)) = 0, vbNewLine, "") & _
-                                   This
+    oModule.CodeModule.InsertLines Line_First, _
+            IIf(Len(oModule.CodeModule.Lines(Line_First, 1)) = 0, vbNewLine, "") & _
+            this
 End Sub
 
 Public Sub InjectToHeaderBottom( _
-                        This As String, _
-                        SkipIfExists As Boolean)
+        this As String, _
+        SkipIfExists As Boolean)
     If SkipIfExists Then
-        If InStr(1, Code_Body, This) > 0 Then Exit Sub
+        If InStr(1, Code_Body, this) > 0 Then Exit Sub
     End If
-    oModule.CodeModule.InsertLines LineIndex(Declaration_First), This
+    oModule.CodeModule.InsertLines Line_Declaration_First, this
 End Sub
 
 Public Sub InjectToBodyTop( _
-                    This As String, _
-                    SkipIfExists As Boolean)
+        this As String, _
+        SkipIfExists As Boolean)
     If SkipIfExists Then
-        If InStr(1, Code_Body, This) > 0 Then Exit Sub
+        If InStr(1, Code_Body, this) > 0 Then Exit Sub
     End If
-    oModule.CodeModule.InsertLines LineIndex(Body_First), This
+    oModule.CodeModule.InsertLines Line_Body_First, this
 End Sub
 
 Public Sub InjectToBodyAfterComments( _
-                                    This As String, _
-                                    SkipIfExists As Boolean)
+        this As String, _
+        SkipIfExists As Boolean)
     If SkipIfExists Then
-        If InStr(1, Code_Body, This) > 0 Then Exit Sub
+        If InStr(1, Code_Body, this) > 0 Then Exit Sub
     End If
-    oModule.CodeModule.InsertLines LineIndex(Body_First_AfterComments), This
+    oModule.CodeModule.InsertLines Line_Body_FirstAfterComments, this
 End Sub
 
 Public Sub InjectToBodyBottom( _
-                             This As String, _
-                             SkipIfExists As Boolean)
+        this As String, _
+        SkipIfExists As Boolean)
     If SkipIfExists Then
-        If InStr(1, Code_Body, This) > 0 Then Exit Sub
+        If InStr(1, Code_Body, this) > 0 Then Exit Sub
     End If
-    oModule.CodeModule.InsertLines LineIndex(Body_Last) + 1, This
+    oModule.CodeModule.InsertLines Line_Body_Last + 1, this
 End Sub
 
-
+'* Modified   : Date and Time       Author              Description
+'* Updated    : 17-08-2023 08:28    Alex                (InjectDescription)
 
 Sub InjectDescription()
-'@LastModified 2303151200
+    '@LastModified 2308170828
 
     Const vbTab2 = vbTab & vbTab
     Const vbTab4 = vbTab2 & vbTab2
-    Const sFersLine     As String = "'* Modified   :" & vbTab & "Date and Time" & vbTab2 & "Author" & vbTab4 & "Description" & vbCrLf
+    Const sFersLine As String = "'* Modified   :" & vbTab & "Date and Time" & vbTab2 & "Author" & vbTab4 & "Description" & vbCrLf
 
-    Dim txtName         As String: txtName = AUTHOR_NAME
+    Dim txtName     As String: txtName = AUTHOR_NAME
     If txtName = vbNullString Then txtName = Environ("UserName")
 
-    Dim txtContacts     As String: txtContacts = AUTHOR_EMAIL
+    Dim txtContacts As String: txtContacts = AUTHOR_EMAIL
     If txtContacts <> vbNullString Then txtContacts = "'* Contacts   :" & vbTab & txtContacts & vbCrLf
 
-    Dim txtCopyright    As String:  txtCopyright = AUTHOR_COPYRIGHT
+    Dim txtCopyright As String: txtCopyright = AUTHOR_COPYRIGHT
     If txtCopyright <> vbNullString Then txtCopyright = "'* Copyright  :" & vbTab & txtCopyright & vbCrLf
 
-    Dim txtOther        As String:   txtOther = AUTHOR_OTHERTEXT
+    Dim txtOther    As String: txtOther = AUTHOR_OTHERTEXT
     If txtOther <> vbNullString Then txtOther = "'* Note       :" & vbTab & txtOther & vbCrLf
 
-    Dim txtMedia        As String:   txtMedia = "'* " & vbLf & AUTHOR_MEDIA
-    Dim CurentCodePane  As CodePane: Set CurentCodePane = oModule.CodeModule.CodePane
-    Dim i               As Byte
-    Dim ProcKind        As VBIDE.vbext_ProcKind
-    Dim sProc           As String: sProc = ActiveProcedure
-    Dim nLine           As Long
-        nLine = LineIndex(Declaration_First)
-    Dim sTemp           As String
-    Dim sTime           As String
-    Dim sType           As String
+    Dim txtMedia    As String: txtMedia = "'* " & vbLf & AUTHOR_MEDIA
+    Dim CurentCodePane As CodePane: Set CurentCodePane = oModule.CodeModule.CodePane
+    Dim i           As Byte
+    Dim ProcKind    As VBIDE.vbext_ProcKind
+    Dim sProc       As String: sProc = ActiveProcedure
+    Dim nLine       As Long
+    nLine = Line_Declaration_First
+    Dim sTemp       As String
+    Dim sTime       As String
+    Dim sType       As String
     Dim sProcDeclartion As String
-    Dim sProcArguments  As String
+    Dim sProcArguments As String
 
-    Dim sUser As String
+    Dim sUser       As String
 
     '* @TODO Created: 01-02-2023 08:20 Author: Anastasiou Alex
     '* @TODO if name is too long have to recalculate tab length
@@ -1593,7 +1772,7 @@ Sub InjectDescription()
         sProcArguments = AddStringParameterFromProcedureHeader(sProcDeclartion)
         sType = TypeProcedureComment(sProcDeclartion)
         sTemp = _
-                sTemp & vbCrLf & _
+                "'" & sTemp & vbCrLf & _
                 "'" & sType & vbTab & sProc & vbCrLf & _
                 "'* Author     :" & vbTab & txtName & vbCrLf & _
                 txtContacts & _
@@ -1611,26 +1790,26 @@ Sub InjectDescription()
 End Sub
 
 Private Function AddStringParameterFromProcedureHeader(ByVal sPocDeclartion As String) As String
-'@BlogPosted
+    '@BlogPosted
     Const vbTab2 = vbTab & vbTab
     Const vbTab4 = vbTab2 & vbTab2
     Dim sDeclaration As String
-        sDeclaration = Right$(sPocDeclartion, Len(sPocDeclartion) - InStr(1, sPocDeclartion, "("))
-        sDeclaration = Left$(sDeclaration, InStr(1, sDeclaration, ")") - 1)
+    sDeclaration = Right$(sPocDeclartion, Len(sPocDeclartion) - InStr(1, sPocDeclartion, "("))
+    sDeclaration = Left$(sDeclaration, InStr(1, sDeclaration, ")") - 1)
     If sDeclaration = vbNullString Then Exit Function
-    Dim arStr() As String
-        arStr = Split(sDeclaration, ",")
-    Dim iMaxLen As Byte
-        iMaxLen = 0
-    Dim iTempLen As Byte
-    Dim sTemp  As String
-    Dim i      As Byte
+    Dim arStr()     As String
+    arStr = Split(sDeclaration, ",")
+    Dim iMaxLen     As Byte
+    iMaxLen = 0
+    Dim iTempLen    As Byte
+    Dim sTemp       As String
+    Dim i           As Byte
     For i = 0 To UBound(arStr)
         iTempLen = Len(Trim$(arStr(i)))
         If iMaxLen < iTempLen Then iMaxLen = iTempLen
     Next i
     Dim numOfSpaces As Long
-        numOfSpaces = iMaxLen - Len(Trim$("'* Argument(s):"))
+    numOfSpaces = iMaxLen - Len(Trim$("'* Argument(s):"))
     If numOfSpaces < 0 Then numOfSpaces = 0
     sDeclaration = "'*" & vbLf & "'* Argument(s):" & Space(numOfSpaces) & vbTab2 & "Description" & vbCrLf & "'*" & vbCrLf
     For i = 0 To UBound(arStr)
@@ -1641,7 +1820,7 @@ Private Function AddStringParameterFromProcedureHeader(ByVal sPocDeclartion As S
 End Function
 
 Private Function TypeProcedureComment(ByVal StrDeclarationProcedure As String) As String
-'@BlogPosted
+    '@BlogPosted
     If StrDeclarationProcedure Like "*Sub*" Then
         TypeProcedureComment = "* Sub        :"
     ElseIf StrDeclarationProcedure Like "*Function*" Then
@@ -1667,94 +1846,94 @@ Sub InjectTimer()
 End Sub
 
 Function SuggestedScope() As String
-    
-    Dim Result As String
 
-    Select Case CallerModules.count
-    Case 0
-        SuggestedScope = "Unspecified"
-        Result = Result & vbNewLine & "Procedure " & Name & " has unclarified scope in " & oWorkbook.Name
-        Result = Result & vbNewLine & "It is called 0 times, so it may be Unused, Unassigned, or Called from elsewhere"
-        Exit Function
-    Case 1
-        SuggestedScope = "Private"
-        Result = Result & vbNewLine & "Suggested scope for procedure " & Name & " is Private"
-    Case Is > 1
-        SuggestedScope = "Public"
-        Result = Result & vbNewLine & "Suggested scope for procedure " & Name & " is Public"
+    Dim result      As String
+
+    Select Case CallerModules.Count
+        Case 0
+            SuggestedScope = "Unspecified"
+            result = result & vbNewLine & "Procedure " & Name & " has unclarified scope in " & oWorkbook.Name
+            result = result & vbNewLine & "It is called 0 times, so it may be Unused, Unassigned, or Called from elsewhere"
+            Exit Function
+        Case 1
+            SuggestedScope = "Private"
+            result = result & vbNewLine & "Suggested scope for procedure " & Name & " is Private"
+        Case Is > 1
+            SuggestedScope = "Public"
+            result = result & vbNewLine & "Suggested scope for procedure " & Name & " is Public"
     End Select
 
-    Result = Result & vbNewLine & "because it is used in " & CallerModules.count & " module(s) of " & oWorkbook.Name
-    
+    result = result & vbNewLine & "because it is used in " & CallerModules.Count & " module(s) of " & oWorkbook.Name
+
 End Function
 
 Sub ScopeSuggested()
-    Dim idx         As Long:        idx = LineIndex(Declaration_First)
-    Dim s           As String:      s = oModule.CodeModule.Lines(idx, 1)
-    Dim Suggestion  As String:      Suggestion = SuggestedScope
-    
+    Dim idx         As Long: idx = Line_Declaration_First
+    Dim S           As String: S = oModule.CodeModule.Lines(idx, 1)
+    Dim Suggestion  As String: Suggestion = SuggestedScope
+
     If Suggestion = "Private" Or Suggestion = "Public" Then
         Select Case True
-        Case s Like "*Public*" & Name & "*"
-            ScopePublic
-        Case s Like "*Private*" & Name & "*"
-            ScopePrivate
-        Case Else
-            Dim sKind As String:    sKind = KindAsString
-            oModule.CodeModule.ReplaceLine idx, Trim(VBA.Replace(s, sKind, " " & Suggestion & " " & sKind, , 1, vbTextCompare))
+            Case S Like "*Public*" & Name & "*"
+                ScopePublic
+            Case S Like "*Private*" & Name & "*"
+                ScopePrivate
+            Case Else
+                Dim sKind As String: sKind = KindAsString
+                oModule.CodeModule.ReplaceLine idx, Trim(VBA.Replace(S, sKind, " " & Suggestion & " " & sKind, , 1, vbTextCompare))
         End Select
     End If
 End Sub
 
 Sub ScopePrivate()
-    Dim idx         As Long:        idx = LineIndex(Declaration_First)
-    Dim s           As String:      s = Code_Declaration_Clean
-    Dim Suggestion  As String:      Suggestion = "Private"
+    Dim idx         As Long: idx = Line_Declaration_First
+    Dim S           As String: S = Code_Declaration_Clean
+    Dim Suggestion  As String: Suggestion = "Private"
     Select Case True
-    Case s Like "*Public*" & Name & "*"
-        Debug.Print Name
-        oModule.CodeModule.ReplaceLine idx, VBA.Replace(s, "Public", "Private", , 1, vbTextCompare)
-    Case s Like "*Private*" & Name & "*"
-        
-    Case Else
-        Dim sKind As String:    sKind = KindAsString
-        Select Case sKind
-            Case sKind Like "*Property*"
-                Debug.Print Name
-                oModule.CodeModule.ReplaceLine idx, VBA.Replace(s, "Property", Suggestion & " " & "Property", , 1, vbTextCompare)
-            Case Else
-                Debug.Print Name
-                oModule.CodeModule.ReplaceLine idx, VBA.Replace(s, sKind, Suggestion & " " & sKind, , 1, vbTextCompare)
-        End Select
+        Case S Like "*Public*" & Name & "*"
+            Debug.Print Name
+            oModule.CodeModule.ReplaceLine idx, VBA.Replace(S, "Public", "Private", , 1, vbTextCompare)
+        Case S Like "*Private*" & Name & "*"
+
+        Case Else
+            Dim sKind As String: sKind = KindAsString
+            Select Case sKind
+                Case sKind Like "*Property*"
+                    Debug.Print Name
+                    oModule.CodeModule.ReplaceLine idx, VBA.Replace(S, "Property", Suggestion & " " & "Property", , 1, vbTextCompare)
+                Case Else
+                    Debug.Print Name
+                    oModule.CodeModule.ReplaceLine idx, VBA.Replace(S, sKind, Suggestion & " " & sKind, , 1, vbTextCompare)
+            End Select
     End Select
 End Sub
 
 Sub ScopePublic()
-    Dim idx         As Long:        idx = LineIndex(Declaration_First)
-    Dim s           As String:      s = Code_Declaration_Clean
-    Dim Suggestion  As String:      Suggestion = "Public"
+    Dim idx         As Long: idx = Line_Declaration_First
+    Dim S           As String: S = Code_Declaration_Clean
+    Dim Suggestion  As String: Suggestion = "Public"
     Select Case True
-    Case s Like "*Public*" & Name & "*"
-        
-    Case s Like "*Private*" & Name & "*"
-        Debug.Print Name
-        oModule.CodeModule.ReplaceLine idx, VBA.Replace(s, "Private", "Public", , 1, vbTextCompare)
-    Case Else
-        Dim sKind As String:    sKind = KindAsString
-        Debug.Print Name
-        oModule.CodeModule.ReplaceLine idx, Trim(VBA.Replace(s, sKind, " " & Suggestion & " " & sKind, , 1, vbTextCompare))
+        Case S Like "*Public*" & Name & "*"
+
+        Case S Like "*Private*" & Name & "*"
+            Debug.Print Name
+            oModule.CodeModule.ReplaceLine idx, VBA.Replace(S, "Private", "Public", , 1, vbTextCompare)
+        Case Else
+            Dim sKind As String: sKind = KindAsString
+            Debug.Print Name
+            oModule.CodeModule.ReplaceLine idx, Trim(VBA.Replace(S, sKind, " " & Suggestion & " " & sKind, , 1, vbTextCompare))
     End Select
 End Sub
 
 Function CallerModules() As Collection
-    Dim myName As String: myName = Name
-    Dim coll As New Collection
-    Dim Module As aModule
+    Dim myName      As String: myName = Name
+    Dim coll        As New Collection
+    Dim module      As aModule
     Dim matchCollection As New Collection
-    For Each Module In aModules.Init(oWorkbook).Items
-        If Module.Contains(myName, True, True, False) Then
+    For Each module In aModules.Init(oWorkbook).items
+        If module.Contains(myName, True, True, False) Then
             On Error Resume Next
-            coll.Add Module.Name, Module.Name
+            coll.Add module.Name, module.Name
             On Error GoTo 0
         End If
     Next
@@ -1763,58 +1942,58 @@ End Function
 
 Function CallerModulesToString() As String
     Dim element
-    Dim Result As String
+    Dim result      As String
     For Each element In CallerModules
-        Result = Result & IIf(Result <> "", vbNewLine, "") & element
+        result = result & IIf(result <> "", vbNewLine, "") & element
     Next
-    CallerModulesToString = Result
+    CallerModulesToString = result
 End Function
 
 Function Callers() As Collection
-    Dim myName As String: myName = Name
-    Dim Result As New Collection
-    Dim Module As aModule
-    Dim Procedure As aProcedure
-    For Each Module In CallerModules
-        For Each Procedure In Module.Procedures
+    Dim myName      As String: myName = Name
+    Dim result      As New Collection
+    Dim module      As aModule
+    Dim Procedure   As aProcedure
+    For Each module In CallerModules
+        For Each Procedure In module.Procedures
             If Procedure.Name <> myName Then
                 If Procedure.Contains(myName, True, True, False) Then
                     On Error Resume Next
-                    Result.Add Procedure.Name, Procedure.Name
+                    result.Add Procedure.Name, Procedure.Name
                     Exit For
                     On Error GoTo 0
                 End If
             End If
         Next
     Next
-    Set Callers = Result
+    Set Callers = result
 End Function
 
 Function CallersToString() As String
     Dim element
-    Dim Result As String
+    Dim result      As String
     For Each element In Callers
-        Result = Result & IIf(Result <> "", vbNewLine, "") & element
+        result = result & IIf(result <> "", vbNewLine, "") & element
     Next
-    CallersToString = Result
+    CallersToString = result
 End Function
 
 Public Sub BringProcedureHere(Procedure As String)
-    Dim AP As New aProcedure
-    AP.Init , , Procedure
-    Dim s As String
-        s = AP.Code_All
-        If InStr(1, s, "'@AssignedModule") = 0 Then
-            AP.PropertySet Parent_Assigned, AP.Parent.Name
-            s = AP.Code_All
-        End If
-    AP.Delete
-    oModule.CodeModule.InsertLines LineIndex(Procedure_Last) + 1, s
+    Dim ap          As New aProcedure
+    ap.Init , , Procedure
+    Dim S           As String
+    S = ap.Code_All
+    If InStr(1, S, "'@AssignedModule") = 0 Then
+        ap.PropertySet Parent_Assigned, ap.Parent.Name
+        S = ap.Code_All
+    End If
+    ap.Delete
+    oModule.CodeModule.InsertLines Line_Last + 1, S
 End Sub
 
 Sub BringLinkedProceduresHere()
     Dim el
-    Dim AP As aProcedure
+    Dim ap          As aProcedure
     For Each el In LinkedProceduresDeep
         BringProcedureHere CStr(el)
     Next
@@ -1823,10 +2002,10 @@ End Sub
 
 
 Sub AddToLinkedTable()
-    
-    Dim aw As aWorkbook
+
+    Dim aw          As aWorkbook
     Set aw = aWorkbook.Init(oWorkbook)
-    Dim cell As Range
+    Dim cell        As Range
     Dim TargetWorksheet As Worksheet
     On Error Resume Next
     Set TargetWorksheet = ThisWorkbook.Sheets("Linked_Table_" & aw.NameClean)
@@ -1846,7 +2025,7 @@ Sub AddToLinkedTable()
     var(7) = aCollection.Init(LinkedUserforms).ToString(vbNewLine)
     var(8) = aCollection.Init(LinkedDeclarations).ToString(vbNewLine)
 
-    Dim Lr As Long
+    Dim Lr          As Long
     Lr = getLastRow(TargetWorksheet) + 1
     TargetWorksheet.Range("A" & Lr & ":H" & Lr).Value = var
 End Sub
@@ -1854,28 +2033,28 @@ End Sub
 
 
 Public Sub Enable_DebugPrint()
-    Dim N As Long
-    Dim s As String
+    Dim N           As Long
+    Dim S           As String
     With oModule.CodeModule
-        For N = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
-            s = .Lines(N, 1)
-            If Left(Trim(s), 6) = "'Debug" Then
+        For N = Line_Last To Line_First Step -1
+            S = .Lines(N, 1)
+            If Left(Trim(S), 6) = "'Debug" Then
                 aCodeModule.Init(oModule).UncommentTargetLine N
-'                s = VBA.Replace(s, "'", "", , 1)
-'                .ReplaceLine N, s
+                '                s = VBA.Replace(s, "'", "", , 1)
+                '                .ReplaceLine N, s
             End If
         Next N
     End With
 End Sub
 Public Sub Disable_DebugPrint()
-    Dim N As Long
-    Dim s As String
+    Dim N           As Long
+    Dim S           As String
     With oModule.CodeModule
-        For N = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
-            s = .Lines(N, 1)
-            If Left(Trim(s), 5) = "Debug" Then
+        For N = Line_Last To Line_First Step -1
+            S = .Lines(N, 1)
+            If Left(Trim(S), 5) = "Debug" Then
                 aCodeModule.Init(oModule).CommentTargetLine N
-'                .ReplaceLine N, "'" & s
+                '                .ReplaceLine N, "'" & s
             End If
         Next N
     End With
@@ -1883,29 +2062,29 @@ End Sub
 
 
 Public Sub Enable_Stop()
-    Dim N As Long
-    Dim s As String
-    Dim Keyword As String
+    Dim N           As Long
+    Dim S           As String
+    Dim Keyword     As String
     Keyword = "Stop"
     With oModule.CodeModule
-        For N = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
-            s = .Lines(N, 1)
-            If InStrExact(1, s, Keyword) > 0 Then
-                s = VBA.Replace(s, "'", "", , 1)
-                .ReplaceLine N, s
+        For N = Line_Last To Line_First Step -1
+            S = .Lines(N, 1)
+            If InStrExact(1, S, Keyword) > 0 Then
+                S = VBA.Replace(S, "'", "", , 1)
+                .ReplaceLine N, S
             End If
         Next N
     End With
 End Sub
 Public Sub Disable_Stop()
-    Dim N As Long
-    Dim s As String
-    Dim Keyword As String: Keyword = "Stop"
+    Dim N           As Long
+    Dim S           As String
+    Dim Keyword     As String: Keyword = "Stop"
     With oModule.CodeModule
-        For N = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
-            s = .Lines(N, 1)
-            If InStrExact(1, s, Keyword) > 0 Then
-                .ReplaceLine N, "'" & s
+        For N = Line_Last To Line_First Step -1
+            S = .Lines(N, 1)
+            If InStrExact(1, S, Keyword) > 0 Then
+                .ReplaceLine N, "'" & S
             End If
         Next N
     End With
@@ -1913,51 +2092,51 @@ End Sub
 
 
 Public Sub Comments_ReplaceQuoteWithRem()
-    Dim N As Long
-    Dim s As String
+    Dim N           As Long
+    Dim S           As String
     With oModule.CodeModule
-        For N = LineIndex(Procedure_Last) To LineIndex(Procedure_First) Step -1
-            s = .Lines(N, 1)
-            If Left(Trim(s), 1) = "'" Then
-                .ReplaceLine N, VBA.Replace(s, "'", "Rem ", , 1)
+        For N = Line_Last To Line_First Step -1
+            S = .Lines(N, 1)
+            If Left(Trim(S), 1) = "'" Then
+                .ReplaceLine N, VBA.Replace(S, "'", "Rem ", , 1)
             End If
         Next N
     End With
 End Sub
 
 
-Public Sub UpdatableVariable_Add(This As String)
-    Dim i As Long: i = LineLike("*UpdatableVariable = *", Body_Code)
+Public Sub UpdatableVariable_Add(this As String)
+    Dim i           As Long: i = LineLike("*UpdatableVariable = *", Body_Code)
     If i = 0 Then Exit Sub
-    Dim Q As String: Q = Chr(34)
-    Dim Line As String: Line = oModule.CodeModule.Lines(i, 1)
-    If UCase(Trim(Line)) Like UCase("UpdatableVariable = *") And InStr(1, Line, This, vbTextCompare) = 0 Then
-        oModule.CodeModule.ReplaceLine i, VBA.Replace(VBA.Replace(Line, Q, Q & This & ",", , 1, vbTextCompare), "," & Q, Q)
-        Line = oModule.CodeModule.Lines(i, 1)
-        If InStr(1, Line, Q & ",") > 0 Then oModule.CodeModule.ReplaceLine i, VBA.Replace(Line, Q & ",", Q)
+    Dim q           As String: q = Chr(34)
+    Dim line        As String: line = oModule.CodeModule.Lines(i, 1)
+    If UCase(Trim(line)) Like UCase("UpdatableVariable = *") And InStr(1, line, this, vbTextCompare) = 0 Then
+        oModule.CodeModule.ReplaceLine i, VBA.Replace(VBA.Replace(line, q, q & this & ",", , 1, vbTextCompare), "," & q, q)
+        line = oModule.CodeModule.Lines(i, 1)
+        If InStr(1, line, q & ",") > 0 Then oModule.CodeModule.ReplaceLine i, VBA.Replace(line, q & ",", q)
     End If
 End Sub
 
-Public Sub UpdatableVariable_Remove(This As String)
-    Dim i As Long: i = LineLike("*UpdatableVariable = *", Body_Code)
+Public Sub UpdatableVariable_Remove(this As String)
+    Dim i           As Long: i = LineLike("*UpdatableVariable = *", Body_Code)
     If i = 0 Then Exit Sub
-    Dim Q As String: Q = Chr(34)
-    Dim Result As String
-    Dim Line As String: Line = oModule.CodeModule.Lines(i, 1)
-    If Trim(Line) Like "UpdatableVariable = *" Then
-        If InStr(1, Line, Q & This & Q, vbTextCompare) > 0 Then
-            Result = VBA.Replace(Line, Q & This & Q, "")
-            Result = VBA.Replace(Result, ",,", ",")
-            Result = VBA.Replace(Result, Q & ",", Q)
-            oModule.CodeModule.ReplaceLine i, Result
+    Dim q           As String: q = Chr(34)
+    Dim result      As String
+    Dim line        As String: line = oModule.CodeModule.Lines(i, 1)
+    If Trim(line) Like "UpdatableVariable = *" Then
+        If InStr(1, line, q & this & q, vbTextCompare) > 0 Then
+            result = VBA.Replace(line, q & this & q, "")
+            result = VBA.Replace(result, ",,", ",")
+            result = VBA.Replace(result, q & ",", q)
+            oModule.CodeModule.ReplaceLine i, result
         End If
     End If
 End Sub
 
 Sub CreateCaller(rng As Range)
-    Dim shp As Shape
+    Dim shp         As Shape
     Set shp = ActiveSheet.Shapes.AddShape _
-    (msoShapeRoundedRectangle, 1, 1, 500, 10)
+            (msoShapeRoundedRectangle, 1, 1, 500, 10)
     With shp.ThreeD
         .BevelTopType = msoBevelCircle
         .BevelTopInset = 6
@@ -1969,18 +2148,18 @@ Sub CreateCaller(rng As Range)
         .Transparency = 0
         .Solid
     End With
-    With shp.Line
+    With shp.line
         .Visible = msoTrue
         .ForeColor.ObjectThemeColor = msoThemeColorBackground1
         .ForeColor.TintAndShade = 0
         .ForeColor.Brightness = 0
         .Transparency = 0
     End With
-    
+
     With shp
         .OnAction = "'" & oWorkbook.Name & "'!" & oProcedure
         .Name = "Run_" & oProcedure
-        .TextFrame2.TextRange.text = oProcedure
+        .TextFrame2.TextRange.TEXT = oProcedure
         .TextFrame2.TextRange.Font.Bold = msoTrue
         .TextFrame2.TextRange.Font.Size = 11
         .TextFrame.HorizontalAlignment = xlHAlignCenter
@@ -1996,11 +2175,11 @@ Function LargestLineLength()
 End Function
 
 Sub ConvertBlankLinesToDividers(Optional Character As String = "~")
-    Dim L As Long: L = LargestLineLength
-    Dim i As Long
-    For i = LineIndex(Procedure_Last) To LineIndex(Declaration_First) Step -1
+    Dim l           As Long: l = LargestLineLength
+    Dim i           As Long
+    For i = Line_Last To Line_Declaration_First Step -1
         If Len(Trim(oModule.CodeModule.Lines(i, 1))) = 0 Then
-            oModule.CodeModule.ReplaceLine i, "'" & String(L - 1, Character)
+            oModule.CodeModule.ReplaceLine i, "'" & String(l - 1, Character)
         End If
     Next
 End Sub

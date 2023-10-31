@@ -1,9 +1,0 @@
-
-Function UserformNames(TargetWorkbook As Workbook)
-'@BlogPosted
-'@AssignedModule F_VbeLinkedProcedures
-'@INCLUDE PROCEDURE ActiveCodepaneWorkbook
-'@INCLUDE PROCEDURE ComponentNames
-    If TargetWorkbook Is Nothing Then Set TargetWorkbook = ActiveCodepaneWorkbook
-    Set UserformNames = ComponentNames(vbext_ct_MSForm, TargetWorkbook)
-End Function
